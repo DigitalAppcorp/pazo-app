@@ -67,14 +67,15 @@ export async function deliverVerifiedMetaRegistration({
   }
   // Privacy must pass BEFORE any matching field is read. A new lease or
   // withdrawal invalidates the reader; missing approval stays retryable.
-  let hashedEmail=null
-  try {hashedEmail=await repository.readApprovedMatchField(claim.eventId,claim.leaseId)}
+  let match=null
+  try {match=await repository.readApprovedMatchField(claim.eventId,claim.leaseId)}
   catch {/* failed privacy or approved-match lookup cannot authorize delivery */}
   const event=buildMetaRegistration({
     releaseEnabled,explicitConsent:true,consentTrusted:true,
     verifiedRegistration:true,excluded:false,globalPrivacyControl:false,
     optedOut:false,qaOrAdmin:false,eventId:claim.eventId,
-    eventTime:claim.eventTime,datasetId,hashedEmail,
+    eventTime:claim.eventTime,datasetId,
+    hashedEmail:match?.em,clientUserAgent:match?.clientUserAgent,
   })
   if (!event) {await settle('retryable');return {status:'not_configured'}}
   const response=await sendMetaCapi({
