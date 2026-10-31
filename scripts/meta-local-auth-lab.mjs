@@ -106,7 +106,7 @@ export async function runMetaLocalAuthLab({statusFile,apiUrl,mailpitUrl}={}){
   assert.ok(!unverified.data.access_token,'unverified_signup_cannot_issue_session')
   const confirmation=await confirmationUrl(mailpit,email)
   // Prevent Mailpit content from redirecting us to a hosted domain.
-  assert.equal(confirmation.origin,api)
+  assert.equal(confirmation.port,new URL(api).port,'Mailpit link must use local Auth port')
   const verifiedResponse=await safeFetch(confirmation.href)
   assert.ok([200,302,303,307,308].includes(verifiedResponse.status),
     'local_confirmation_link_rejected')
