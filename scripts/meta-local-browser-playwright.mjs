@@ -142,7 +142,13 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
       'browser_gotrue_login_failed','browser_real_auth_verification_failed',
       'browser_first_grant_receipt_failed','browser_repeat_conversion_accepted',
       'browser_gpc_veto_failed','browser_durable_withdrawal_failed',
-      'browser_withdrawn_account_regranted']
+      'browser_withdrawn_account_regranted',
+      'browser_controller_initialization_failed',
+      'browser_controller_first_grant_failed',
+      'browser_controller_repeat_conversion_dispatched',
+      'browser_controller_gpc_veto_failed',
+      'browser_controller_durable_gpc_withdrawal_failed',
+      'browser_controller_withdrawn_account_regranted']
     const reason=known.find(x=>msg.includes(x))||
       (/Failed to fetch/i.test(msg)?'browser_fetch_failed':'unknown_browser_failure')
     console.log('META_BROWSER_FAILURE_CATEGORY '+reason)
@@ -154,7 +160,9 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
   assert.match(result.eventId,UUID4)
   assert.equal(result.datasetId,'1438916858347709')
   assert.equal(result.simulatedPixelCallbacks,1)
-  assert.equal(result.first,'queued')
+  assert.equal(result.first,'saved')
+  assert.equal(result.second,'saved_no_duplicate')
+  assert.equal(result.postWithdrawal,'suppressed')
   assert.equal(result.gpcVeto,'suppressed')
   assert.equal(result.withdrawal,'withdrawn')
   assert.ok(result.sdkFunctionInvocations>=3,'supabase-js invoke must reach local Edge')
