@@ -5,6 +5,7 @@ import {META_EVENT_NAME,META_CANONICAL_URL} from './metaConversion.mjs'
 const API_VERSION = /^v(?:[2-9][0-9]|[1-9][0-9]{2,})\.0$/
 const DATASET = /^[1-9][0-9]{5,24}$/
 const HASH = /^[a-f0-9]{64}$/
+const USER_AGENT = /^[\x20-\x7E]{20,512}$/
 const UUID4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 export function validMetaServerEvent(event,datasetId) {
   return !!event && typeof event==='object' && !Array.isArray(event)
@@ -13,9 +14,12 @@ export function validMetaServerEvent(event,datasetId) {
     && event.event_name===META_EVENT_NAME && UUID4.test(event.event_id)
     && event.action_source==='website' && event.event_source_url===META_CANONICAL_URL
     && Number.isSafeInteger(event.event_time) && event.event_time > 0
-    && event.user_data && Object.keys(event.user_data).join(',')==='em'
+    && event.user_data && !Array.isArray(event.user_data)
+    && Object.keys(event.user_data).sort().join(',')==='client_user_agent,em'
     && Array.isArray(event.user_data.em) && event.user_data.em.length===1
     && typeof event.user_data.em[0]==='string' && HASH.test(event.user_data.em[0])
+    && typeof event.user_data.client_user_agent==='string'
+    && USER_AGENT.test(event.user_data.client_user_agent)
     && typeof datasetId==='string' && DATASET.test(datasetId)
 }
 /** Never call this sender for an unverified/replayed signup. The 'authorized'
