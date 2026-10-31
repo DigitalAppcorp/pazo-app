@@ -60,7 +60,8 @@ export function createMetaReceiptHandler({
     // Trusted server lookup MUST join durable outbox, purpose consent, live QA
     // exclusion and ownership, verifying the session user as the only owner.
     let result
-    try{result=await lookupReceipt(owner.id)}catch{return reply(DENIED,503,origin)}
+    try{result=await lookupReceipt(owner.id,request.headers.get('user-agent'))}
+    catch{return reply(DENIED,503,origin)}
     const stamp=now()
     if(!result||result.authorized!==true||result.ownerId!==owner.id
       ||result.verifiedRegistration!==true||result.excluded!==false
