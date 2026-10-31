@@ -83,37 +83,46 @@ async function confirmationUrl(mailpit,email){
   throw Error('local_confirmation_email_not_received')
 }
 export async function runMetaLocalAuthLab({statusFile,apiUrl,mailpitUrl}={}){
+  console.log('META_AUTH_PHASE status_file')
   const vars=statusFile?envMap(statusFile):{}
   const api=requireLocalBase(apiUrl||vars.API_URL||vars.SUPABASE_URL,54321)
   const mailpit=requireLocalBase(mailpitUrl||vars.MAILPIT_URL||vars.INBUCKET_URL,54324)
   // All server URLs must be local, before any network request.
   local(api+'/auth/v1/signup',['/auth/v1/'])
   local(mailpit+'/api/v1/messages',['/api/v1/'])
+  console.log('META_AUTH_PHASE loopback_only')
   const key=vars.ANON_KEY||vars.PUBLISHABLE_KEY
   assert.ok(typeof key==='string'&&key.length>=16,
     'local_publishable_key_not_available')
+  console.log('META_AUTH_PHASE local_key_ready')
   const email='pazo-auth-'+Date.now()+'-'+randomUUID().slice(0,8)+'@example.invalid'
   const password='PazoLab!4'+randomUUID().replaceAll('-','')
+  console.log('META_AUTH_PHASE signup_requested')
   const requested=await requestAuth(api,key,'signup',{email,password})
   assert.ok([200,201].includes(requested.status),'local_signup_failed')
   assert.equal(!!requested.data.access_token,false,
     'signup_requested_cannot_be_an_authenticated_conversion')
   assert.equal(requested.data.user?.email_confirmed_at??null,null,
     'signup_request_should_not_mark_email_confirmed')
+  console.log('META_AUTH_PHASE signup_no_session')
   const unverified=await requestAuth(api,key,'token?grant_type=password',{email,password})
   assert.ok([400,401,403,422].includes(unverified.status),
     'unverified_signup_must_not_login')
   assert.ok(!unverified.data.access_token,'unverified_signup_cannot_issue_session')
+  console.log('META_AUTH_PHASE unverified_login_denied')
   const confirmation=await confirmationUrl(mailpit,email)
+  console.log('META_AUTH_PHASE mailpit_confirmation_link')
   // Prevent Mailpit content from redirecting us to a hosted domain.
   assert.equal(confirmation.port,new URL(api).port,'Mailpit link must use local Auth port')
   const verifiedResponse=await safeFetch(confirmation.href)
   assert.ok([200,302,303,307,308].includes(verifiedResponse.status),
     'local_confirmation_link_rejected')
+  console.log('META_AUTH_PHASE confirmation_request')
   const loggedIn=await requestAuth(api,key,'token?grant_type=password',{email,password})
   assert.equal(loggedIn.status,200,'confirmed_signup_cannot_login')
   const token=loggedIn.data.access_token
   assert.ok(typeof token==='string'&&token.length>=50,'confirmed_jwt_missing')
+  console.log('META_AUTH_PHASE confirmed_password_login')
   const who=await requestAuth(api,key,'user',null,token)
   assert.equal(who.status,200,'verified_jwt_get_user_failed')
   assert.equal(who.data.id,requested.data.user?.id,'owner_changed_during_confirmation')
@@ -121,6 +130,7 @@ export async function runMetaLocalAuthLab({statusFile,apiUrl,mailpitUrl}={}){
   assert.notEqual(who.data.is_anonymous,true,'synthetic user must not be anonymous')
   // Re-login is *not* a new confirmed signup; last state is checked in
   // GoTrue, while one-time outbox issuance is separately verified in PG17.
+  console.log('META_AUTH_PHASE verified_get_user')
   const repeat=await requestAuth(api,key,'token?grant_type=password',{email,password})
   assert.equal(repeat.status,200,'repeat_login_failed')
   assert.equal(repeat.data.user?.id,who.data.id,'repeat_login_changed_owner')
@@ -138,7 +148,7 @@ if(direct){
   }).catch(error=>{
     // Never reveal token, email, signup response, Mailpit content or passwords.
     const allowed=/^[a-zA-Z0-9_ -]{3,100}$/.test(error.message)
-    console.error('META_LOCAL_AUTH_LAB_FAIL: '+(allowed?error.message:'unexpected_local_failure'))
+    console.error('META_LOCAL_AUTH_LAB_FAIL: '+error.name+' / '+(allowed?error.message:'redacted_failure_detail'))
     process.exitCode=1
   })
 }
