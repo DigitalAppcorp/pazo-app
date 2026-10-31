@@ -39,3 +39,25 @@
 - La auditoría actual no prueba cumplimiento legal, disponibilidad de Meta, conversión pagada ni resultados de campañas.
 
 **Conclusión:** Código modular y laboratorio considerablemente preparados, con CI verde. **Integración funcional en producción NO completada; Meta no verificado; NO-GO de activación.** Mantener #168 abierto y PR #171 DRAFT hasta cerrar los requisitos anteriores y contar con autorización específica.
+
+## Infraestructura y entorno de staging — verificación real, 31-oct-2026
+
+**Auditoría read-only de Supabase y Vercel conectados (no pruebas de Auth reales):**
+
+- **Supabase:** un solo proyecto visible, `PAZO`, ref `mrybvqdebbgcayuvgkkr`, `ACTIVE_HEALTHY`, PostgreSQL 17.11; **`list_branches` devuelve cero ramas**. No hay otro backend staging visible para pruebas autenticadas sin afectar producción.
+- **Vercel:** dos proyectos visibles: `pazo-app` y `pazo-app-t83r`; ambos incluyen variables Supabase para `preview`. No se descifraron las variables ni se demostró que una vista previa use una base diferente. **Vercel preview ≠ backend staging aislado** por sí solo. Está prohibido aplicar la migración candidata o utilizar la cuenta real para pruebas de signup/opt-out sin aislamiento confirmado.
+- **Repositorios:** el PR #170 de atribución sigue abierto en borrador; #171 tiene como base su rama, por lo que no se puede considerar la dependencia #168 publicada. `supabase/config.toml` contiene `[auth.email] enable_confirmations = false` para el entorno local; esto **no acredita el ajuste de Auth alojado**. Un entorno de prueba para `CompleteRegistration` debe habilitar/verificar confirmación real del correo y probar que un registro solicitado no cuenta como confirmado.
+- **Copia de datos:** no copiar cuentas, correos, mascotas, medios, información de pago ni registros de personas desde producción a staging. Usar exclusivamente usuarios sintéticos y correos de captura local/staging.
+- **Coste y autorización:** Supabase preview branching crea una instancia aislada con cargos por uso de compute, egress y almacenamiento. La documentación oficial indica que las ramas no están protegidas por el Spend Cap: https://supabase.com/docs/guides/platform/manage-your-usage/branching . **No se creó rama, proyecto ni gasto**, porque aún no hay autorización explícita para esos posibles cargos.
+
+### Secuencia segura para desbloquear el E2E real
+
+1. **Elegir un backend aislado:** preferir un laboratorio Supabase CLI efímero sin credenciales de producción para ejercitar Auth/Edge local; alternativamente, aprovisionar una rama preview Supabase o proyecto staging separado **después de aprobar el coste**. Confirmar que su project ref sea distinto de `mrybvqdebbgcayuvgkkr`.
+2. **Hacer inventario de Auth y flujos de seguridad:** habilitar confirmación de correo en el entorno sintético; ensayar signup solicitado → correo confirmado por servidor → único UUID de evento; denegar autoconfirm, QA/admin, GPC, retirada y permisos ausentes. Mantener PayPal Live, MFA y servicios de producción totalmente fuera de alcance.
+3. **Aplicar únicamente la migración candidata auditada al entorno sintético** después de convertirla en versión revisada. Ejecutar allí las funciones grant/withdrawal/receipt con `CAPI/Pixel OFF`, validar RLS/RPC con rol service y usuario real sintético.
+4. **Validar recorridos completos de navegador y back-end:** ES/EN y 390/430 px, múltiples pestañas, logout/login, pérdida de red, reconciliación tras retirada, GPC y exclusión de sesiones QA/admin. Ningún script de Meta ni llamada externa debe aparecer.
+5. **Sin activar Meta hasta el próximo GO:** concluir revisión legal/Design OS e inventario de datos; solo entonces autorizar Event Manager Test Events en un dataset de prueba y una prueba externa de deduplicación. La etapa de gasto publicitario requiere decisión independiente.
+
+**GO de implementación:** continuar solo trabajos de laboratorio que no generen cargos ni impacten producción.
+
+**NO-GO operativo:** no crear todavía Supabase branch/proyecto pago, no aplicar SQL hospedado, no cambiar `supabase/config.toml` global como sustituto de evaluar el Auth alojado, no conectar un Vercel preview al backend vivo para QA, no cargar SDK/CAPI ni usar Meta Events Manager.
