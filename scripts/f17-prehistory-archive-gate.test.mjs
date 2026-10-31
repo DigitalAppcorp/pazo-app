@@ -11,7 +11,7 @@ const additional=prepared.additionalInstalledVersions??[]
 const marketing=JSON.parse(readFileSync(new URL('../docs/evidence/marketing-e2e-20261026/prepared-migrations.json',import.meta.url),'utf8'))
 const pendingMarketing=[...new Set([...marketing.records,...(marketing.pendingRecords??[]),...(marketing.installedRecords??[])].map(r=>r.version))]
 const intelligence=JSON.parse(readFileSync(new URL('docs/product-intelligence/PREPARED_MIGRATIONS.json',root),'utf8'))
-const pendingIntelligence=intelligence.records.map(r=>r.version).concat(['20261029120000','20261029121000']) // Separate prepared admin reporting initiative; no hosted installation.
+const pendingIntelligence=intelligence.records.map(r=>r.version).concat(['20261029120000','20261029121000','20261031032812']) // Separate prepared admin reporting initiative; no hosted installation.
 function sha(buffer) {
  const prefix=Buffer.concat([Buffer.from('blob '+buffer.length),Buffer.from([0])])
  return createHash('sha1').update(prefix).update(buffer).digest('hex')
