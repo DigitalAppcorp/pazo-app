@@ -34,7 +34,7 @@ export async function sendMetaCapi({
     || typeof serverToken!=='string' || serverToken.length<24
     || typeof authorized!=='function') return {status:'not_configured'}
   let allowed=false
-  try {allowed=await authorized()} catch {return {status:'suppressed'}}
+  try {allowed=await authorized()} catch {return {status:'unavailable'}}
   if (allowed!==true) return {status:'suppressed'}
   // Authorization header, never put the access token in a URL or query string.
   try {
