@@ -185,7 +185,7 @@ REVOKE ALL ON FUNCTION marketing_private.meta_settle_candidate(uuid,uuid,boolean
 CREATE FUNCTION public.pazo_meta_lease_candidate()
 RETURNS TABLE(owner_id uuid,event_id uuid,event_time timestamptz,lease_id uuid)
 LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=''
-AS $ SELECT * FROM marketing_private.meta_lease_candidate() $;
+AS $$ SELECT * FROM marketing_private.meta_lease_candidate() $$;
 REVOKE ALL ON FUNCTION public.pazo_meta_lease_candidate()
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_meta_lease_candidate() TO service_role;
@@ -193,7 +193,7 @@ GRANT EXECUTE ON FUNCTION public.pazo_meta_lease_candidate() TO service_role;
 CREATE FUNCTION public.pazo_meta_settle_candidate(
  p_event uuid,p_lease uuid,p_success boolean
 ) RETURNS boolean LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=''
-AS $ SELECT marketing_private.meta_settle_candidate(p_event,p_lease,p_success) $;
+AS $$ SELECT marketing_private.meta_settle_candidate(p_event,p_lease,p_success) $$;
 REVOKE ALL ON FUNCTION public.pazo_meta_settle_candidate(uuid,uuid,boolean)
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_meta_settle_candidate(uuid,uuid,boolean)
