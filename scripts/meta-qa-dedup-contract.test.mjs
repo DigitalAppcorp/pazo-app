@@ -55,8 +55,9 @@ test('real browser loader and CAPI sender emit exact same dataset, name and even
  f.scripts[0].onload()
  assert.deepEqual(await promise,{status:'queued'})
  const browserCalls=f.browser.fbq.queue
- assert.deepEqual(browserCalls.slice(0,3),
-  [['consent','revoke'],['init',DATASET],['consent','grant']])
+ assert.deepEqual(browserCalls.slice(0,4),
+  [['consent','revoke'],['set','autoConfig',false,DATASET],
+   ['init',DATASET],['consent','grant']])
  const pixel=browserCalls.filter(c=>c[0]==='trackSingle')
  assert.deepEqual(pixel,[
   ['trackSingle',DATASET,'CompleteRegistration',{}, {eventID:EVENT}],
