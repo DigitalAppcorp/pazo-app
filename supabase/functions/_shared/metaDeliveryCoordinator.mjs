@@ -9,6 +9,9 @@ const DEFAULTS=Object.freeze({allowed:false})
  * new account and issue/reuse a DB-stored UUIDv4 atomically.
  * leaseOne(): returns {eventId,eventTime,claimWasInserted,record,
  *  accountExcluded,qaOrAdmin,gpc,sharingOptOut,hashedEmail}
+ * `kind: retry` is permissible ONLY when it leases the previously inserted,
+ * unique verified event row, reusing its original eventId. claimWasInserted
+ * attests existence of that original row, NOT an INSERT in this attempt.
  * or null. IDs and email hashes may NEVER be built by the browser.
  * settle(): acknowledgements must be atomic and idempotent; a lease that fails
  * remains retryable using the SAME event ID, never a fresh conversion.
@@ -26,7 +29,7 @@ export async function deliverVerifiedMetaRegistration({
     return {status:'not_configured'}
   let claim
   try { claim=await repository.leaseOne() } catch {return {status:'unavailable'}}
-  if (!claim || claim.kind!=='new' || claim.claimWasInserted!==true)
+  if (!claim || !['new','retry'].includes(claim.kind) || claim.claimWasInserted!==true)
     return {status:'not_eligible'}
   const settle=async status=>{
     try { await repository.settle(claim.eventId,status) } catch { return false }
