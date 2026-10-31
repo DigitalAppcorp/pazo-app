@@ -157,3 +157,44 @@ test('positive Meta permission cannot start without an available withdrawal chan
  assert.equal(await c.onWithdraw(),false)
  assert.deepEqual(f.actions,[])
 })
+
+function browserWithSyntheticSdk(){
+ const scripts=[]
+ const dom={head:{appendChild:e=>scripts.push(e)},createElement:()=>({})}
+ const browser={document:dom,navigator:{globalPrivacyControl:false}}
+ return {scripts,dom,browser}
+}
+test('explicit withdrawal revokes owned SDK synchronously before async server receipt',async()=>{
+ const f=lab(),b=browserWithSyntheticSdk()
+ const c=createMetaConsentController({...f.options(),
+  browser:b.browser,dom:b.dom})
+ const grant=c.onGrant()
+ // Grant/receipt use promises, wait for the script without arbitrary timers.
+ for(let i=0;i<20&&b.scripts.length===0;i++)await Promise.resolve()
+ assert.equal(b.scripts.length,1)
+ b.scripts[0].onload()
+ assert.equal(await grant,true)
+ assert.deepEqual(b.browser.fbq.queue.at(-1),
+  ['trackSingle',datasetId,'CompleteRegistration',{}, {eventID:eventId}])
+ const withdrawal=c.onWithdraw()
+ assert.deepEqual(b.browser.fbq.queue.at(-1),['consent','revoke'],
+  'local browser must revoke prior to server RPC')
+ assert.equal(await withdrawal,true)
+ assert.equal(await c.onGrant(),false)
+ assert.equal(b.browser.fbq.queue.filter(c=>c[0]==='trackSingle').length,1)
+})
+test('new GPC revokes existing owned Pixel immediately and never retries registration',async()=>{
+ const f=lab(),b=browserWithSyntheticSdk()
+ const c=createMetaConsentController({...f.options(),browser:b.browser,dom:b.dom})
+ const grant=c.onGrant()
+ for(let i=0;i<20&&b.scripts.length===0;i++)await Promise.resolve()
+ assert.equal(b.scripts.length,1)
+ b.scripts[0].onload()
+ assert.equal(await grant,true)
+ b.browser.navigator.globalPrivacyControl=true
+ const withdrawal=c.syncGpc()
+ assert.deepEqual(b.browser.fbq.queue.at(-1),['consent','revoke'])
+ assert.deepEqual(await withdrawal,{status:'withdrawn'})
+ assert.equal(await c.onGrant(),false)
+ assert.equal(b.browser.fbq.queue.filter(c=>c[0]==='trackSingle').length,1)
+})
