@@ -21,10 +21,11 @@ const secrets={
 }
 function fake({privacy=purpose,claimed=true,match='a'.repeat(64)}={}) {
  const calls=[]
+ let matchingReads=0
  let available=claimed
  const repository=createMetaOutboxRepository({
   enabled:true,privacyApproved:true,matchFieldsApproved:true,
-  url,serviceKey,readApprovedMatchField:async()=>match,
+  url,serviceKey,readApprovedMatchField:async()=>{matchingReads++;return match},
   fetchImpl:async(uri,req)=>{
     const name=uri.split('/rpc/')[1]
     const body=JSON.parse(req.body)
@@ -48,7 +49,7 @@ function fake({privacy=purpose,claimed=true,match='a'.repeat(64)}={}) {
     throw Error('unexpected RPC')
   },
  })
- return {repository,calls}
+ return {repository,calls,matchingReads:()=>matchingReads}
 }
 test('OFF and missing privacy/approved field reader cause zero DB operations',async()=>{
  let requests=0,matching=0
@@ -70,16 +71,20 @@ test('server-only lease, current lease privacy, typed settle; no PII in RPC requ
  const c=await f.repository.leaseOne()
  assert.equal(c.eventId,eventId)
  assert.equal(c.leaseId,leaseId)
- assert.equal(c.hashedEmail,'a'.repeat(64))
+ assert.equal(c.hashedEmail,undefined,'leasing must not touch personal matching data')
+ assert.equal(f.matchingReads(),0)
  assert.equal(c.claimWasInserted,true)
  const p=await f.repository.checkPrivacy(eventId,leaseId)
  assert.equal(p.trusted,true)
  assert.equal(p.verifiedRegistration,true)
  assert.equal(p.record.decision,'granted')
+ const approved=await f.repository.readApprovedMatchField(eventId,leaseId)
+ assert.equal(approved,'a'.repeat(64))
+ assert.equal(f.matchingReads(),1)
  assert.equal(await f.repository.settle(eventId,leaseId,'sent'),true)
  assert.deepEqual(f.calls.map(x=>x.name),[
   'pazo_meta_lease_candidate','pazo_meta_check_claim_candidate',
-  'pazo_meta_settle_candidate',
+  'pazo_meta_check_claim_candidate','pazo_meta_settle_candidate',
  ])
  for(const x of f.calls){
    assert.equal(x.uri.includes(serviceKey),false)
@@ -87,7 +92,7 @@ test('server-only lease, current lease privacy, typed settle; no PII in RPC requ
    assert.equal(x.req.body.includes('@'),false)
  }
  assert.deepEqual(f.calls[1].body,{p_event:eventId,p_lease:leaseId})
- assert.deepEqual(f.calls[2].body,{
+ assert.deepEqual(f.calls[3].body,{
    p_event:eventId,p_lease:leaseId,p_status:'sent',
  })
 })
@@ -98,10 +103,16 @@ test('unknown or stale lease and revoked privacy fail closed',async()=>{
  assert.equal(f.calls.length,1)
  const g=fake({privacy:{...purpose,decision:'withdrawn',withdrawn_at:stamp}})
  assert.equal(await g.repository.checkPrivacy(eventId,leaseId),null)
+ assert.equal(await g.repository.readApprovedMatchField(eventId,leaseId),null)
+ assert.equal(g.matchingReads(),0)
  const h=fake({privacy:{...purpose,gpc:true}})
  assert.equal(await h.repository.checkPrivacy(eventId,leaseId),null)
+ assert.equal(await h.repository.readApprovedMatchField(eventId,leaseId),null)
+ assert.equal(h.matchingReads(),0)
  const i=fake({privacy:{...purpose,eligible:false}})
  assert.equal(await i.repository.checkPrivacy(eventId,leaseId),null)
+ assert.equal(await i.repository.readApprovedMatchField(eventId,leaseId),null)
+ assert.equal(i.matchingReads(),0)
 })
 test('invalid settlement status cannot trigger a privileged RPC',async()=>{
  const f=fake()
@@ -140,6 +151,6 @@ test('isolated synthetic end-to-end CAPI uses existing UUID with live lease poli
  })
  assert.deepEqual(out,{status:'accepted'})
  assert.equal(sent,1)
- assert.equal(f.calls.filter(x=>x.name==='pazo_meta_check_claim_candidate').length,2)
+ assert.equal(f.calls.filter(x=>x.name==='pazo_meta_check_claim_candidate').length,3)
  assert.equal(f.calls.at(-1).body.p_status,'sent')
 })
