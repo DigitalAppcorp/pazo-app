@@ -14,7 +14,7 @@ export async function completeExplicitMetaOptIn({
   releaseEnabled=false,privacyApproved=false,deliberateOptIn=false,
   ownerId=null,accessToken=null,getActiveSession=()=>null,
   browser=null,dom=null,stillPermitted=()=>false,
-  requestGrant=null,requestReceipt=null,
+  requestGrant=null,requestReceipt=null,requestWithdraw=null,
   pixelLoader=loadMetaPixelForVerifiedSignup,
 }={}) {
   // No startup hooks, no autogrant, no PageView; only a deliberate opt-in.
@@ -36,21 +36,51 @@ export async function completeExplicitMetaOptIn({
         && current?.id===ownerId && current?.accessToken===accessToken
     } catch {return false}
   }
+  // After a grant request has been sent, a later GPC/opt-out may race
+  // with a successful server write. Attempt a *first-party* persistent
+  // withdrawal before reporting privacy suppression. Never call Meta.
+  const postGrantVeto=async()=>{
+    let sameOwner=false
+    try{
+      const snapshot=getActiveSession()
+      sameOwner=snapshot?.id===ownerId && snapshot?.accessToken===accessToken
+    }catch{/* stale Auth must fail closed */}
+    if(!sameOwner||typeof requestWithdraw!=='function')
+      return {status:'withdrawal_unconfirmed'}
+    let timer
+    try {
+      const outcome=await Promise.race([
+        Promise.resolve().then(()=>requestWithdraw({
+          accessToken,body:{action:'withdraw'},
+        })),
+        new Promise(resolve=>{
+          timer=setTimeout(()=>resolve({status:'not_available'}),2500)
+        }),
+      ])
+      return {status:outcome?.status==='withdrawn'
+        ?'suppressed':'withdrawal_unconfirmed'}
+    }catch{return {status:'withdrawal_unconfirmed'}}
+    finally{if(timer!==undefined)clearTimeout(timer)}
+  }
   if(!allowed())return {status:'suppressed'}
   let grant
   try {
     grant=await requestGrant({
       accessToken,body:{action:'grant',noticeVersion:NOTICE},
     })
-  }catch{return {status:'unavailable'}}
-  if(!allowed())return {status:'suppressed'}
+  }catch{
+    return !allowed()?postGrantVeto():{status:'unavailable'}
+  }
+  if(!allowed())return postGrantVeto()
   if(grant?.status!=='granted')return {status:'not_granted'}
   let receipt
   try {
     // No client-supplied event, owner, identity or consent payload is allowed.
     receipt=await requestReceipt({accessToken,body:{}})
-  }catch{return {status:'unavailable'}}
-  if(!allowed())return {status:'suppressed'}
+  }catch{
+    return !allowed()?postGrantVeto():{status:'unavailable'}
+  }
+  if(!allowed())return postGrantVeto()
   if(receipt?.status!=='verified'||receipt.eventName!=='CompleteRegistration'
      ||typeof receipt.eventId!=='string'||!ID.test(receipt.eventId)
      ||typeof receipt.datasetId!=='string'||!DATASET.test(receipt.datasetId))
