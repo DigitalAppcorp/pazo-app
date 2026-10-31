@@ -54,6 +54,7 @@ jobs:
       - run: grep -qx 'const META_WORKER_PRIVACY_REVIEWED=false' supabase/functions/pazo-meta-worker/index.ts
       - run: grep -qx 'const META_WORKER_MATCH_FIELDS_APPROVED=false' supabase/functions/pazo-meta-worker/index.ts
       - run: grep -qx 'const META_WORKER_PROVIDER_APPROVED=false' supabase/functions/pazo-meta-worker/index.ts
+      - run: grep -qx 'const META_WORKER_MATCH_SOURCE_APPROVED=false' supabase/functions/pazo-meta-worker/index.ts
       - run: grep -qx 'const META_GRANT_ENDPOINT_RELEASED=false' supabase/functions/pazo-meta-grant/index.ts
       - run: grep -qx 'const META_CONSENT_PRIVACY_REVIEWED=false' supabase/functions/pazo-meta-grant/index.ts
       - run: grep -qx 'export const META_CHOICES_RELEASED=false' src/features/marketing/MetaConsentChoice.tsx
