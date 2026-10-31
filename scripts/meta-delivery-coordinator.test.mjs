@@ -213,3 +213,29 @@ test('stale-worker settlement failure never reports successful completion',async
   assert.equal(sent,1)
   assert.equal(out.status,'unavailable','false settlement cannot be silently treated as saved')
 })
+
+test('Meta reports receipt with warning: settle sent once and do NOT retry accepted conversion',async()=>{
+ let sent=0,settled=null
+ const repository={
+  leaseOne:async()=>claim,
+  checkPrivacy:async()=>privacy,
+  readApprovedMatchField:async()=>match,
+  settle:async(id,lease,state)=>{
+   assert.equal(id,eventId);assert.equal(lease,leaseId)
+   settled=state;return true
+  },
+ }
+ const result=await deliverVerifiedMetaRegistration({
+  ...base,repository,testModeEnabled:true,testEventCode:'TESTSYNTH01',
+  nonProduction:true,
+  fetchImpl:async()=>{
+   sent++
+   return {ok:true,json:async()=>({
+    events_received:1,messages:['test_event_code does not match an active Test Events session']
+   })}
+  },
+ })
+ assert.deepEqual(result,{status:'accepted_with_warnings'})
+ assert.equal(settled,'sent','Meta received it; retrying would duplicate the conversion')
+ assert.equal(sent,1)
+})
