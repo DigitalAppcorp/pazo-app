@@ -29,7 +29,7 @@ test('both candidate consent languages disclose the actual approved fields and m
 test('owner scope approval creates a draft, not live legal consent or provider authorization',()=>{
  for(const marker of ['PO_SCOPE_APPROVED','BORRADOR','NO PUBLICADO',
    'PRODUCTION=OFF','pazo-meta-conversions-v1',
-   'appdigital.corp@gmail.com','retención','GPC']){
+   'appdigital.corp@gmail.com','conservación','GPC']){
    assert.ok(doc.includes(marker),'missing review marker: '+marker)
  }
  assert.match(doc,/no autoriza por este acto desplegar/i)
