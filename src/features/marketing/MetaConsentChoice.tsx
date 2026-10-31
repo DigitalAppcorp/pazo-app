@@ -16,7 +16,7 @@ interface Props {
 const COPY={
  es:{
   title:'Tú decides qué compartir',
-  description:'¿Permites que PAZO informe a Meta cuando confirmas tu registro para medir nuestros anuncios? Si lo permites, Meta puede recibir datos técnicos de conexión, como IP y navegador. Un identificador derivado de tu correo solo podrá enviarse si se aprueba específicamente.',
+  description:'¿Nos permites informar a Meta que confirmaste tu cuenta para saber si nuestros anuncios funcionan? Si aceptas, Meta podría recibir esa señal y datos técnicos, como tu dirección IP y navegador. También podría usar información derivada de tu correo para reconocer el registro. Consulta los detalles antes de decidir.',
   toggle:'Sí, permito medir mi registro con Meta.',
   link:'Cómo se usarían mis datos',
   grant:'Permitir medición',
@@ -31,7 +31,7 @@ const COPY={
  },
  en:{
   title:'You decide what to share',
-  description:'May PAZO tell Meta when you confirm your registration to measure our ads? If you allow it, Meta may receive technical connection data such as IP address and browser information. An identifier derived from your email would only be sent after separate approval.',
+  description:'May PAZO tell Meta you confirmed your account so we can measure our ads? If you agree, Meta may receive that event and technical data such as your IP address and browser. It may also use information derived from your email to recognize the registration. Review the details before deciding.',
   toggle:'Yes, I allow Meta to measure my registration.',
   link:'How my data may be used',
   grant:'Allow measurement',
@@ -117,24 +117,24 @@ export function MetaConsentChoice({
       {gpcState==='saved'?t.syncSaved:gpcState==='error'?t.syncError:t.syncPending}
     </p>}
     {gpcState==='error'&&<button type="button" onClick={retryWithdrawal}
-      className="min-h-11 text-[15px] font-semibold underline underline-offset-4">
+      className="min-h-11 text-[15px] font-semibold underline underline-offset-4 focus-visible:bg-[#E1E53F]">
       {t.retry}
     </button>}
    </> :
     <label className="my-3 flex min-h-12 items-center gap-3 rounded-2xl bg-[#F1F6F2] px-3 py-3 text-[15px] font-semibold">
      <input type="checkbox" checked={selected} disabled={disabled}
       onChange={e=>setSelected(e.currentTarget.checked)}
-      className="h-5 w-5 accent-[#204E4A]"/>
+      className="h-5 w-5 accent-[#204E4A] focus-visible:shadow-[0_0_0_4px_#204E4A]"/>
      <span>{t.toggle}</span>
     </label>}
    {failed && <p role="alert" className="my-2 text-[15px]">{t.error}</p>}
    {!gpc && <button type="button" disabled={disabled||!selected}
      onClick={()=>{void accept()}}
-     className="mt-2 min-h-12 w-full rounded-full bg-[#204E4A] px-5 text-[16px] font-bold text-white disabled:opacity-40">
+     className="mt-2 min-h-12 w-full rounded-full bg-[#204E4A] px-5 text-[16px] font-bold text-white disabled:opacity-40 focus-visible:shadow-[0_0_0_4px_#E1E53F] focus-visible:underline focus-visible:underline-offset-4">
      {t.grant}
    </button>}
    <button type="button" onClick={continueWithoutSharing} disabled={disabled}
-    className="mt-3 min-h-12 w-full rounded-full bg-[#E1E53F] px-5 text-[16px] font-bold text-[#204E4A] disabled:opacity-40">
+    className="mt-3 min-h-12 w-full rounded-full bg-[#E1E53F] px-5 text-[16px] font-bold text-[#204E4A] disabled:opacity-40 focus-visible:shadow-[0_0_0_4px_#204E4A] focus-visible:underline focus-visible:underline-offset-4">
     {t.continue}
    </button>
   </section>
