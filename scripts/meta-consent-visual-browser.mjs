@@ -15,11 +15,17 @@ const DIR='artifacts/meta-consent-ui'
 const plugin={
  name:'pazo-meta-consent-test-only',
  configureServer(server){
-  server.middlewares.use((req,res,next)=>{
+  server.middlewares.use(async(req,res,next)=>{
    if(!req.url?.startsWith('/__meta_consent_lab__/'))return next()
-   res.setHeader('Content-Type','text/html; charset=utf-8')
-   res.setHeader('Cache-Control','no-store')
-   res.end('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PAZO isolated consent QA</title></head><body><div id="qa-root"></div><script type="module" src="/scripts/meta-consent-lab-entry.tsx"></script></body></html>')
+   try{
+    const markup='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PAZO isolated consent QA</title></head><body><div id="qa-root"></div><script type="module" src="/scripts/meta-consent-lab-entry.tsx"></script></body></html>'
+    // Inject the same @vitejs/plugin-react preamble used on a normal Vite
+    // HTML page. Otherwise Fast Refresh blocks the isolated TSX mount.
+    const html=await server.transformIndexHtml(req.url,markup)
+    res.setHeader('Content-Type','text/html; charset=utf-8')
+    res.setHeader('Cache-Control','no-store')
+    res.end(html)
+   }catch(error){next(error)}
   })
  },
 }
