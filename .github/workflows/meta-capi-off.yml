@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: node --test scripts/meta-conversion-off.test.mjs scripts/meta-delivery-coordinator.test.mjs scripts/meta-pixel-loader.test.mjs scripts/meta-receipt-off.test.mjs scripts/meta-server-config-off.test.mjs scripts/meta-server-gateway-off.test.mjs
+      - run: node --test scripts/meta-conversion-off.test.mjs scripts/meta-delivery-coordinator.test.mjs scripts/meta-pixel-loader.test.mjs scripts/meta-receipt-off.test.mjs scripts/meta-server-config-off.test.mjs scripts/meta-server-gateway-off.test.mjs scripts/meta-withdraw-off.test.mjs
       - run: node --check supabase/functions/_shared/metaConversion.mjs
       - run: node --check supabase/functions/_shared/metaCapi.mjs
       - run: node --check supabase/functions/_shared/metaPurposePolicy.mjs
@@ -26,6 +26,7 @@ jobs:
       - run: node --check src/features/marketing/metaPixel.mjs
       - run: node --check src/features/marketing/metaPixelLoader.mjs
       - run: node --check supabase/functions/pazo-meta-receipt/receiptCore.mjs
+      - run: node --check supabase/functions/pazo-meta-consent/withdrawCore.mjs
       # All provider integrations remain deliberately unreferenced.
       - run: |
           if grep -E 'metaCapi|metaPixel' src/App.tsx src/features/marketing/marketingRuntime.ts supabase/functions/pazo-marketing-attribution/index.ts; then
