@@ -13,7 +13,8 @@ const result={lab:SITE,dataset:DATASET,productionUntouched:true,
   initialMetaRequests:0,gpcMetaRequests:0,
   inspectedPixelRequests:[],externalRequestsDenied:[],
   testPageStatus:null,eventIdentifier:null,metaResponseStatus:null,
-  cookiesAfterWithdrawal:[],errors:[],
+  cookiesAfterWithdrawal:[],cookieScopeAfterWithdrawal:[],
+  sdkStateEarly:null,sdkStateLate:null,consoleErrors:[],failedRequests:[],errors:[],
   limitations:[
    'One synthetic browser Pixel request is not CAPI deduplication',
    'Meta Events Manager ingestion has not been independently confirmed',
@@ -59,6 +60,34 @@ try{
  const ctx=await browser.newContext({serviceWorkers:'block',
   viewport:{width:390,height:780}})
  const page=await ctx.newPage()
+ page.on('console',msg=>{
+  if(msg.type()==='error' && result.consoleErrors.length<12){
+   const val=msg.text()
+   result.consoleErrors.push(val.includes('Content Security Policy')
+    ?'CSP_BLOCK':'BROWSER_CONSOLE_ERROR')
+  }
+ })
+ page.on('pageerror',()=>{
+  if(result.consoleErrors.length<12)result.consoleErrors.push('PAGE_EXCEPTION')
+ })
+ page.on('requestfailed',req=>{
+  if(result.failedRequests.length<12){
+   try{
+    const url=new URL(req.url())
+    result.failedRequests.push({host:url.hostname,path:url.pathname.slice(0,90),
+      reason:String(req.failure()?.errorText||'network_failed').slice(0,100)})
+   }catch{}
+  }
+ })
+ const sdkState=()=>page.evaluate(()=>({
+  loaded:typeof window.fbq==='function',
+  callMethodType:typeof window.fbq?.callMethod,
+  pushType:typeof window.fbq?.push,
+  queueCount:window.fbq?.queue?.length??null,
+  gpc:navigator.globalPrivacyControl===true,
+  cookieNames:document.cookie.split(';').map(x=>x.trim().split('=')[0]).filter(Boolean),
+  sdkScripts:[...document.scripts].filter(x=>x.src.includes('facebook.net')).length,
+ }))
  let forwarded=0
  await page.route('**/*',async route=>{
   const request=route.request()
@@ -107,13 +136,20 @@ try{
  await page.locator('#agree').check()
  assert.equal(await page.locator('#fire').isEnabled(),true)
  await page.locator('#fire').click()
- await page.waitForTimeout(6500)
+ await page.waitForTimeout(900)
+ result.sdkStateEarly=await sdkState()
+ await page.waitForTimeout(5600)
+ result.sdkStateLate=await sdkState()
  result.testPageStatus=(await page.locator('#status').innerText()).slice(0,350)
  const match=result.testPageStatus.match(
   /ID:\s*([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})/i)
  if(match)result.eventIdentifier=match[1]
- const cookies=(await ctx.cookies()).map(c=>c.name)
- result.cookiesAfterWithdrawal=cookies.filter(c=>c==='_fbp'||c==='_fbc')
+ const cookies=(await ctx.cookies()).filter(c=>c.name==='_fbp'||c.name==='_fbc')
+ result.cookiesAfterWithdrawal=cookies.map(c=>c.name)
+ result.cookieScopeAfterWithdrawal=cookies.map(c=>({
+  name:c.name,domain:c.domain,path:c.path,httpOnly:c.httpOnly,
+  sameSite:c.sameSite,
+ }))
  if(!result.eventIdentifier)result.errors.push('QA page did not expose a valid synthetic event ID')
  if(result.inspectedPixelRequests.length===0)
    result.status='INCONCLUSIVE_NO_PIXEL_NETWORK_REQUEST'
