@@ -102,7 +102,14 @@ export async function runMetaLocalAuthLab({statusFile,apiUrl,mailpitUrl}={}){
   assert.ok([200,201].includes(requested.status),'local_signup_failed')
   assert.equal(!!requested.data.access_token,false,
     'signup_requested_cannot_be_an_authenticated_conversion')
-  assert.equal(requested.data.user?.email_confirmed_at??null,null,
+  // Raw GoTrue POST /signup returns a user object directly, whereas
+  // supabase-js wraps it as {user,session}. Accept either shape, but never
+  // infer confirmation from the existence of a signup response alone.
+  const requestedUser=requested.data.user||requested.data
+  assert.match(String(requestedUser.id||''),
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    'signup_user_id_missing')
+  assert.equal(requestedUser.email_confirmed_at??null,null,
     'signup_request_should_not_mark_email_confirmed')
   console.log('META_AUTH_PHASE signup_no_session')
   const unverified=await requestAuth(api,key,'token?grant_type=password',{email,password})
@@ -125,7 +132,7 @@ export async function runMetaLocalAuthLab({statusFile,apiUrl,mailpitUrl}={}){
   console.log('META_AUTH_PHASE confirmed_password_login')
   const who=await requestAuth(api,key,'user',null,token)
   assert.equal(who.status,200,'verified_jwt_get_user_failed')
-  assert.equal(who.data.id,requested.data.user?.id,'owner_changed_during_confirmation')
+  assert.equal(who.data.id,requestedUser.id,'owner_changed_during_confirmation')
   assert.ok(who.data.email_confirmed_at,'email_confirmation_not_recorded_by_auth')
   assert.notEqual(who.data.is_anonymous,true,'synthetic user must not be anonymous')
   // Re-login is *not* a new confirmed signup; last state is checked in
