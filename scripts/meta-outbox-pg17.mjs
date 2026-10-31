@@ -35,7 +35,29 @@ assert.equal(count(noGrant),'0','late opt-in never backfills older registration'
 create(owner);pref(owner)
 const results=await Promise.all(Array.from({length:8},()=>sqlAsync(record(owner))))
 assert.equal(results.filter(v=>v==='t').length,1,'only one first-party registration under concurrency')
-assert.equal(count(owner),'1','trigger must atomically mint exactly one event')
+const ownerEventCount=count(owner)
+if(ownerEventCount!=='1') {
+ const diag=sql(`SELECT (
+  SELECT row_to_json(x) FROM (
+   SELECT
+    a.signup_verified_at=u.email_confirmed_at AS verify_match,
+    a.signup_verified_at<=statement_timestamp() AS verify_not_future,
+    a.signup_verified_at>=statement_timestamp()-interval '15 minutes' AS fresh_verified,
+    a.recorded_at>=statement_timestamp()-interval '15 minutes' AS fresh_recorded,
+    p.decided_at<=statement_timestamp() AS grant_persisted,
+    p.decision='granted' AS granted,
+    p.gpc_at_last_request IS FALSE AS no_gpc,
+    p.sharing_opt_out IS FALSE AS no_opt_out,
+    marketing_private.is_eligible_owner(a.owner_id) AS eligible,
+    (SELECT enabled FROM marketing_private.meta_release_gate_candidate) AS release_enabled
+   FROM marketing_private.acquisition a JOIN auth.users u ON u.id=a.owner_id
+    JOIN marketing_private.meta_purpose_candidate p ON p.owner_id=a.owner_id
+   WHERE a.owner_id='${owner}'
+  ) x
+ )`)
+ console.error('LAB_ONLY_META_ENQUEUE_DIAGNOSTIC',diag)
+}
+assert.equal(ownerEventCount,'1','trigger must atomically mint exactly one event')
 const eventId=sql(`SELECT event_id::text FROM marketing_private.meta_outbox_candidate
  WHERE owner_id='${owner}'`)
 assert.match(eventId,/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
