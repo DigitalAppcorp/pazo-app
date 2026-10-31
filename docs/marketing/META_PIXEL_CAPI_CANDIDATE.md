@@ -106,3 +106,13 @@ The handler requires a server-only POST with no Origin, cookies, body or browser
 Synthetic tests `scripts/meta-worker-off.test.mjs` cover default OFF, missing gates, incorrect service credential, browser-looking requests, body rejection, secret errors and response minimization. These tests do not prove scheduling, actual Meta delivery or external data-processing compliance.
 
 **Still BLOCKED:** approved legal ES/EN notice and Design OS, matching field inventory/approval, actual server-only approved matching field resolver, migration approval and staged installation, trusted GPC signal persistence, full production Auth E2E, Meta Events Manager deduplication, independent PO approval for live tracking/campaign. Never change the four constants from false solely because synthetic CI succeeds.
+
+## Privacy-before-matching correction — 31 Oct 2026
+
+The CAPI candidate previously called its injected `readApprovedMatchField(owner_id)` **during outbox leasing**, before the coordinator had checked the up-to-date Meta-purpose grant. That was an unnecessary personal-data access, even if final provider delivery would later be suppressed.
+
+**Corrected contract:** `leaseOne()` returns only the stored event UUID, lease UUID and event time (no match data); the coordinator verifies current purpose consent, GPC/opt-out and QA exclusion **before** calling `readApprovedMatchField(eventId,leaseId)`. That method requires a fresh service-only SQL `pazo_meta_check_claim_candidate` proof bound to the same valid lease. A further policy check is performed immediately before CAPI transmission. Missing approval or matching value prevents Meta calls and leaves the original event retryable with the **same ID**. Tests also assert that a denied/withdrawn/GPC claim triggers **zero matching-field reads**, not merely zero Meta transmissions.
+
+Files: `supabase/functions/_shared/metaDeliveryCoordinator.mjs`, `supabase/functions/_shared/metaOutboxRepository.mjs` and the corresponding isolated tests. These changes supersede earlier descriptions that listed `hashedEmail` as a field returned by `leaseOne()`. The matching-field reader itself is deliberately absent; no actual email or hash is fetched or sent. No new migration, hosted Edge deployment, browser Pixel, provider request or ads activity was authorized.
+
+**Still blocking production:** legally reviewed Meta purpose and fields (including browser technical data), reliable GPC propagation and withdrawal, official audited migration, secure runtime integration, Meta Events Manager Test Events and dedup evidence, and independent final release approval.
