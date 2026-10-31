@@ -103,3 +103,22 @@ Validado:
 **Qué NO se ha verificado aún:** Auth real + outbox SQL candidate en una **misma** base de datos Supabase, Edge Functions realmente desplegadas en staging, interacción real UI ES/EN en PAZO, consentimiento jurídico publicado, lector de identificadores CAPI aprobado o deduplicación Pixel/CAPI en Meta Events Manager. No confundir el callback Pixel simulado con un envío al proveedor.
 
 **Costos:** No se creó ninguna rama/proyecto Supabase alojado ni se aceptó la tarifa propuesta. El laboratorio utiliza los workflows GitHub Actions existentes y sus minutos de ejecución habituales (sujetos a cuotas del plan GitHub), no nueva infraestructura facturable de Supabase. Meta Pixel, CAPI, tracking en vivo y campañas siguen OFF. La opción de staging pagado queda descartada por ahora conforme a la instrucción del PO.
+
+## Auth real y SQL candidato en la MISMA base local — PASS
+
+**Evidencia ejecutada:** [GitHub Actions — Supabase Auth real + SQL candidato + GPC, SUCCESS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/41178064177) en commit `e295147ebe25c5abb78f122b4622939a72c22863`. Resultado verificable del runner: `LOCAL_REAL_AUTH_SQL_META_PASS`, junto a `LOCAL_GOTRUE_CONFIRMED_SIGNUP_PASS` y `LOCAL_AUTH_META_EDGE_CONTRACT_PASS`. La tarea de limpieza `supabase stop --no-backup` finalizó en SUCCESS.
+
+**Avance específico respecto a la evidencia anterior:** el usuario y el JWT provienen de GoTrue real; ahora se aplica el archivo `supabase/tests/marketing/meta-outbox-candidate.sql` **sin modificaciones** sobre el **mismo PostgreSQL 17 del Supabase CLI que contiene `auth.users` y verifica el correo**. El único esquema auxiliar `meta-local-gotrue-prerequisites.sql` construye en ese laboratorio los requisitos mínimos de adquisición/retención/eligibilidad para no instalar las ~137 migraciones de PAZO ni alterar la configuración Auth alojada. Esta simplificación se declara, no se presenta como una reproducción completa de las exclusiones de administración y QA, que tienen pruebas independientes en `meta-outbox-pg17.mjs`.
+
+**Verificado end-to-end dentro del laboratorio local sin tráfico Meta:**
+
+1. Un registro confirmado genera usuario real en `auth.users`; insertar la atribución sin consentimiento explícito no crea outbox.
+2. La primera sesión verificada y una elección positiva explícita invocan el endpoint candidato con JWT real y un RPC SQL privado; crean **un único `event_id` UUIDv4** persistido en la tabla outbox. El comprobante HTTP usa exactamente ese ID. La parte de Pixel es **un callback simulado, no el SDK real**.
+3. Una repetición de grant o refresco de sesión no emite otra conversión ni cambia el evento almacenado.
+4. La función de reserva de CAPI obtiene un lease único. Una petición Auth válida con `Sec-GPC: 1` persiste la retirada real en PostgreSQL, marca la fila como `suppressed`, invalida el lease y bloquea tanto el settlement del trabajador obsoleto como un segundo comprobante de Pixel.
+5. Los roles de navegador `anon` y `authenticated` no pueden leer el outbox privado ni llamar al RPC restringido de retirada.
+6. No se usaron claves alojadas, no se envió nada a Meta, no se creó rama pagada y se descartaron los contenedores y usuarios sintéticos.
+
+**Alcance NO cubierto aún:** no se aplicaron las migraciones completas de PAZO en la misma instancia; el esquema auxiliar de atribución tiene reglas simplificadas. Los handlers corrieron dentro del test Node contra Auth/SQL reales, **no mediante un despliegue real de Edge**. No se validaron la interfaz real bilingüe, los avisos legales, la aprobación de campos de CAPI, ni el envío/deduplicación en Events Manager. No activar proveedores basándose en este PASS.
+
+**Costo:** sin nueva infraestructura Supabase facturable. Uso de runners GitHub Actions conforme a sus cuotas habituales. `META_PROVIDER_OFF / RELEASE_NOT_AUTHORIZED / NO_AD_SPEND`.
