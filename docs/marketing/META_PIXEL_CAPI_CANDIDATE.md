@@ -4,14 +4,17 @@
 
 This branch follows [PR #170](https://github.com/DigitalAppcorp/pazo-app/pull/170) (#168). It adds independently testable Meta Pixel and CAPI event *adapters* only. **Neither is imported or invoked by the production app. No SDK, HTTP request, secret, Meta dataset, ad or budget has been created or activated.** This is not a claim of full integration or an Events Manager PASS.
 
-**Candidate: CODE_PARTIAL, PROVIDER_OFF, PRIVACY_BLOCKED, META_DATASET_NOT_VERIFIED.**
+**Candidate: CODE_PARTIAL (contracts, private purpose policy, lazy SDK and delivery coordinator), PROVIDER_OFF, PRIVACY_BLOCKED, META_DATASET_NOT_VERIFIED.**
 The user approved implementation and testing, but not the third-party production data release or ad spend.
 
 ## Technical assets
 - `supabase/functions/_shared/metaConversion.mjs`: shared, strictly validated `CompleteRegistration` contract; the same random UUIDv4 event ID is presented as Pixel `eventID` and CAPI `event_id`. Requires independent positive Meta purpose consent, independently *trusted* consent, valid verified account, QA/admin/exclusion/GPC/opt-out negative checks, format-valid ID, server event timestamp and explicit dataset ID + SHA256 match field. Uses a fixed query-free canonical URL. This module **does not issue or persist event IDs**.
 - `supabase/functions/_shared/metaCapi.mjs`: isolated server-side transport with flags OFF, trusted server-side authorization recheck, a required unique-claim proof, strict canonical payload and version, token only in `Authorization` header, timeout/error handling without logging data. A caller MUST implement durable idempotency, server-only approved match-field processing, and privacy authorization before using it.
 - `src/features/marketing/metaPixel.mjs`: isolated Pixel event dispatcher requiring positive browser privacy and a same-ID server-attested conversion. It intentionally does **not** load a third-party script or initialize a Pixel. A later, reviewed consent-gated loader is still needed.
-- `scripts/meta-conversion-off.test.mjs` and isolated workflow: synthetic-only tests. Never call Meta or Supabase.
+- `supabase/functions/_shared/metaPurposePolicy.mjs`: independent, versioned affirmative marketing purpose; opt-out, GPC, QA/admin and withdrawal override any prior grant. A trusted server read is mandatory. It **does not persist consent**.
+- `supabase/functions/_shared/metaDeliveryCoordinator.mjs`: composed CAPI event delivery with a required DB-backed `leaseOne()` + privacy read + idempotent `settle()` interface. Rechecks current permission immediately before network transmission; failures remain retryable using the same event ID. No DB adapter is implemented yet.
+- `src/features/marketing/metaPixelLoader.mjs`: isolated SDK bootstrap that creates no third-party script until release, purpose-specific consent and browser eligibility are all affirmative. Queues a consent revoke before init; does not send PageView; sends the named event only after a post-load consent/GPC check. Does not import into PAZO.
+- `scripts/meta-conversion-off.test.mjs`, `scripts/meta-delivery-coordinator.test.mjs`, `scripts/meta-pixel-loader.test.mjs` and isolated workflow: synthetic-only tests. No real Meta or Supabase requests.
 
 ## Blockers — do not flip flags or wire the adapters until resolved
 
@@ -28,10 +31,12 @@ The user approved implementation and testing, but not the third-party production
 |---|---|
 | #168 attribution implementation | PR #170 draft; CI succeeded before #169 branch |
 | Shared event data contract | Prepared, provider disconnected |
-| Pixel SDK/real runtime integration | NOT IMPLEMENTED |
+| Pixel SDK loader | Isolated opt-in loader implemented; NOT wired to production |
+| Pixel runtime integration | NOT IMPLEMENTED |
 | CAPI API transport | Prepared, provider disconnected |
+| Consent purpose policy | Tested, but no durable trusted storage or UI |
 | Trusted persistent privacy decision | BLOCKED |
-| Atomic one-time event proof | NOT IMPLEMENTED |
+| Atomic one-time event proof | Outbox lease/settle interface prepared; DB transaction NOT IMPLEMENTED |
 | Meta asset ID/token | NOT VERIFIED |
 | Browser/server dedup in Meta | NOT TESTED |
 | Real Meta conversions | NOT VERIFIED |
@@ -39,3 +44,9 @@ The user approved implementation and testing, but not the third-party production
 | Advertising spend | No Ads Manager write by #169 |
 
 Documentation basis: https://developers.facebook.com/docs/marketing-api/conversions-api/deduplicate-pixel-and-server-events and https://developers.facebook.com/docs/marketing-api/conversions-api/using-the-api ; official California guidance https://cppa.ca.gov/faq. Do not mistake documentation for a legal determination.
+
+## Handoff for subsequent work (do not bypass gates)
+
+The next implementation milestone is a private, transactionally safe one-event claim/outbox at the trusted signup insertion boundary, with a persistent and independently verified purpose preference and withdrawal. Test concurrently on disposable PG17 first; any additional SQL is PREPARED_ONLY with no hosted installation. Only then bind the isolated coordinator to that private adapter and a consented browser-side callback; continue to require an owned PAZO Pixel/dataset and Test Events evidence. In the interim the isolated loader is inert; do not interpret code preparation as Meta registration measurement.
+
+Privacy basis: California's CPPA describes the opt-out right for cross-context behavioral advertising and user-enabled opt-out signals at https://cppa.ca.gov/faq ; a legal review is still required to determine the exact PAZO implementation. The prior PAZO 14-day acquisition record purge and the duration of a purpose-specific preference are separate concerns; do not silently expire a privacy opt-out by applying the analytics TTL.
