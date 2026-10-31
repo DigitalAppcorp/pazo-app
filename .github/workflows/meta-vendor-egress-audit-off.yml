@@ -32,13 +32,9 @@ jobs:
           node scripts/meta-production-boundary.mjs
       - name: Load actual SDK only inside isolated Chromium; BLOCK all event egress
         run: node scripts/meta-vendor-egress-browser.mjs
-      - name: ONE-TIME HTTPS QA synthetic Pixel request (second diagnostic)
-        run: node scripts/meta-qa-https-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: meta-qa-vendor-egress-observations
-          path: |
-            artifacts/meta-vendor-egress/
-            artifacts/meta-qa-https/
+          path: artifacts/meta-vendor-egress/
           retention-days: 7
