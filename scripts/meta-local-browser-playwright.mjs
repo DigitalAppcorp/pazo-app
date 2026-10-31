@@ -1,16 +1,17 @@
 // #169 — Real Chromium + supabase-js and real GoTrue/Edge/SQL via localhost.
-// The served page has PAZO's origin but NEVER makes production requests:
-// Playwright intercepts the sole synthetic HTML and aborts all remote traffic.
+// The synthetic page is hosted on loopback, same address space as GoTrue.
+// CORS is still exercised across ports; all remote requests are blocked.
 import assert from 'node:assert/strict'
 import {randomUUID} from 'node:crypto'
 import {createRequire} from 'node:module'
+import {createServer as createHttpServer} from 'node:http'
 import {build} from 'vite'
 import {mkdtempSync,readFileSync,rmSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join,resolve} from 'node:path'
 import {localPsql} from './meta-local-gotrue-sql-lab.mjs'
 const {chromium}=createRequire(import.meta.url)('playwright')
-const ORIGIN='https://pazo-app.vercel.app'
+const ORIGIN='http://127.0.0.1:5389'
 const UUID4=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 function localOnly(url,port){
  const u=new URL(url)
@@ -46,11 +47,11 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
  assert.equal(sql(`INSERT INTO marketing_private.acquisition(owner_id,signup_verified_at)
   SELECT id,email_confirmed_at FROM auth.users WHERE id=${ownerSql}
   RETURNING owner_id::text`),ownerId)
- // Bundle supabase-js into one JS file and serve BOTH HTML and JS only
- // through the intercepted PAZO-origin page. No real PAZO network access.
+ // Bundle supabase-js into one JS file served from a loopback-only HTTP page.
+ // Browser-to-Edge requests use real CORS, without public-to-loopback LNA.
  console.log('META_BROWSER_PHASE local_sql_attribution_inserted')
  const temp=mkdtempSync(join(tmpdir(),'pazo-meta-chromium-'))
- let browser
+ let browser,localServer
  let blocked=0
  try{
   console.log('META_BROWSER_PHASE vite_bundle_begin')
@@ -65,6 +66,23 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
   const bundled=readFileSync(join(temp,'browser-lab.js'),'utf8')
   assert.ok(bundled.includes('__runPazoMetaBrowserLab'))
   console.log('META_BROWSER_PHASE vite_bundle_loaded')
+  localServer=createHttpServer((req,res)=>{
+    res.setHeader('Cache-Control','no-store')
+    if(req.method!=='GET'){res.writeHead(405);res.end();return}
+    if(req.url==='/__meta_browser_lab/'){
+      res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'})
+      res.end('<!doctype html><meta charset="utf-8"><title>synthetic local browser contract</title><script type="module" src="/__meta_browser_lab/browser-lab.js"></script>')
+    }else if(req.url==='/__meta_browser_lab/browser-lab.js'){
+      res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8'})
+      res.end(bundled)
+    }else if(req.url==='/favicon.ico'){res.writeHead(204);res.end()}
+    else{res.writeHead(404);res.end()}
+  })
+  await new Promise((resolve,reject)=>{
+    localServer.once('error',reject)
+    localServer.listen(5389,'127.0.0.1',resolve)
+  })
+  console.log('META_BROWSER_PHASE loopback_page_server_ready')
   console.log('META_BROWSER_PHASE chromium_launch_begin')
   browser=await chromium.launch({headless:true,args:['--no-sandbox']})
   console.log('META_BROWSER_PHASE chromium_launched')
@@ -72,16 +90,6 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
     viewport:{width:390,height:844},serviceWorkers:'block',
     ignoreHTTPSErrors:false,
   })
-  // Current Chrome may require a permission when a simulated public
-  // origin fetches localhost. This is an ephemeral browser context only;
-  // hosted PAZO never needs loopback permissions.
-  for(const permission of ['loopback-network','local-network-access']){
-    try{
-      await context.grantPermissions([permission],{origin:ORIGIN})
-      console.log('META_BROWSER_LOCAL_PERMISSION '+permission)
-      break
-    }catch{/* unsupported Chromium/Playwright permission; diagnose below */}
-  }
   const page=await context.newPage()
   page.on('console',msg=>{
     if(msg.type()==='log'&&msg.text().startsWith('META_BROWSER_CLIENT_PHASE '))
@@ -104,16 +112,10 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
   })
   await page.route('**/*',async route=>{
     const u=new URL(route.request().url())
-    if(u.origin===ORIGIN&&u.pathname==='/__meta_browser_lab/'){
-      return route.fulfill({status:200,contentType:'text/html; charset=utf-8',
-        body:'<!doctype html><meta charset="utf-8"><title>local synthetic contract</title><script type="module" src="/__meta_browser_lab/browser-lab.js"></script>'})
-    }
-    if(u.origin===ORIGIN&&u.pathname==='/__meta_browser_lab/browser-lab.js'){
-      return route.fulfill({status:200,contentType:'text/javascript; charset=utf-8',
-        body:bundled})
-    }
-    if(u.origin===ORIGIN&&u.pathname==='/favicon.ico')
-      return route.fulfill({status:204,body:''})
+    if(u.origin===ORIGIN&&[
+      '/__meta_browser_lab/','/__meta_browser_lab/browser-lab.js',
+      '/favicon.ico',
+    ].includes(u.pathname))return route.continue()
     if(u.protocol==='http:'&&u.hostname==='127.0.0.1'
        &&u.port==='54321'&&(
          u.pathname.startsWith('/auth/v1/')
@@ -171,6 +173,7 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
     metaRequests:0,productionRequests:0}
  }finally{
   if(browser)await browser.close()
+  if(localServer)await new Promise(resolve=>localServer.close(()=>resolve()))
   rmSync(temp,{recursive:true,force:true})
  }
 }
