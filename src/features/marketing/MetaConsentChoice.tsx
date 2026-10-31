@@ -16,7 +16,7 @@ interface Props {
 const COPY={
  es:{
   title:'Tú decides qué compartir',
-  description:'¿Nos permites informar a Meta que confirmaste tu cuenta para saber si nuestros anuncios funcionan? Si aceptas, Meta podría recibir esa señal y datos técnicos, como tu dirección IP y navegador. También podría usar información derivada de tu correo para reconocer el registro. Consulta los detalles antes de decidir.',
+  description:'Si aceptas, PAZO informará a Meta que confirmaste tu registro para medir anuncios. Podrá enviar un identificador aleatorio del evento, una versión SHA-256 de tu correo (sigue siendo dato personal) y el identificador de tu navegador (User-Agent). Al cargar Meta Pixel, Meta también podría recibir tu dirección IP y otros datos técnicos de conexión.',
   toggle:'Sí, permito medir mi registro con Meta.',
   link:'Cómo se usarían mis datos',
   grant:'Permitir medición',
@@ -27,11 +27,11 @@ const COPY={
   syncError:'No pudimos confirmar tu preferencia en el servidor. No activaremos la medición. Puedes reintentar.',
   retry:'Reintentar guardar',
   error:'No se pudo guardar el permiso. Puedes continuar sin permitirlo.',
-  optional:'Es opcional. Todas las herramientas de PAZO funcionan sin esta medición.',
+  optional:'Es opcional. PAZO funciona igual sin este permiso. Puedes retirarlo para detener envíos futuros.',
  },
  en:{
   title:'You decide what to share',
-  description:'May PAZO tell Meta you confirmed your account so we can measure our ads? If you agree, Meta may receive that event and technical data such as your IP address and browser. It may also use information derived from your email to recognize the registration. Review the details before deciding.',
+  description:'If you agree, PAZO will tell Meta you confirmed your registration to measure ads. It may send a random event identifier, a SHA-256 hash of your email (still personal data), and your browser identifier (User-Agent). When Meta Pixel loads, Meta may also receive your IP address and other technical connection data.',
   toggle:'Yes, I allow Meta to measure my registration.',
   link:'How my data may be used',
   grant:'Allow measurement',
@@ -42,7 +42,7 @@ const COPY={
   syncError:'We could not confirm your preference on the server. We will not enable measurement. You can retry.',
   retry:'Retry saving',
   error:'We could not save permission. You can continue without allowing.',
-  optional:'Optional. All PAZO tools work without this measurement.',
+  optional:'Optional. PAZO works the same without permission. You can withdraw it to stop future transfers.',
  },
 } as const
 export const META_CHOICES_RELEASED=false
