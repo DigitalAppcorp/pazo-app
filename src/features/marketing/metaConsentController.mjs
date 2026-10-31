@@ -38,7 +38,10 @@ export function createMetaConsentController({
         && browser?.navigator?.globalPrivacyControl!==true
     }catch{return false}
   }
+  // Opt-in cannot be offered unless the same account can also withdraw.
+  // Independent withdrawal may remain available while opt-in is OFF.
   const optIn=releaseEnabled===true && privacyApproved===true
+    && withdrawalReleased===true
     ?createMetaConsentTransport({
       released:true,privacyApproved:true,supabaseClient,ownerId,
       getSessionSnapshot,stillPermitted:affirmativeAllowed,browser,
