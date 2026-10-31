@@ -110,3 +110,21 @@ test('absent match identifier, token or Meta dataset fails closed',async()=>{
   assert.equal(settled,'suppressed')
   assert.equal(calls,0)
 })
+
+
+test('CAPI retry leases the original verified event ID rather than minting a second conversion',async()=>{
+  const observed=[],settled=[]
+  const repository={
+    leaseOne:async()=>({...claim,kind:'retry'}),
+    checkPrivacy:async()=>privacy,
+    settle:async(id,state)=>settled.push([id,state]),
+  }
+  const result=await deliverVerifiedMetaRegistration({...base,repository,
+    fetchImpl:async(url,config)=>{
+      observed.push(JSON.parse(config.body).data[0].event_id)
+      return {ok:true,json:async()=>({events_received:1})}
+    }})
+  assert.equal(result.status,'accepted')
+  assert.deepEqual(observed,[eventId])
+  assert.deepEqual(settled,[[eventId,'sent']])
+})
