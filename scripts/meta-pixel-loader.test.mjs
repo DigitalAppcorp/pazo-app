@@ -185,3 +185,25 @@ test('withdrawal revokes only the Pixel owned by PAZO, not a third-party Pixel',
   other.browser._fbq=other.browser.fbq
   assert.equal(revokeOwnedMetaPixelConsent({browser:other.browser}),false)
 })
+
+test('revocation removes Meta _fbp/_fbc cookies but leaves PAZO session cookie intact',async()=>{
+ const f=fakeBrowser(false)
+ const jar=new Map([['_fbp','synthetic-tracker'],
+  ['_fbc','synthetic-click'],['pazo_session','synthetic-first-party-session']])
+ Object.defineProperty(f.dom,'cookie',{
+  get(){return [...jar].map(([k,v])=>k+'='+v).join('; ')},
+  set(value){
+   const head=value.split(';')[0],name=head.split('=')[0]
+   if(value.includes('Max-Age=0'))jar.delete(name)
+   else jar.set(name,head.slice(name.length+1))
+  },
+ })
+ f.browser.location={hostname:'pazo-app.vercel.app'}
+ const pending=loadMetaPixelForVerifiedSignup({...settings,...f,stillAllowed:()=>true})
+ f.appended[0].onload()
+ assert.equal((await pending).status,'queued')
+ assert.equal(revokeOwnedMetaPixelConsent({browser:f.browser}),true)
+ assert.equal(jar.has('_fbp'),false)
+ assert.equal(jar.has('_fbc'),false)
+ assert.equal(jar.get('pazo_session'),'synthetic-first-party-session')
+})
