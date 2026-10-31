@@ -93,9 +93,11 @@ export function MetaConsentChoice({
   setFailed(true);setSaving(false)
  }
  const continueWithoutSharing=()=>{
-  // A deliberate decline persists a withdrawal without needing Meta SDK.
-  // Failure cannot block the core PAZO experience. No grant is attempted.
-  if(!gpc||gpcState==='error')void persistWithdrawal()
+  // Declining this new optional invitation is NOT a permanent withdrawal
+  // of an earlier grant. With no affirmative grant, no Meta transfer is
+  // authorized. A GPC signal IS an opt-out and must reach the server.
+  // Failure never blocks the underlying PAZO account or QR tools.
+  if(gpc&&gpcState==='error')void persistWithdrawal()
   onContinue()
  }
  return (
