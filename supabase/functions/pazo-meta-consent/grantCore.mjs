@@ -2,6 +2,7 @@
 // This is solely a server-backed, first verified-session purpose decision.
 // Does not send a Meta event or permit a browser-provided owner/event ID.
 import {readMarketingBody} from '../pazo-marketing-attribution/requestBody.mjs'
+import {persistAuthenticatedMetaGpc} from '../_shared/metaGpcOverride.mjs'
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const NOTICE='pazo-meta-conversions-v1'
 const OFF=Object.freeze({status:'disabled'}),DENY=Object.freeze({status:'not_available'})
@@ -11,7 +12,7 @@ const respond=(body,status,origin=null)=>new Response(JSON.stringify(body),{
   ...(origin?{'access-control-allow-origin':origin}:{})}
 })
 export function createMetaGrantHandler({
- released=false,privacyReviewed=false,authenticate=null,grant=null,
+ released=false,privacyReviewed=false,authenticate=null,grant=null,persistGpc=null,
  origin='https://pazo-app.vercel.app',
 }={}) {
  return async function handle(request){
@@ -19,7 +20,6 @@ export function createMetaGrantHandler({
     ||typeof authenticate!=='function'||typeof grant!=='function')
     return respond(OFF,503)
   if(request.headers.get('origin')!==origin)return respond(DENY,403)
-  if(request.headers.get('sec-gpc')==='1')return respond(DENY,403,origin)
   if(request.method==='OPTIONS')return new Response(null,{status:204,
     headers:{'access-control-allow-origin':origin,'vary':'Origin',
       'access-control-allow-methods':'POST, OPTIONS',
@@ -32,6 +32,16 @@ export function createMetaGrantHandler({
   const token=request.headers.get('authorization')||''
   if(!/^Bearer [A-Za-z0-9._~+=-]{12,4096}$/.test(token))
     return respond(DENY,401,origin)
+  if(request.headers.get('sec-gpc')==='1'){
+    // This same-origin, authenticated POST must persist GPC as an opt-out,
+    // not merely prevent this one conversion request.
+    if(typeof persistGpc!=='function')return respond(DENY,403,origin)
+    const result=await persistAuthenticatedMetaGpc({
+      request,authenticate,withdraw:persistGpc,
+    })
+    return respond(DENY,result==='persisted'?403:
+      result==='unauthorized'?401:503,origin)
+  }
   let raw
   try{raw=await readMarketingBody(request,80,3000)}
   catch{return respond(DENY,400,origin)}
