@@ -28,6 +28,13 @@ window.__runPazoMetaBrowserLab=async({api,key,email,password}={})=>{
     }
     return fetch(url.href,init)
   }
+  // Distinguish browser loopback/CORS gating from supabase-js auth errors.
+  let probe
+  try{
+    probe=await fetch(base.origin+'/auth/v1/settings',{method:'GET'})
+  }catch{throw Error('browser_local_auth_network_unavailable')}
+  if(!probe.ok)throw Error('browser_local_auth_settings_rejected')
+  console.log('META_BROWSER_CLIENT_PHASE local_network_probe_passed')
   let privacyPermitted=true,gpc=false
   Object.defineProperty(navigator,'globalPrivacyControl',{
     configurable:true,get:()=>gpc,
