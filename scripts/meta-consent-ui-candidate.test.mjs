@@ -8,6 +8,7 @@ import React from 'react'
 import {create,act} from 'react-test-renderer'
 
 globalThis.IS_REACT_ACT_ENVIRONMENT=true
+fs.mkdirSync(path.resolve('node_modules/.cache'),{recursive:true})
 const work=fs.mkdtempSync(path.resolve('node_modules/.cache/meta-consent-ui-'))
 const filename=path.join(work,'choice.mjs')
 const src=fs.readFileSync('src/features/marketing/MetaConsentChoice.tsx','utf8')
