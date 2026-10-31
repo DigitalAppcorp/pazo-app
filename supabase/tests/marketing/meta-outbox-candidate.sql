@@ -246,7 +246,7 @@ REVOKE ALL ON FUNCTION marketing_private.meta_withdraw_candidate(uuid)
 -- server-verified getUser(jwt) and same-origin CSRF controls.
 CREATE FUNCTION public.pazo_meta_withdraw_candidate(p_owner uuid)
 RETURNS boolean LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=''
-AS $ SELECT marketing_private.meta_withdraw_candidate(p_owner) $;
+AS $meta_wrapper$ SELECT marketing_private.meta_withdraw_candidate(p_owner) $meta_wrapper$;
 REVOKE ALL ON FUNCTION public.pazo_meta_withdraw_candidate(uuid)
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_meta_withdraw_candidate(uuid)
