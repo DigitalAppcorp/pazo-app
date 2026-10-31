@@ -73,19 +73,45 @@ const [leasedOwner,leasedEvent,leasedAt,leaseToken]=active[0].split('|')
 assert.equal(leasedOwner,owner)
 assert.equal(leasedEvent,eventId,'worker must reuse verified event_id')
 assert.match(leaseToken,/^[0-9a-f-]{36}$/)
+assert.equal(sql(`SET ROLE service_role;
+ SELECT owner_id::text FROM public.pazo_meta_check_claim_candidate(
+  '${leasedEvent}','${leaseToken}')`),owner,'current worker sees only its eligible private policy')
+assert.equal(sql(`SET ROLE service_role;
+ SELECT owner_id::text FROM public.pazo_meta_check_claim_candidate(
+  '${leasedEvent}','11111111-1111-4111-8111-111111111111')`),'',
+ 'unowned/stale lease gets no privacy attestation')
+assert.throws(()=>sql(`SET ROLE anon;
+ SELECT * FROM public.pazo_meta_check_claim_candidate(
+  '${leasedEvent}','${leaseToken}')`))
+assert.throws(()=>sql(`SET ROLE authenticated;
+ SELECT * FROM public.pazo_meta_check_claim_candidate(
+  '${leasedEvent}','${leaseToken}')`))
+
 assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_settle_candidate(
- '${leasedEvent}','11111111-1111-4111-8111-111111111111',true)`),'f','wrong lease cannot settle')
+ '${leasedEvent}','11111111-1111-4111-8111-111111111111','sent')`),'f','wrong lease cannot settle')
 assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_settle_candidate(
- '${leasedEvent}','${leaseToken}',false)`),'t','failed provider call becomes retryable')
+ '${leasedEvent}','${leaseToken}','retryable')`),'t','failed provider call becomes retryable')
 const retry=sql('SET ROLE service_role;SELECT * FROM public.pazo_meta_lease_candidate()')
 const [retryOwner,retryEvent,retryTime,retryLease]=retry.split('|')
 assert.equal(retryOwner,owner)
 assert.equal(retryEvent,eventId,'retry cannot mint another conversion')
 assert.notEqual(retryLease,leaseToken,'fresh worker lease id')
+assert.equal(sql(`SET ROLE service_role;
+ SELECT owner_id::text FROM public.pazo_meta_check_claim_candidate(
+  '${leasedEvent}','${leaseToken}')`),'','re-leased worker fences stale privacy read')
+assert.equal(sql(`SET ROLE service_role;
+ SELECT owner_id::text FROM public.pazo_meta_check_claim_candidate(
+  '${retryEvent}','${retryLease}')`),owner,'new lease is authorized')
 assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_settle_candidate(
- '${leasedEvent}','${leaseToken}',true)`),'f','old worker cannot settle after re-lease')
+  '${retryEvent}','${retryLease}','bad_status')`),'f','settlement requires typed state')
+
 assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_settle_candidate(
- '${retryEvent}','${retryLease}',true)`),'t','current worker settles')
+ '${leasedEvent}','${leaseToken}','sent')`),'f','old worker cannot settle after re-lease')
+assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_settle_candidate(
+ '${retryEvent}','${retryLease}','sent')`),'t','current worker settles')
+assert.equal(sql(`SET ROLE service_role;
+ SELECT owner_id::text FROM public.pazo_meta_check_claim_candidate(
+  '${retryEvent}','${retryLease}')`),'','settled event must not issue another privacy proof')
 assert.equal(sql('SET ROLE service_role;SELECT * FROM public.pazo_meta_lease_candidate()'),'')
 assert.equal(sql(`SELECT event_time=(SELECT email_confirmed_at FROM auth.users
  WHERE id='${owner}') FROM marketing_private.meta_outbox_candidate
@@ -185,7 +211,7 @@ const [lgOwner,lgEvent,lgTime,lgLease]=lateGrantedLease.split('|')
 assert.equal(lgOwner,lateGranted)
 assert.equal(lgEvent,lateGrantedEvent)
 assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_settle_candidate(
- '${lgEvent}','${lgLease}',true)`),'t')
+ '${lgEvent}','${lgLease}','sent')`),'t')
 
 const deniedGrant='16900000-0000-4000-8000-000000000009'
 create(deniedGrant)
@@ -241,7 +267,7 @@ assert.equal(sql(`SELECT count(*) FROM marketing_private.meta_purpose_candidate
 assert.equal(sql('SELECT row_to_json(g) FROM marketing_private.collection_gate g'),before)
 console.log(JSON.stringify({status:'PASS',environment:'disposable PG17',
  atomicSignupAndEvent:true,concurrentFirstParty:8,concurrentLeases:8,
- oneTimeClaims:1,leaseFence:true,stableRetryId:true,revocationStopsPending:true,withdrawalIdempotent:true,serverOnlyWithdrawal:true,
+ oneTimeClaims:1,leaseBoundPrivacy:true,typedSettlement:true,leaseFence:true,stableRetryId:true,revocationStopsPending:true,withdrawalIdempotent:true,serverOnlyWithdrawal:true,
  singleUseBrowserReceipt:true,concurrentBrowserReceiptClaims:8,
  independentGateDefaultsOff:true,gpcExclusion:true,qaExclusion:true,
  noBackfill:true,verifiedSessionGrant:true,explicitNotice:true,grantGpcGate:true,grantNoReversal:true,rlsForced:true,retentionCascade:true,hostedWrites:0}))
