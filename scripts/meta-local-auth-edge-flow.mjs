@@ -122,12 +122,14 @@ export async function runAuthenticatedMetaEdgeLab({api,key,ownerId,token}={}){
  const beforeMutations=mutations
  const invalid=await direct('pazo-meta-grant',
   {action:'grant',noticeVersion:'pazo-meta-conversions-v1'},'invalid-jwt-token-lab-12345')
- assert.equal(invalid.status,401,'unknown JWT must never grant')
+ assert.equal(invalid.status,403,'unknown JWT must never grant or reach outbox')
  assert.equal(mutations,beforeMutations)
+ console.log('META_EDGE_PHASE invalid_jwt_denied')
  const spoof=await direct('pazo-meta-grant',
   {action:'grant',noticeVersion:'pazo-meta-conversions-v1',ownerId:randomUUID()})
  assert.equal(spoof.status,400,'browser owner field rejected')
  assert.equal(mutations,beforeMutations)
+ console.log('META_EDGE_PHASE owner_spoof_denied')
  const result=await completeExplicitMetaOptIn({
   releaseEnabled:true,privacyApproved:true,deliberateOptIn:true,
   ownerId,accessToken:token,getActiveSession:snapshot,
@@ -146,6 +148,7 @@ export async function runAuthenticatedMetaEdgeLab({api,key,ownerId,token}={}){
  assert.equal(mutations,beforeMutations+1)
  assert.equal(receipts,1)
  assert.equal(pixelCallbacks,1)
+ console.log('META_EDGE_PHASE real_auth_consent_event_simulated')
  // Re-login / repeated callbacks must never generate another conversion.
  const second=await completeExplicitMetaOptIn({
   releaseEnabled:true,privacyApproved:true,deliberateOptIn:true,
@@ -156,6 +159,7 @@ export async function runAuthenticatedMetaEdgeLab({api,key,ownerId,token}={}){
  })
  assert.notEqual(second.status,'queued')
  assert.equal(pixelCallbacks,1)
+ console.log('META_EDGE_PHASE repeat_event_denied')
  // After consent, a browser GPC request persists the opt-out even when
  // a browser receipt was consumed; future receipt is blocked.
  const gpcResult=await direct('pazo-meta-receipt',{},token,{'sec-gpc':'1'})
@@ -166,6 +170,7 @@ export async function runAuthenticatedMetaEdgeLab({api,key,ownerId,token}={}){
   accessToken:token,body:{action:'withdraw'}}),{status:'withdrawn'},
   'an explicit repeated withdrawal must stay idempotent')
  assert.equal(granted,false)
+ console.log('META_EDGE_PHASE gpc_and_withdrawal_persisted_in_memory')
  assert.equal((await direct('pazo-meta-grant',
   {action:'grant',noticeVersion:'pazo-meta-conversions-v1'})).status,409,
   'GPC withdrawal cannot be silently undone')
