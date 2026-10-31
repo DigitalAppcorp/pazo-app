@@ -52,7 +52,7 @@ test.after(()=>fs.rmSync(work,{recursive:true,force:true}))
 test('UI is hardcoded OFF and not linked to the production runtime',()=>{
  assert.equal(META_CHOICES_RELEASED,false)
 })
-for(const lang of ['es','en'])test(lang+': default unchecked, no pregrant, skip persists opt-out-only',async()=>{
+for(const lang of ['es','en'])test(lang+': default unchecked, no grant or irreversible withdrawal on skip',async()=>{
  let grants=0,withdrawals=0,continued=0
  await render({lang,onGrant:async()=>{grants++;return true},
   onWithdraw:async()=>{withdrawals++;return true},
@@ -62,7 +62,7 @@ for(const lang of ['es','en'])test(lang+': default unchecked, no pregrant, skip 
  assert.ok(button,'positive consent should be disabled by default')
  await click(lang==='es'?'Continuar sin permitirlo':'Continue without allowing')
  assert.equal(grants,0)
- assert.equal(withdrawals,1)
+ assert.equal(withdrawals,0,'declining a fresh prompt cannot permanently revoke consent')
  assert.equal(continued,1)
 })
 test('positive choice needs explicit checkbox; success does not persist a refusal',async()=>{
@@ -88,7 +88,8 @@ test('grant failure is visible and still allows first-party continuation',async(
  await click('Permitir medición')
  assert.equal(root.root.findAll(x=>x.props.role==='alert').length,1)
  await click('Continuar sin permitirlo')
- assert.equal(continued,1);assert.equal(withdrawals,1)
+ assert.equal(continued,1);assert.equal(withdrawals,0,
+  'grant failure and continue are not an account-wide withdrawal')
 })
 test('GPC never offers positive consent; persist-only call confirms actual server result',async()=>{
  let withdrawals=0,grants=0,continued=0
