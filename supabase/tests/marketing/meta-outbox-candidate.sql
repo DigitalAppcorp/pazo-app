@@ -91,8 +91,8 @@ BEGIN
    AND a.signup_verified_at=u.email_confirmed_at
    AND a.signup_verified_at<=statement_timestamp()
    AND a.signup_verified_at>=statement_timestamp()-interval '15 minutes'
-   AND a.created_at<=statement_timestamp()
-   AND a.created_at>=statement_timestamp()-interval '15 minutes'
+   AND a.recorded_at<=statement_timestamp()
+   AND a.recorded_at>=statement_timestamp()-interval '15 minutes'
    AND p.purpose='meta_conversions_v1'
    AND p.version='pazo-meta-conversions-v1'
    AND p.decision='granted' AND p.withdrawn_at IS NULL
