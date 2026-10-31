@@ -16,7 +16,7 @@ const reply=(body,status,origin=null)=>new Response(JSON.stringify(body),{
 })
 export function createMetaReceiptHandler({
   released=false,privacyReviewed=false,authenticate=null,
-  lookupReceipt=null,persistGpc=null,now=()=>Date.now(),
+  authenticateGpc=null,lookupReceipt=null,persistGpc=null,now=()=>Date.now(),
   origin='https://pazo-app.vercel.app',
 }={}) {
   return async function handle(request) {
@@ -42,7 +42,7 @@ export function createMetaReceiptHandler({
       // Atomic server-side suppression must precede any receipt lookup.
       if(typeof persistGpc!=='function')return reply(DENIED,403,origin)
       const result=await persistAuthenticatedMetaGpc({
-        request,authenticate,withdraw:persistGpc,
+        request,authenticate:authenticateGpc||authenticate,withdraw:persistGpc,
       })
       return reply(DENIED,result==='persisted'?403:
         result==='unauthorized'?401:503,origin)
