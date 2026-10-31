@@ -6,6 +6,7 @@ import {deliverVerifiedMetaRegistration}
   from '../supabase/functions/_shared/metaDeliveryCoordinator.mjs'
 const eventId='11111111-2222-4333-8444-555555555555',datasetId='123456789012345'
 const hashedEmail='a'.repeat(64) // synthetic, not an actual email hash
+const match={em:hashedEmail,clientUserAgent:'Mozilla/5.0 (PAZO Synthetic Consent Test)'}
 const now=Date.now(),date=new Date(now).toISOString()
 const record={
   purpose:META_PURPOSE,version:META_CONSENT_VERSION,decision:'granted',
@@ -39,14 +40,14 @@ test('a first-party analytics preference is not Meta advertising consent',()=>{
 test('no release => no claim, no privacy query, no Meta call',async()=>{
   let invoked=0
   const repo={leaseOne:async()=>{invoked++;return claim},
-    checkPrivacy:async()=>{invoked++;return privacy},readApprovedMatchField:async()=>hashedEmail,settle:async()=>{invoked++}}
+    checkPrivacy:async()=>{invoked++;return privacy},readApprovedMatchField:async()=>match,settle:async()=>{invoked++}}
   const out=await deliverVerifiedMetaRegistration({repository:repo})
   assert.equal(out.status,'disabled')
   assert.equal(invoked,0)
 })
 test('claim repository must be complete, and duplicate verified owner is suppressed',async()=>{
   assert.equal((await deliverVerifiedMetaRegistration(base)).status,'not_configured')
-  const rep={leaseOne:async()=>({kind:'duplicate'}),checkPrivacy:async()=>privacy,readApprovedMatchField:async()=>hashedEmail,settle:async()=>true}
+  const rep={leaseOne:async()=>({kind:'duplicate'}),checkPrivacy:async()=>privacy,readApprovedMatchField:async()=>match,settle:async()=>true}
   assert.equal((await deliverVerifiedMetaRegistration({...base,repository:rep})).status,'not_eligible')
 })
 test('one lease + two privacy reads, same event_id, token only in header',async()=>{
@@ -54,7 +55,7 @@ test('one lease + two privacy reads, same event_id, token only in header',async(
   const repository={
     leaseOne:async()=>claim,
     checkPrivacy:async()=>{checks++;return privacy},
-    readApprovedMatchField:async()=>hashedEmail,settle:async(id,lease,state)=>{assert.equal(id,eventId);assert.equal(lease,leaseId);settled=state;return true},
+    readApprovedMatchField:async()=>match,settle:async(id,lease,state)=>{assert.equal(id,eventId);assert.equal(lease,leaseId);settled=state;return true},
   }
   const out=await deliverVerifiedMetaRegistration({...base,repository,
     fetchImpl:async(url,config)=>{
@@ -76,7 +77,7 @@ test('uncertain initial DB privacy read retries without PII or provider request'
    const repo={
      leaseOne:async()=>claim,
      checkPrivacy:source,
-     readApprovedMatchField:async()=>{matchingReads++;return hashedEmail},
+     readApprovedMatchField:async()=>{matchingReads++;return match},
      settle:async(id,lease,status)=>{
        assert.equal(id,eventId);assert.equal(lease,leaseId)
        settled=status;return true
@@ -101,7 +102,7 @@ test('uncertain final DB privacy recheck retries without provider request',async
        if(failure==='null')return null
        throw Error('temporary DB failure')
      },
-     readApprovedMatchField:async()=>{reads++;return hashedEmail},
+     readApprovedMatchField:async()=>{reads++;return match},
      settle:async(_,lease,status)=>{
        assert.equal(lease,leaseId);settled=status;return true
      },
@@ -119,7 +120,7 @@ test('a late GPC/withdrawal change suppresses the provider call',async()=>{
   let calls=0,checks=0,settled
   const repository={leaseOne:async()=>claim,
     checkPrivacy:async()=>++checks===1?privacy:{...privacy,gpc:true},
-    readApprovedMatchField:async()=>hashedEmail,settle:async(_,lease,status)=>{assert.equal(lease,leaseId);settled=status;return true}}
+    readApprovedMatchField:async()=>match,settle:async(_,lease,status)=>{assert.equal(lease,leaseId);settled=status;return true}}
   const out=await deliverVerifiedMetaRegistration({...base,repository,
     fetchImpl:async()=>{calls++;throw Error('never called')}})
   assert.equal(out.status,'suppressed')
@@ -129,7 +130,7 @@ test('a late GPC/withdrawal change suppresses the provider call',async()=>{
 test('server account exclusion and unknown purpose suppress before provider',async()=>{
   let calls=0,settled
   const repository={leaseOne:async()=>claim,checkPrivacy:async()=>({...privacy,qaOrAdmin:true}),
-    readApprovedMatchField:async()=>hashedEmail,settle:async(_,lease,status)=>{assert.equal(lease,leaseId);settled=status;return true}}
+    readApprovedMatchField:async()=>match,settle:async(_,lease,status)=>{assert.equal(lease,leaseId);settled=status;return true}}
   const result=await deliverVerifiedMetaRegistration({...base,repository,
     fetchImpl:async()=>{calls++}})
   assert.equal(result.status,'suppressed')
@@ -141,7 +142,7 @@ test('privacy refusal never reads any approved matching data',async()=>{
  const repository={
    leaseOne:async()=>claim,
    checkPrivacy:async()=>({...privacy,gpc:true}),
-   readApprovedMatchField:async()=>{reads++;return hashedEmail},
+   readApprovedMatchField:async()=>{reads++;return match},
    settle:async()=>true,
  }
  const out=await deliverVerifiedMetaRegistration({...base,repository,
@@ -154,7 +155,7 @@ test('privacy refusal never reads any approved matching data',async()=>{
 test('provider failure keeps same event lease retryable; no duplicate is minted',async()=>{
   let settled,calls=0
   const repository={leaseOne:async()=>claim,checkPrivacy:async()=>privacy,
-    readApprovedMatchField:async()=>hashedEmail,settle:async(_,lease,status)=>{assert.equal(lease,leaseId);settled=status;return true}}
+    readApprovedMatchField:async()=>match,settle:async(_,lease,status)=>{assert.equal(lease,leaseId);settled=status;return true}}
   const result=await deliverVerifiedMetaRegistration({...base,repository,
     fetchImpl:async()=>{calls++;return {ok:false}}})
   assert.equal(result.status,'provider_error')
@@ -178,7 +179,7 @@ test('CAPI retry leases the original verified event ID rather than minting a sec
   const repository={
     leaseOne:async()=>({...claim,kind:'retry'}),
     checkPrivacy:async()=>privacy,
-    readApprovedMatchField:async()=>hashedEmail,settle:async(id,lease,state)=>{settled.push([id,lease,state]);return true},
+    readApprovedMatchField:async()=>match,settle:async(id,lease,state)=>{settled.push([id,lease,state]);return true},
   }
   const result=await deliverVerifiedMetaRegistration({...base,repository,
     fetchImpl:async(url,config)=>{
@@ -196,7 +197,7 @@ test('invalid or missing lease ID cannot trigger provider or privacy reads',asyn
     let privacyReads=0,network=0,settles=0
     const repo={leaseOne:async()=>({...claim,leaseId:invalid}),
       checkPrivacy:async()=>{privacyReads++;return privacy},
-      readApprovedMatchField:async()=>hashedEmail,settle:async()=>{settles++;return true}}
+      readApprovedMatchField:async()=>match,settle:async()=>{settles++;return true}}
     const out=await deliverVerifiedMetaRegistration({...base,repository:repo,
       fetchImpl:async()=>{network++;return {ok:true,json:async()=>({events_received:1})}}})
     assert.equal(out.status,'not_eligible')
@@ -206,7 +207,7 @@ test('invalid or missing lease ID cannot trigger provider or privacy reads',asyn
 test('stale-worker settlement failure never reports successful completion',async()=>{
   let sent=0
   const repo={leaseOne:async()=>claim,checkPrivacy:async()=>privacy,
-    readApprovedMatchField:async()=>hashedEmail,settle:async()=>false}
+    readApprovedMatchField:async()=>match,settle:async()=>false}
   const out=await deliverVerifiedMetaRegistration({...base,repository:repo,
     fetchImpl:async()=>{sent++;return {ok:true,json:async()=>({events_received:1})}}})
   assert.equal(sent,1)
