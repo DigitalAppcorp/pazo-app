@@ -1,4 +1,5 @@
 import {readMarketingBody} from '../pazo-marketing-attribution/requestBody.mjs'
+import {persistAuthenticatedMetaGpc} from '../_shared/metaGpcOverride.mjs'
 // #169: SERVER-ATTESTED BROWSER RECEIPT CANDIDATE — NOT DEPLOYED.
 // This service never talks to Meta and must not be activated before full
 // privacy review, server-only lookup and separate production GO.
@@ -15,7 +16,7 @@ const reply=(body,status,origin=null)=>new Response(JSON.stringify(body),{
 })
 export function createMetaReceiptHandler({
   released=false,privacyReviewed=false,authenticate=null,
-  lookupReceipt=null,now=()=>Date.now(),
+  lookupReceipt=null,persistGpc=null,now=()=>Date.now(),
   origin='https://pazo-app.vercel.app',
 }={}) {
   return async function handle(request) {
@@ -24,7 +25,6 @@ export function createMetaReceiptHandler({
       ||typeof authenticate!=='function'||typeof lookupReceipt!=='function')
       return reply(OFF,503)
     if(request.headers.get('origin')!==origin) return reply(DENIED,403)
-    if(request.headers.get('sec-gpc')==='1') return reply(DENIED,403,origin)
     if(request.method==='OPTIONS')return new Response(null,{
       status:204,headers:{'access-control-allow-origin':origin,'vary':'Origin',
       'access-control-allow-methods':'POST, OPTIONS',
@@ -38,6 +38,15 @@ export function createMetaReceiptHandler({
     if(Number(request.headers.get('content-length')||0)>2)return reply(DENIED,413,origin)
     const token=request.headers.get('authorization')||''
     if(!/^Bearer [A-Za-z0-9._~+=-]{12,4096}$/.test(token))return reply(DENIED,401,origin)
+    if(request.headers.get('sec-gpc')==='1'){
+      // Atomic server-side suppression must precede any receipt lookup.
+      if(typeof persistGpc!=='function')return reply(DENIED,403,origin)
+      const result=await persistAuthenticatedMetaGpc({
+        request,authenticate,withdraw:persistGpc,
+      })
+      return reply(DENIED,result==='persisted'?403:
+        result==='unauthorized'?401:503,origin)
+    }
     let raw
     try {raw=await readMarketingBody(request,2,3000)}
     catch {return reply(DENIED,400,origin)}
