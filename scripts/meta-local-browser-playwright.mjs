@@ -72,10 +72,28 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
     viewport:{width:390,height:844},serviceWorkers:'block',
     ignoreHTTPSErrors:false,
   })
+  // Current Chrome may require a permission when a simulated public
+  // origin fetches localhost. This is an ephemeral browser context only;
+  // hosted PAZO never needs loopback permissions.
+  for(const permission of ['loopback-network','local-network-access']){
+    try{
+      await context.grantPermissions([permission],{origin:ORIGIN})
+      console.log('META_BROWSER_LOCAL_PERMISSION '+permission)
+      break
+    }catch{/* unsupported Chromium/Playwright permission; diagnose below */}
+  }
   const page=await context.newPage()
   page.on('console',msg=>{
     if(msg.type()==='log'&&msg.text().startsWith('META_BROWSER_CLIENT_PHASE '))
       console.log(msg.text())
+    if(msg.type()==='error'){
+      const description=msg.text()
+      const category=/local network|loopback network|local-network-access/i.test(description)
+        ?'local_network_permission':
+        /CORS|Access-Control-Allow-Origin|preflight/i.test(description)
+        ?'cors':'browser_network_or_script'
+      console.log('META_BROWSER_CONSOLE_ERROR '+category)
+    }
   })
   page.on('requestfailed',req=>{
     const u=new URL(req.url())
@@ -118,6 +136,7 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
     const msg=String(error?.message||'')
     const known=['outbound_browser_request_forbidden',
       'not_local_auth_or_candidate','unknown_local_meta_endpoint',
+      'browser_local_auth_network_unavailable','browser_local_auth_settings_rejected',
       'browser_gotrue_login_failed','browser_real_auth_verification_failed',
       'browser_first_grant_receipt_failed','browser_repeat_conversion_accepted',
       'browser_gpc_veto_failed','browser_durable_withdrawal_failed',
