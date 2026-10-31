@@ -42,6 +42,23 @@ try{
      deviceScaleFactor:1,reducedMotion:'reduce',
      serviceWorkers:'block'})
     const page=await context.newPage()
+    const pageIssues=[]
+    page.on('pageerror',err=>pageIssues.push(
+      'module_runtime_exception:'+String(err.message||'').slice(0,140)
+       .replace(/https?:[^\\s]+/g,'local-url')))
+    page.on('console',msg=>{
+      if(msg.type()==='error')pageIssues.push(
+        'console_error:'+msg.text().slice(0,140).replace(/https?:[^\\s]+/g,'local-url'))
+    })
+    page.on('requestfailed',req=>{
+      const u=new URL(req.url())
+      if(u.origin===ORIGIN)pageIssues.push('local_request_failed:'+u.pathname.slice(0,65))
+    })
+    page.on('response',res=>{
+      const u=new URL(res.url())
+      if(u.origin===ORIGIN&&res.status()>=400)
+        pageIssues.push('local_http_'+res.status()+'_path_'+u.pathname.slice(0,70))
+    })
     await page.route('**/*',async route=>{
      const url=new URL(route.request().url())
      if(url.origin===ORIGIN)return route.continue()
@@ -50,17 +67,17 @@ try{
     })
     const url=ORIGIN+'/__meta_consent_lab__/?lang='+lang+'&case='+scenario
     await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000})
-    const pageIssues=[]
-    page.on('pageerror',()=>pageIssues.push('module_runtime_exception'))
-    page.on('response',res=>{
-      const u=new URL(res.url())
-      if(u.origin===ORIGIN&&res.status()>=400)
-        pageIssues.push('local_http_'+res.status()+'_path_'+u.pathname.slice(0,70))
-    })
     try{
-      await page.waitForFunction(()=>window.__metaLabReady===true,null,{timeout:12000})
+      await page.waitForFunction(()=>window.__metaLabReady===true,null,{timeout:9000})
     }catch{
-      throw Error('synthetic_visual_entry_failed:'+pageIssues.join(','))
+      await page.screenshot({path:DIR+'/entry-failure.png',fullPage:true})
+      const state=await page.evaluate(()=>({
+        scripts:Array.from(document.scripts).map(x=>x.getAttribute('src')),
+        rootChildCount:document.getElementById('qa-root')?.childElementCount,
+      }))
+      console.log('META_VISUAL_BOOT_FAILURE '+JSON.stringify({
+        issues:pageIssues.slice(0,8),state}))
+      throw Error('synthetic_visual_entry_failed')
     }
     const section=page.locator('section[aria-labelledby="meta-consent-title"]')
     await section.waitFor()
