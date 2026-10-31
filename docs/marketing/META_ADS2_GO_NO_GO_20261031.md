@@ -85,3 +85,21 @@ Comprobaciones programadas:
 - El primer intento detectó la necesidad de diagnósticos no sensibles y el segundo detectó una discrepancia entre la respuesta HTTP directa de GoTrue y el wrapper `supabase-js`. Ambos fueron corregidos sin modificar la política de email: esta sigue habilitada **solo en el directorio temporal del runner**, no en producción.
 - **Limitación:** aún no se ha ejecutado una prueba completa de los endpoints Meta candidatos con Auth real y migración Meta aplicada a un entorno aislado. El flujo de laboratorio GoTrue no equivale a validación de Meta CAPI/Pixel, ni valida la UX de PAZO. `AUTH_CONFIRMED_LOCAL_PASS` pero `META_END_TO_END_HOSTED_NOT_TESTED`.
 - **Rama alojada NO creada:** Supabase requirió ID de confirmación del coste. Falta consultar la cotización asociada a la organización correcta y obtener aceptación expresa del precio real; la autorización genérica de continuar no sustituye al consentimiento formal de facturación requerido por Supabase.
+
+## Validación real de GoTrue JWT con endpoints Meta candidatos (laboratorio local)
+
+**Evidencia:** [Workflow Supabase local / GoTrue + Edge candidate: SUCCESS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/41177663254) para SHA `dbd0d883551daf903cba024a5a4d04a64c0934a2`. Prueba `scripts/meta-local-auth-edge-flow.mjs`, invocada por `scripts/meta-local-auth-lab.mjs` tras confirmar correo con el Auth local real, bajo `.github/workflows/meta-auth-local-lab.yml`. Las tareas de verificación y `supabase stop --no-backup` finalizaron PASS.
+
+El flujo usó **un JWT auténtico emitido por GoTrue local** y los handlers HTTP candidatos `createMetaGrantHandler`, `createMetaReceiptHandler` y `createMetaWithdrawalHandler`. El backend de consentimiento/outbox se reemplazó deliberadamente por un **almacén aislado en memoria**; el contrato de SQL/reintentos/concurrencia continúa verificado **por separado** en los tests PostgreSQL 17 descartables. No se usaron funciones Edge alojadas ni credenciales reales de Meta.
+
+Validado:
+- Signup solicitado sin sesión; login no confirmado denegado; confirmación real vía Mailpit; `GET /auth/v1/user` verifica email confirmado y propietario; regreso de la misma cuenta sin crear otra identidad.
+- Handler grant reconsulta Auth real usando el JWT y no acepta credenciales desconocidas ni campos `ownerId` enviados por navegador. La decisión positiva es sintética y **no publica el aviso legal**.
+- Contrato explícito grant → recibo con un solo UUIDv4 → Pixel **simulado mediante callback**. Un segundo intento no genera otro evento.
+- `Sec-GPC: 1` en una solicitud de recibo provoca persistencia de retirada **en memoria**; la prueba verifica que tras retirar no se produce un recibo nuevo, que la retirada repetida es idempotente y que no se restablece el permiso automáticamente.
+- Sin conexiones de salida a Meta, ningún correo externo, sin base de datos Supabase alojada, sin logs con correo/JWT/secretos.
+- [Meta unitario + frontera OFF](https://github.com/DigitalAppcorp/pazo-app/actions/runs/41177666542): SUCCESS, **113/113 PASS**. La regresión general [Ads2 aislado](https://github.com/DigitalAppcorp/pazo-app/actions/runs/41177666589) debe verificarse al concluir; no atribuir PASS por anticipado.
+
+**Qué NO se ha verificado aún:** Auth real + outbox SQL candidate en una **misma** base de datos Supabase, Edge Functions realmente desplegadas en staging, interacción real UI ES/EN en PAZO, consentimiento jurídico publicado, lector de identificadores CAPI aprobado o deduplicación Pixel/CAPI en Meta Events Manager. No confundir el callback Pixel simulado con un envío al proveedor.
+
+**Costos:** No se creó ninguna rama/proyecto Supabase alojado ni se aceptó la tarifa propuesta. El laboratorio utiliza los workflows GitHub Actions existentes y sus minutos de ejecución habituales (sujetos a cuotas del plan GitHub), no nueva infraestructura facturable de Supabase. Meta Pixel, CAPI, tracking en vivo y campañas siguen OFF. La opción de staging pagado queda descartada por ahora conforme a la instrucción del PO.
