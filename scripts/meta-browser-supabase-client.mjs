@@ -36,15 +36,18 @@ window.__runPazoMetaBrowserLab=async({api,key,email,password}={})=>{
     global:{fetch:localFetch},
     auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},
   })
+  console.log('META_BROWSER_CLIENT_PHASE login_request')
   const login=await client.auth.signInWithPassword({email,password})
   if(login.error||!login.data?.session?.access_token)
     throw Error('browser_gotrue_login_failed')
   const ownerId=login.data.user?.id
   const token=login.data.session.access_token
+  console.log('META_BROWSER_CLIENT_PHASE login_reply')
   const verified=await client.auth.getUser()
   if(verified.error||verified.data?.user?.id!==ownerId
     ||!verified.data.user.email_confirmed_at)
     throw Error('browser_real_auth_verification_failed')
+  console.log('META_BROWSER_CLIENT_PHASE real_gotrue_user_verified')
   const session=()=>({id:ownerId,accessToken:token})
   const transport=createMetaConsentTransport({
     released:true,privacyApproved:true,supabaseClient:client,
@@ -69,9 +72,11 @@ window.__runPazoMetaBrowserLab=async({api,key,email,password}={})=>{
     },
   })
   // Browser preflight + functions.invoke MUST complete before this counts.
+  console.log('META_BROWSER_CLIENT_PHASE consent_and_receipt_request')
   const first=await run()
   if(first.status!=='queued'||callbacks!==1)
     throw Error('browser_first_grant_receipt_failed:'+first.status)
+  console.log('META_BROWSER_CLIENT_PHASE first_consent_accepted')
   const second=await run()
   if(second.status==='queued'||callbacks!==1)
     throw Error('browser_repeat_conversion_accepted')
@@ -79,6 +84,7 @@ window.__runPazoMetaBrowserLab=async({api,key,email,password}={})=>{
   const veto=await run()
   if(veto.status!=='suppressed'||callbacks!==1)
     throw Error('browser_gpc_veto_failed')
+  console.log('META_BROWSER_CLIENT_PHASE repeated_event_and_gpc_veto')
   const removed=await withdrawal.requestWithdraw({
     accessToken:token,body:{action:'withdraw'},
   })
@@ -89,6 +95,7 @@ window.__runPazoMetaBrowserLab=async({api,key,email,password}={})=>{
   const afterWithdraw=await run()
   if(afterWithdraw.status==='queued'||callbacks!==1)
     throw Error('browser_withdrawn_account_regranted')
+  console.log('META_BROWSER_CLIENT_PHASE withdrawal_persisted')
   await client.auth.signOut({scope:'local'})
   return {status:'REAL_BROWSER_SUPABASE_JS_META_OFF_PASS',
     ownerId,eventId:issuedId,datasetId:issuedDataset,
