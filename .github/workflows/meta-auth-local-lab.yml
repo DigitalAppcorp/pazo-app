@@ -1,0 +1,66 @@
+name: PAZO Meta independent local Auth lab (provider OFF)
+on:
+  push:
+    branches: [feat/issue169-meta-pixel-capi-off]
+    paths:
+      - 'scripts/meta-local-auth-lab.mjs'
+      - '.github/workflows/meta-auth-local-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-auth-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: supabase/setup-cli@v3
+        with:
+          version: '2.81.3'
+      - name: Prepare a fresh local-only Supabase stack, confirmed email enabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/pazo-meta-auth-lab"
+          cd "$RUNNER_TEMP/pazo-meta-auth-lab"
+          supabase init
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          config=Path('supabase/config.toml')
+          data=config.read_text()
+          data=re.sub(r'^project_id\s*=.*$', 'project_id = "pazo-meta-auth-lab"', data, count=1, flags=re.M)
+          section=re.search(r'(?ms)^\[auth\.email\]\s*\n(.*?)(?=^\[|\Z)',data)
+          assert section, 'Local Auth email section missing'
+          patched,count=re.subn(r'^enable_confirmations\s*=\s*false\s*$',
+             'enable_confirmations = true',section.group(1),count=1,flags=re.M)
+          assert count==1, 'Fail closed: confirmation requirement must be enabled in local Auth'
+          data=data[:section.start(1)]+patched+data[section.end(1):]
+          assert 'enable_confirmations = true' in patched
+          config.write_text(data)
+          PY
+      - name: Boot local Auth/Postgres/Mailpit (no linked project or hosted credentials)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/pazo-meta-auth-lab"
+          # Keep gotrue, postgres, kong and mailpit; no production DB/Meta.
+          supabase start -x realtime,storage-api,imgproxy,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+          umask 077
+          supabase status -o json > "$RUNNER_TEMP/pazo-meta-auth-lab/status.json"
+      - name: Verify signup requested != confirmed and confirmed GoTrue Auth login
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/meta-local-auth-lab.mjs "$RUNNER_TEMP/pazo-meta-auth-lab/status.json"
+      - name: Stop and discard all synthetic local data
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/pazo-meta-auth-lab/supabase/config.toml" ]; then
+            cd "$RUNNER_TEMP/pazo-meta-auth-lab"
+            supabase stop --no-backup || true
+          fi
