@@ -3,10 +3,10 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {buildMetaRegistration,eligibleMetaRegistration,META_EVENT_NAME,META_CANONICAL_URL}
-  from '../../supabase/functions/_shared/metaConversion.mjs'
+  from '../supabase/functions/_shared/metaConversion.mjs'
 import {sendMetaCapi,validMetaServerEvent}
-  from '../../supabase/functions/_shared/metaCapi.mjs'
-import {canUseMetaPixel,dispatchMetaPixel} from '../../src/features/marketing/metaPixel.mjs'
+  from '../supabase/functions/_shared/metaCapi.mjs'
+import {canUseMetaPixel,dispatchMetaPixel} from '../src/features/marketing/metaPixel.mjs'
 
 const eventId='11111111-2222-4333-8444-555555555555'
 const datasetId='123456789012345'
