@@ -1,3 +1,4 @@
+import {readMarketingBody} from '../pazo-marketing-attribution/requestBody.mjs'
 // #169: SERVER-ATTESTED BROWSER RECEIPT CANDIDATE — NOT DEPLOYED.
 // This service never talks to Meta and must not be activated before full
 // privacy review, server-only lookup and separate production GO.
@@ -38,7 +39,8 @@ export function createMetaReceiptHandler({
     const token=request.headers.get('authorization')||''
     if(!/^Bearer [A-Za-z0-9._~+=-]{12,4096}$/.test(token))return reply(DENIED,401,origin)
     let raw
-    try {raw=await request.text()} catch {return reply(DENIED,400,origin)}
+    try {raw=await readMarketingBody(request,2,3000)}
+    catch {return reply(DENIED,400,origin)}
     if(raw!=='{}')return reply(DENIED,400,origin)
     let owner
     try{owner=await authenticate(token.slice(7))}catch{return reply(DENIED,401,origin)}
