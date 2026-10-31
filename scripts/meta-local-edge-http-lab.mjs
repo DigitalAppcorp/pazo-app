@@ -80,10 +80,14 @@ export async function runMetaLocalEdgeHttpLab({api,key,ownerId,token,dbUrl}={}){
  WHERE owner_id=${q}`),'suppressed')
  console.log('META_EDGE_HTTP_PHASE durable_gpc_and_idempotent_withdraw')
  const cors=await request('withdraw',{method:'OPTIONS'})
+ console.log('META_EDGE_HTTP_DIAG cors_status='+cors.status
+  +' allow_origin_matches='+(cors.headers.get('access-control-allow-origin')===ORIGIN)
+  +' cache_control='+String(cors.headers.get('cache-control')).replace(/[^a-z, -]/gi,''))
  assert.equal(cors.status,204)
  assert.equal(cors.headers.get('access-control-allow-origin'),ORIGIN)
  assert.equal(cors.headers.get('cache-control'),'no-store')
  const noBrowser=await request('withdraw',{body:{action:'withdraw',ownerId}})
+ console.log('META_EDGE_HTTP_DIAG extra_owner_status='+noBrowser.status)
  assert.equal(noBrowser.status,400,
   'browser must not provide an owner ID in withdrawal body')
  return {status:'LOCAL_REAL_EDGE_HTTP_META_PASS',
