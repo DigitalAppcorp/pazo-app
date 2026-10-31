@@ -28,6 +28,29 @@ const ids=results.filter(x=>x!=='none')
 assert.equal(ids.length,1,'exactly one claim created under 8 concurrent requests')
 assert.match(ids[0],/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
 assert.equal(sql(claim(owner)),'none','refresh and retry cannot mint another conversion')
+
+const leased=await Promise.all(Array.from({length:8},()=>sqlAsync('SET ROLE service_role;SELECT * FROM public.pazo_meta_lease_candidate()')))
+const active=leased.filter(Boolean)
+assert.equal(active.length,1,'only one worker gets a live lease')
+const [leasedOwner,leasedEvent,leasedAt,leaseToken]=active[0].split('|')
+assert.equal(leasedOwner,owner)
+assert.equal(leasedEvent,ids[0],'worker must reuse verified event_id')
+assert.match(leaseToken,/^[0-9a-f-]{36}$/)
+assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_settle_candidate(
+ '${leasedEvent}','11111111-1111-4111-8111-111111111111',true)`),'f','wrong lease cannot settle')
+assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_settle_candidate(
+ '${leasedEvent}','${leaseToken}',false)`),'t','failure yields retryable state')
+const retried=sql('SET ROLE service_role;SELECT * FROM public.pazo_meta_lease_candidate()')
+const [retryOwner,retryEvent,retryAt,retryLease]=retried.split('|')
+assert.equal(retryOwner,owner)
+assert.equal(retryEvent,leasedEvent,'retry must NOT mint another conversion')
+assert.notEqual(retryLease,leaseToken,'new lease fencing token')
+assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_settle_candidate(
+ '${leasedEvent}','${leaseToken}',true)`),'f','old delayed worker cannot acknowledge renewed lease')
+assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_settle_candidate(
+ '${retryEvent}','${retryLease}',true)`),'t','current worker settles exactly once')
+assert.equal(sql('SET ROLE service_role;SELECT * FROM public.pazo_meta_lease_candidate()'),'','sent events cannot be leased again')
+
 assert.equal(sql(`SELECT count(*) FROM marketing_private.meta_outbox_candidate
  WHERE owner_id='${owner}'`),'1')
 assert.equal(sql(`SELECT event_time=(SELECT email_confirmed_at FROM auth.users
@@ -45,6 +68,20 @@ sql(prefs(qa))
 sql(`UPDATE auth.users SET raw_app_meta_data='{"pazo_marketing_qa":true}'
  WHERE id='${qa}'`)
 assert.equal(sql(claim(qa)),'none','retroactive QA is excluded')
+
+const withdrawn='16900000-0000-4000-8000-000000000005'
+sql(`INSERT INTO auth.users(id,created_at,email_confirmed_at)
+ VALUES('${withdrawn}',now()-interval '3 minutes',now()-interval '1 minute');
+ INSERT INTO public.profiles(id) VALUES('${withdrawn}');`)
+assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_marketing_record_verified_v1('${withdrawn}','qr_v2_en',now()-interval '4 minutes')`),'t')
+sql(prefs(withdrawn))
+const canceled=sql(claim(withdrawn))
+assert.notEqual(canceled,'none')
+sql(`UPDATE marketing_private.meta_purpose_candidate SET
+ decision='withdrawn',withdrawn_at=now() WHERE owner_id='${withdrawn}'`)
+assert.equal(sql('SET ROLE service_role;SELECT * FROM public.pazo_meta_lease_candidate()'),'','withdrawal suppresses even an already minted pending conversion')
+
 for(const role of ['anon','authenticated','service_role']){
   assert.throws(()=>sql(`SET ROLE ${role};
     SELECT * FROM marketing_private.meta_outbox_candidate`))
@@ -62,5 +99,5 @@ assert.equal(sql(`SELECT count(*) FROM marketing_private.meta_purpose_candidate
  WHERE owner_id='${owner}'`),'1','consent history remains separately accountable')
 assert.equal(sql('SELECT row_to_json(g) FROM marketing_private.collection_gate g'),before)
 console.log(JSON.stringify({status:'PASS',environment:'disposable PG17',
- oneTimeClaims:1,concurrentRequests:8,gpcExclusion:true,qaExclusion:true,
+ oneTimeClaims:1,concurrentRequests:8,concurrentLeases:8,leaseFence:true,stableRetryId:true,revocationStopsPending:true,gpcExclusion:true,qaExclusion:true,
  preConsentOnly:true,rlsForced:true,retentionCascade:true,hostedWrites:0}))
