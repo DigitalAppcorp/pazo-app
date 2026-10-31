@@ -8,6 +8,8 @@ import {completeExplicitMetaOptIn}
   from './metaConsentRegistrationFlow.mjs'
 import {syncMetaGpcWithdrawal}
   from './metaGpcSync.mjs'
+import {revokeOwnedMetaPixelConsent}
+  from './metaPixelLoader.mjs'
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -88,6 +90,8 @@ export function createMetaConsentController({
   const onWithdraw=async()=>{
     localWithdrawal=true
     confirmedGrant=false
+    // Immediately revoke the owned SDK before any async server write.
+    revokeOwnedMetaPixelConsent({browser})
     if(!withdrawal)return false
     try{
       const result=await withdrawal.requestWithdraw({
@@ -105,6 +109,7 @@ export function createMetaConsentController({
     if(browser?.navigator?.globalPrivacyControl===true){
       localWithdrawal=true
       confirmedGrant=false
+      revokeOwnedMetaPixelConsent({browser})
     }
     return syncMetaGpcWithdrawal({
     withdrawalReleased,browser,ownerId,accessToken,
