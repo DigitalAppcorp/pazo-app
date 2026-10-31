@@ -1,6 +1,6 @@
 import {supabase} from '../../services/supabaseClient'
 export type BehaviorSegment='all'|'paid_attributed'|'unknown'
-export const creatives=['all','perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en'] as const
+export const creatives=['all','perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en','qr_v2_en','cuidados_v2_en','app_v2_en'] as const
 export interface BehaviorSummary{
  status:'paused'|'insufficient'|'collecting';period_days:7|30|90;effective_days:number;coverage_since:string|null;as_of:string;timezone:'America/Los_Angeles';minimum_sample:10;segment:BehaviorSegment;creative:string;source_gaps:string[];
  totals:null|{accounts:number;sessions:number;first_observed_sessions:number;return_sessions:number;active_account_days:number;useful_accounts:number|null};

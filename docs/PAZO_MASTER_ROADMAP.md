@@ -1,3 +1,7 @@
+## #168 — ensayo2 implementado en rama, sin release
+
+Orden PO30-oct: #168 antes #169, implementación/QA/PR sin producción ni publicidad. Contrato histórico preservado; campaña pazo_la_en_202611 con qr_v2_en/cuidados_v2_en/app_v2_en. Única SQL nueva PREPARED_NOT_APPLIED, retención14d/gates/QA preservados. [Auditoría y alcance](marketing/ADS2_PREFLIGHT.md). Events Manager sin Pixel web PAZO observado: META_CONVERSION_NOT_VERIFIED. No nueva categoría de datos, proveedor activo ni activos publicitarios en Git. Próximo gate: revisión del PR/CI; lanzamiento reservado al PO.
+
 ## Issue #150 — candidato de analítica preparado, sin GO de release
 
 Orden vigente: https://github.com/DigitalAppcorp/pazo-app/issues/150 y comentario6479704793. Implementación integral, pruebas, diseño autónomo y staging autorizados. Prioridad: tramo anuncio → landing → registro, separado de cuentas verificadas y regreso. Dashboard nativo, limpio y comprensible para el PO; decisiones primero, nombres legibles y definiciones secundarias. Informe único: docs/PAZO_ISSUE150_FINAL_REPORT_20261028.md. PR151 y staging pazo-7f4g5xiro-digitalapp.vercel.app, frontend2b623bb8. Consultar contrato y runbook de privacidad enlazados en el informe. El estado exacto de CI y revisión se registra en issue150 al entregar.

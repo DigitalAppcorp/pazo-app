@@ -9,6 +9,9 @@ import { FirstUtilityPanel } from '../../marketing/FirstUtilityPanel'
 export const PAZO_MARKETING_ADMIN_REPORT_ENABLED=true
 
 const campaigns:Record<string,{es:string;en:string}>={
+ qr_v2_en:{es:'QR · inglés · ensayo 2',en:'QR · English · trial 2'},
+ cuidados_v2_en:{es:'Cuidados · inglés · ensayo 2',en:'Care · English · trial 2'},
+ app_v2_en:{es:'PAZO · inglés · ensayo 2',en:'PAZO · English · trial 2'},
  perfil_es:{es:'Perfil · español',en:'Profile · Spanish'},
  perfil_en:{es:'Perfil · inglés',en:'Profile · English'},
  qr_es:{es:'QR · español',en:'QR · Spanish'},

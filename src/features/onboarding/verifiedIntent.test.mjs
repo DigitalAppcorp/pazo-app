@@ -7,7 +7,7 @@ import ts from 'typescript'
 fs.mkdirSync('node_modules/.cache',{recursive:true})
 const cache=fs.mkdtempSync(path.resolve('node_modules/.cache/verified-intent-'))
 async function moduleFrom(source,name){const file=path.join(cache,name+'.mjs');fs.writeFileSync(file,ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2023}}).outputText);return import(pathToFileURL(file).href)}
-const attr=await moduleFrom(fs.readFileSync('src/features/marketing/attribution.ts','utf8'),'attribution')
+const attr=await moduleFrom(fs.readFileSync('src/features/marketing/attribution.ts','utf8').replace("'../../../supabase/functions/_shared/marketingCampaign.mjs'",JSON.stringify(pathToFileURL(path.resolve('supabase/functions/_shared/marketingCampaign.mjs')).href)),'attribution')
 let result={data:{status:'accepted'},error:null},reply,calls=[]
 const storage=new Map()
 const oldWindow=globalThis.window

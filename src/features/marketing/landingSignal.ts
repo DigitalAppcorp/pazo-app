@@ -1,9 +1,8 @@
 // A modest same-tab repeat suppression; not bot prevention or unique visitors.
 // No generated tracking ID, persistent cookie or device fingerprint.
 export const LANDING_SIGNAL_REPEAT_MS = 24 * 60 * 60 * 1000
-const creatives = new Set([
-  'perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en',
-])
+import {ALL_CREATIVES} from '../../../supabase/functions/_shared/marketingCampaign.mjs'
+const creatives = new Set(ALL_CREATIVES)
 export function shouldSendLandingSignal(
   previous: unknown,
   creative: string,

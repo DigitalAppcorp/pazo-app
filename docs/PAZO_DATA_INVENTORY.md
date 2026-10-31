@@ -1,3 +1,7 @@
+## #168 — ensayo2 implementado en rama, sin release
+
+Orden PO30-oct: #168 antes #169, implementación/QA/PR sin producción ni publicidad. Contrato histórico preservado; campaña pazo_la_en_202611 con qr_v2_en/cuidados_v2_en/app_v2_en. Única SQL nueva PREPARED_NOT_APPLIED, retención14d/gates/QA preservados. [Auditoría y alcance](marketing/ADS2_PREFLIGHT.md). Events Manager sin Pixel web PAZO observado: META_CONVERSION_NOT_VERIFIED. No nueva categoría de datos, proveedor activo ni activos publicitarios en Git. Próximo gate: revisión del PR/CI; lanzamiento reservado al PO.
+
 ## #150 — navegación y prerregistro preparados, no activos
 
 Solo candidato autorizado en rama. Sesiones efímeras de cuentas verificadas, pantallas/enums de estado y confirmaciones de cuidado/primera compartición QR; referencia Auth interna privada, sin contenido ni identificador persistente del dispositivo. Datos vinculables elegibles≤14d desde cada inicio de sesión, purga habitual6h y backups/logs separados. Excepción de retención: preferencia mínima de exclusión hasta eliminar la cuenta. Cuatro tablas marketing_private FORCE RLS, informes admin+aal2/k10/complementos, sin personas en dashboard/export. QA/founder/admin excluidos en backend. Prerregistro anónimo: solo contadores diarios allowlisted con Turnstile single-use existente, sin identidad/enlace de landing a cuenta. No proveedor nuevo ni Meta/Pixel/CAPI. Fuente y límites: PAZO_ISSUE150_PRIVACY_AND_RELEASE.md. SQL OFF preparada; nueva recopilación no autorizada hasta GO final.

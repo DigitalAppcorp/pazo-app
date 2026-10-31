@@ -1,3 +1,4 @@
+import {validCampaignPair} from '../../../supabase/functions/_shared/marketingCampaign.mjs'
 /**
  * PAZO marketing attribution: first-party, allowlisted campaign metadata only.
  * No IP, GPS, email, external IDs or full URLs in campaign metadata.
@@ -14,7 +15,7 @@
 export function prepareAutomaticCampaignIntake(state: AttributionState | null): {
   utm_source: 'meta'
   utm_medium: 'paid_social'
-  utm_campaign: typeof PAZO_CAMPAIGN
+  utm_campaign: CampaignCode
   utm_content: string
   first_touch_at: string
 } | null {
@@ -22,7 +23,7 @@ export function prepareAutomaticCampaignIntake(state: AttributionState | null): 
   return {
     utm_source: state.attribution.source,
     utm_medium: state.attribution.medium,
-    utm_campaign: PAZO_CAMPAIGN,
+    utm_campaign: state.attribution.campaign,
     utm_content: state.attribution.creative,
     first_touch_at: new Date(state.attribution.firstTouchAt).toISOString(),
   }
@@ -32,16 +33,14 @@ export const MARKETING_ATTRIBUTION_TTL_MS = 72 * 60 * 60 * 1000
 const MAX_TIMESTAMP_SKEW_MS = 5 * 60 * 1000
 
 export const PAZO_CAMPAIGN = 'pazo_beta_local_202610'
-const CREATIVE_CODES = new Set([
-  'perfil_es', 'perfil_en', 'qr_es', 'qr_en', 'comunidad_es', 'comunidad_en',
-])
+export type CampaignCode = typeof PAZO_CAMPAIGN | 'pazo_la_en_202611'
 const STEPS = ['landing', 'signup_requested', 'signup_verified', 'first_pet_created'] as const
 export type MarketingStep = typeof STEPS[number]
 
 export interface CampaignAttribution {
   source: 'meta'
   medium: 'paid_social'
-  campaign: typeof PAZO_CAMPAIGN
+  campaign: CampaignCode
   creative: string
   firstTouchAt: number
 }
@@ -72,13 +71,13 @@ export function parsePazoCampaign(search: string, now: number): CampaignAttribut
     if (keys.some((key) => params.getAll(key).length !== 1)) return null
     if (params.get('utm_source') !== 'meta') return null
     if (params.get('utm_medium') !== 'paid_social') return null
-    if (params.get('utm_campaign') !== PAZO_CAMPAIGN) return null
+    const campaign = params.get('utm_campaign') as CampaignCode
     const creative = params.get('utm_content')
-    if (!creative || !CREATIVE_CODES.has(creative)) return null
+    if (!creative || !validCampaignPair(campaign, creative)) return null
     return {
       source: 'meta',
       medium: 'paid_social',
-      campaign: PAZO_CAMPAIGN,
+      campaign,
       creative,
       firstTouchAt: now,
     }
@@ -93,7 +92,7 @@ function validState(value: unknown, now: number): value is AttributionState {
   const attr = state.attribution
   if (state.version !== 1 || !attr || !safeTime(attr.firstTouchAt)) return false
   if (attr.source !== 'meta' || attr.medium !== 'paid_social'
-    || attr.campaign !== PAZO_CAMPAIGN || !CREATIVE_CODES.has(attr.creative)) return false
+    || !validCampaignPair(attr.campaign, attr.creative)) return false
   if (now < attr.firstTouchAt - MAX_TIMESTAMP_SKEW_MS
     || now - attr.firstTouchAt > MARKETING_ATTRIBUTION_TTL_MS) return false
   if (!Array.isArray(state.steps)
