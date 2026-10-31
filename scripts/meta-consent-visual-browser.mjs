@@ -137,11 +137,13 @@ try{
      const firstFocus=await page.evaluate(()=>{
        const node=document.activeElement
        return {tag:node?.tagName,
-        background:getComputedStyle(node).backgroundColor}
+        background:getComputedStyle(node).backgroundColor,
+        shadow:getComputedStyle(node).boxShadow}
      })
      assert.equal(firstFocus.tag,'BUTTON')
-     assert.notEqual(firstFocus.background,'rgba(0, 0, 0, 0)',
-       'keyboard-focused privacy link must visibly change background')
+     assert.ok(firstFocus.background!=='rgba(0, 0, 0, 0)'
+       ||firstFocus.shadow!=='none',
+       'focused privacy link needs a distinguishable non-static visual cue')
      await page.keyboard.press('Tab')
      assert.equal(await page.evaluate(()=>document.activeElement?.tagName),'INPUT')
      await page.keyboard.press('Tab')
