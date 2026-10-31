@@ -145,3 +145,15 @@ test('parallel clicks share one flight and do not duplicate a receipt or Pixel',
  assert.deepEqual(f.actions,['pazo-meta-grant','pazo-meta-receipt'])
  assert.deepEqual(pixels,[eventId])
 })
+
+test('positive Meta permission cannot start without an available withdrawal channel',async()=>{
+ const f=lab()
+ const c=createMetaConsentController({...f.options(),
+   withdrawalReleased:false,pixelLoader:async()=>{
+     throw Error('must never load Pixel')
+   }})
+ assert.ok(c)
+ assert.equal(await c.onGrant(),false)
+ assert.equal(await c.onWithdraw(),false)
+ assert.deepEqual(f.actions,[])
+})
