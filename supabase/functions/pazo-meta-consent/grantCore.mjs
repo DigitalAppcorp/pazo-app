@@ -23,7 +23,7 @@ export function createMetaGrantHandler({
   if(request.method==='OPTIONS')return new Response(null,{status:204,
     headers:{'access-control-allow-origin':origin,'vary':'Origin',
       'access-control-allow-methods':'POST, OPTIONS',
-      'access-control-allow-headers':'authorization,content-type,apikey',
+      'access-control-allow-headers':'authorization,content-type,apikey,x-client-info',
       'access-control-max-age':'300','cache-control':'no-store'}})
   if(request.method!=='POST')return respond(DENY,405,origin)
   const contentType=(request.headers.get('content-type')||'').toLowerCase().trim()
