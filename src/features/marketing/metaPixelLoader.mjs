@@ -9,7 +9,7 @@ export async function loadMetaPixelForVerifiedSignup({
   releaseEnabled=false,privacyGateApproved=false,explicitConsent=false,
   accountExcluded=true,qaOrAdmin=true,optedOut=true,verifiedRegistration=false,
   datasetId=null,eventId=null,stillAllowed=()=>false,
-  browser=null,dom=null,
+  browser=null,dom=null,sdkTimeoutMs=8000,
 }={}) {
   const stillPermitted=()=>{
     try{return stillAllowed()===true && browser?.navigator?.globalPrivacyControl!==true}
@@ -44,25 +44,30 @@ export async function loadMetaPixelForVerifiedSignup({
   fbq('init',datasetId)
   return new Promise(resolve=>{
     let settled=false
-    const finish=result=>{if(!settled){settled=true;resolve(result)}}
+    let timer=null
+    const finish=result=>{
+      if(settled)return
+      settled=true
+      if(timer!==null)clearTimeout(timer)
+      resolve(result)
+    }
+    const fail=status=>{
+      fbq('consent','revoke')
+      finish({status})
+    }
     let script
     try {script=dom.createElement('script')}
-    catch {
-      fbq('consent','revoke')
-      return finish({status:'unavailable'})
-    }
+    catch {return fail('unavailable')}
     script.async=true
     script.src=PIXEL_URL
     script.onerror=()=>{
-      // On failure, leave no pending tracked event.
-      fbq('consent','revoke')
-      finish({status:'unavailable'})
+      // An absent or failed third-party script must never hold up PAZO.
+      if(!settled)fail('unavailable')
     }
     script.onload=()=>{
-      if (!stillPermitted()){
-        fbq('consent','revoke')
-        return finish({status:'suppressed'})
-      }
+      // Late SDK callbacks must not resurrect a timed-out conversion.
+      if(settled)return
+      if (!stillPermitted())return fail('suppressed')
       try {
         fbq('consent','grant')
         const result=dispatchMetaPixel({
@@ -72,12 +77,20 @@ export async function loadMetaPixelForVerifiedSignup({
         // A preference may change between the pre-load and dispatch checks.
         if(result.status!=='queued')fbq('consent','revoke')
         finish(result)
-      } catch {
-        fbq('consent','revoke')
-        finish({status:'unavailable'})
-      }
+      } catch {fail('unavailable')}
     }
+    // Bound third-party loading, even when neither load nor error fires.
+    // An invalid timeout uses the conservative default; it never disables
+    // the privacy checks or authorizes a late delivery.
+    const delay=Number.isSafeInteger(sdkTimeoutMs)&&sdkTimeoutMs>=1
+      && sdkTimeoutMs<=15000?sdkTimeoutMs:8000
+    timer=setTimeout(()=>{
+      if(settled)return
+      fbq('consent','revoke')
+      try{script.remove?.()}catch{/* safe even in restricted DOM */}
+      finish({status:'unavailable'})
+    },delay)
     try {dom.head.appendChild(script)}
-    catch {fbq('consent','revoke');finish({status:'unavailable'})}
+    catch {fail('unavailable')}
   })
 }
