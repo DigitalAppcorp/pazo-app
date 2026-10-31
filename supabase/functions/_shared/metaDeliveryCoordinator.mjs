@@ -46,7 +46,16 @@ export async function deliverVerifiedMetaRegistration({
   }
   let privacy=DEFAULTS
   try {privacy=await repository.checkPrivacy(claim.eventId,claim.leaseId)}
-  catch {await settle('suppressed');return {status:'suppressed'}}
+  catch {
+    // DB/Auth uncertainty is NOT a confirmed opt-out. Do not send, but
+    // preserve the original event for a future authorized retry.
+    await settle('retryable')
+    return {status:'unavailable'}
+  }
+  if (!privacy || privacy.trusted!==true) {
+    await settle('retryable')
+    return {status:'unavailable'}
+  }
   const policy=assessMetaPurpose({
     record:privacy?.record,now:clock(),trusted:privacy?.trusted===true,
     gpc:privacy?.gpc,sharingOptOut:privacy?.sharingOptOut,
@@ -74,7 +83,11 @@ export async function deliverVerifiedMetaRegistration({
     // Live privacy check after payload creation, before any network call.
     authorized:async()=>{
       const current=await repository.checkPrivacy(claim.eventId,claim.leaseId)
-      return current?.verifiedRegistration===true
+      // An unavailable privacy source is indeterminate, NOT an affirmative
+      // refusal. sendMetaCapi converts this exception to a retryable error.
+      if (!current || current.trusted!==true)
+        throw Error('meta_current_privacy_unavailable')
+      return current.verifiedRegistration===true
         && assessMetaPurpose({
           record:current.record,now:clock(),trusted:current.trusted===true,
           gpc:current.gpc,sharingOptOut:current.sharingOptOut,
