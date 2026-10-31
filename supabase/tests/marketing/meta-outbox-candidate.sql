@@ -51,6 +51,8 @@ CREATE TABLE marketing_private.meta_outbox_candidate(
  event_id uuid UNIQUE NOT NULL DEFAULT gen_random_uuid(),
  event_time timestamptz NOT NULL,
  created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+ -- Atomic browser claim: first eligible tab only. Does not change CAPI retry.
+ pixel_receipt_claimed_at timestamptz,
  status text NOT NULL DEFAULT 'pending'
    CHECK(status IN('pending','leased','retryable','sent','suppressed')),
  attempts integer NOT NULL DEFAULT 0 CHECK(attempts BETWEEN 0 AND 10),
@@ -278,6 +280,47 @@ REVOKE ALL ON FUNCTION public.pazo_meta_settle_candidate(uuid,uuid,boolean)
 GRANT EXECUTE ON FUNCTION public.pazo_meta_settle_candidate(uuid,uuid,boolean)
  TO service_role;
 
+
+-- One-time, service-only proof for the *browser* copy of the SAME event.
+-- A lost browser response means Pixel may be absent; it must never be
+-- reissued or minted again to "fix" a missing browser event. CAPI is separate.
+-- Calls are made by trusted Edge AFTER Supabase Auth verifies the owner;
+-- never expose the privileged service RPC to client JWTs.
+CREATE FUNCTION marketing_private.meta_take_pixel_receipt_candidate(p_owner uuid)
+RETURNS TABLE(event_id uuid,event_time timestamptz)
+LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=''
+AS $pixel_receipt$
+  WITH chosen AS (
+    SELECT o.owner_id
+    FROM marketing_private.meta_outbox_candidate o
+    JOIN auth.users u ON u.id=o.owner_id
+    WHERE o.owner_id=p_owner
+      AND o.pixel_receipt_claimed_at IS NULL
+      AND o.status <> 'suppressed'
+      AND u.email_confirmed_at=o.event_time
+      AND o.event_time>=statement_timestamp()-interval '15 minutes'
+      AND o.event_time<=statement_timestamp()
+      AND marketing_private.meta_send_eligible_candidate(o.owner_id)
+    FOR UPDATE OF o SKIP LOCKED
+  )
+  UPDATE marketing_private.meta_outbox_candidate o
+  SET pixel_receipt_claimed_at=statement_timestamp()
+  FROM chosen c WHERE o.owner_id=c.owner_id
+  RETURNING o.event_id,o.event_time
+$pixel_receipt$;
+REVOKE ALL ON FUNCTION marketing_private.meta_take_pixel_receipt_candidate(uuid)
+  FROM PUBLIC,anon,authenticated,service_role;
+
+CREATE FUNCTION public.pazo_meta_take_pixel_receipt_candidate(p_owner uuid)
+RETURNS TABLE(event_id uuid,event_time timestamptz)
+LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=''
+AS $meta_pixel_rpc$
+  SELECT * FROM marketing_private.meta_take_pixel_receipt_candidate(p_owner)
+$meta_pixel_rpc$;
+REVOKE ALL ON FUNCTION public.pazo_meta_take_pixel_receipt_candidate(uuid)
+  FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_meta_take_pixel_receipt_candidate(uuid)
+  TO service_role;
 
 -- Opt-out/withdrawal does NOT require the Meta release switch, a matching
 -- dataset, confirmed email, or an affirmative prior preference. The caller
