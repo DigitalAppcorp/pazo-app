@@ -6,6 +6,7 @@ import {readFileSync} from 'node:fs'
 import {randomUUID} from 'node:crypto'
 import {runAuthenticatedMetaEdgeLab} from './meta-local-auth-edge-flow.mjs'
 import {runLocalGoTrueSqlMeta} from './meta-local-gotrue-sql-lab.mjs'
+import {runMetaLocalEdgeHttpLab} from './meta-local-edge-http-lab.mjs'
 
 function local(url,allowedPaths=[]){
   const parsed=new URL(url)
@@ -155,6 +156,11 @@ export async function runMetaLocalAuthLab({statusFile,apiUrl,mailpitUrl}={}){
     api,key,ownerId:who.data.id,token,dbUrl:vars.DB_URL,
   })
   assert.equal(database.status,'LOCAL_REAL_AUTH_SQL_META_PASS')
+  console.log('META_AUTH_PHASE real_deno_edge_over_http')
+  const edgeHttp=await runMetaLocalEdgeHttpLab({
+    api,key,ownerId:who.data.id,token,dbUrl:vars.DB_URL,
+  })
+  assert.equal(edgeHttp.status,'LOCAL_REAL_EDGE_HTTP_META_PASS')
   return {result:'LOCAL_GOTRUE_CONFIRMED_SIGNUP_PASS',
     signupRequestedWithoutSession:true,
     unverifiedLoginRejected:true,
@@ -165,6 +171,7 @@ export async function runMetaLocalAuthLab({statusFile,apiUrl,mailpitUrl}={}){
     gpcWithdrawPersistedInMemory:edge.gpcWithdrawPersistedInMemory,
     realAuthSameDatabaseSql:database.status,
     persistentGpcLeaseSuppression:database.gpcRevokedLeasedWork,
+    actualEdgeHttp:edgeHttp.status,
     hostedRequests:0,metaProviderRequests:0}
 }
 const direct=process.argv[1]?.endsWith('/meta-local-auth-lab.mjs')
