@@ -65,3 +65,42 @@ export function createMetaConsentTransport({
     },
   })
 }
+
+
+// Withdrawal has an independent release gate. Unlike opt-in, it must NOT
+// depend on Meta provider approval, browser GPC, or positive consent.
+export function createMetaWithdrawalTransport({
+  withdrawalReleased=false,supabaseClient=null,
+  ownerId=null,getSessionSnapshot=()=>null,
+}={}) {
+  if(withdrawalReleased!==true
+     ||typeof supabaseClient?.functions?.invoke!=='function'
+     ||typeof ownerId!=='string'||!UUID.test(ownerId)
+     ||typeof getSessionSnapshot!=='function')return null
+  const currentOwner=token=>{
+    try{
+      const snapshot=getSessionSnapshot()
+      return typeof token==='string'&&token.length>=12
+        && snapshot?.id===ownerId && snapshot?.accessToken===token
+    }catch{return false}
+  }
+  return Object.freeze({
+    requestWithdraw:async({accessToken,body}={})=>{
+      if(body?.action!=='withdraw'||Object.keys(body).length!==1
+         ||!currentOwner(accessToken))return {status:'not_available'}
+      let response
+      try{
+        response=await supabaseClient.functions.invoke('pazo-meta-consent',{
+          method:'POST',headers:{Authorization:'Bearer '+accessToken},
+          body:{action:'withdraw'},
+        })
+      }catch{return {status:'not_available'}}
+      // Identity might have changed while this was in flight. Do not
+      // report a confirmed withdrawal to the wrong current session.
+      if(!currentOwner(accessToken)||response?.error
+         ||response?.data?.status!=='withdrawn')
+        return {status:'not_available'}
+      return {status:'withdrawn'}
+    },
+  })
+}
