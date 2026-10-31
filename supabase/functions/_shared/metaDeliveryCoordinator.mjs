@@ -26,6 +26,7 @@ export async function deliverVerifiedMetaRegistration({
   releaseEnabled=false,privacyGateApproved=false,
   repository=null,datasetId=null,apiVersion=null,serverToken=null,
   fetchImpl=fetch,clock=()=>Date.now(),
+  testModeEnabled=false,testEventCode=null,nonProduction=false,
 }={}) {
   if (releaseEnabled!==true || privacyGateApproved!==true)
     return {status:'disabled'}
@@ -81,6 +82,7 @@ export async function deliverVerifiedMetaRegistration({
   const response=await sendMetaCapi({
     releaseEnabled,privacyGateApproved,claimWasInserted:true,
     event:event.server,datasetId,apiVersion,serverToken,fetchImpl,
+    testModeEnabled,testEventCode,nonProduction,
     // Live privacy check after payload creation, before any network call.
     authorized:async()=>{
       const current=await repository.checkPrivacy(claim.eventId,claim.leaseId)
