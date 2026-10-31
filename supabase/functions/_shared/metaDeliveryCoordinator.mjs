@@ -14,6 +14,7 @@ const UUID4=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12
  * unique verified event row, reusing its original eventId. claimWasInserted
  * attests existence of that original row, NOT an INSERT in this attempt.
  * or null. IDs and email hashes may NEVER be built by the browser.
+ * checkPrivacy(eventId, leaseId): reject stale/mismatched leases.
  * settle(eventId, leaseId, status): acknowledgement MUST compare both IDs
  * against the current DB lease. A stale worker may never settle a newer lease.
  * Acknowledgements must be atomic and idempotent; a lease that fails
@@ -41,7 +42,7 @@ export async function deliverVerifiedMetaRegistration({
     catch { return false }
   }
   let privacy=DEFAULTS
-  try {privacy=await repository.checkPrivacy(claim.eventId)}
+  try {privacy=await repository.checkPrivacy(claim.eventId,claim.leaseId)}
   catch {await settle('suppressed');return {status:'suppressed'}}
   const policy=assessMetaPurpose({
     record:privacy?.record,now:clock(),trusted:privacy?.trusted===true,
@@ -58,13 +59,13 @@ export async function deliverVerifiedMetaRegistration({
     optedOut:false,qaOrAdmin:false,eventId:claim.eventId,
     eventTime:claim.eventTime,datasetId,hashedEmail:claim.hashedEmail,
   })
-  if (!event) {await settle('suppressed');return {status:'not_configured'}}
+  if (!event) {await settle('retryable');return {status:'not_configured'}}
   const response=await sendMetaCapi({
     releaseEnabled,privacyGateApproved,claimWasInserted:true,
     event:event.server,datasetId,apiVersion,serverToken,fetchImpl,
     // Live privacy check after payload creation, before any network call.
     authorized:async()=>{
-      const current=await repository.checkPrivacy(claim.eventId)
+      const current=await repository.checkPrivacy(claim.eventId,claim.leaseId)
       return current?.verifiedRegistration===true
         && assessMetaPurpose({
           record:current.record,now:clock(),trusted:current.trusted===true,
