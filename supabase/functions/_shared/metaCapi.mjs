@@ -1,0 +1,54 @@
+// #169: isolated server-only Meta CAPI transport; no production import or sender.
+// Caller must obtain an already-authorized one-time event from a trusted, durable
+// server claim, never from a browser assertion. No secrets or user data in logs.
+import {META_EVENT_NAME,META_CANONICAL_URL} from './metaConversion.mjs'
+const API_VERSION = /^v(?:[2-9][0-9]|[1-9][0-9]{2,})\.0$/
+const DATASET = /^[1-9][0-9]{5,24}$/
+const HASH = /^[a-f0-9]{64}$/
+const UUID4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+export function validMetaServerEvent(event,datasetId) {
+  return !!event && typeof event==='object' && !Array.isArray(event)
+    && Object.keys(event).sort().join(',') ===
+       'action_source,event_id,event_name,event_source_url,event_time,user_data'
+    && event.event_name===META_EVENT_NAME && UUID4.test(event.event_id)
+    && event.action_source==='website' && event.event_source_url===META_CANONICAL_URL
+    && Number.isSafeInteger(event.event_time) && event.event_time > 0
+    && event.user_data && Object.keys(event.user_data).join(',')==='em'
+    && Array.isArray(event.user_data.em) && event.user_data.em.length===1
+    && typeof event.user_data.em[0]==='string' && HASH.test(event.user_data.em[0])
+    && typeof datasetId==='string' && DATASET.test(datasetId)
+}
+/** Never call this sender for an unverified/replayed signup. The 'authorized'
+ * callback must check the server's current durable consent + GPC/optout + QA
+ * exclusions immediately before the request. Passing browser flags is invalid.
+ */
+export async function sendMetaCapi({
+  releaseEnabled=false, privacyGateApproved=false, claimWasInserted=false,
+  event=null, datasetId=null, apiVersion=null, serverToken=null,
+  authorized=async()=>false, fetchImpl=fetch,
+}={}) {
+  if (releaseEnabled!==true || privacyGateApproved!==true || claimWasInserted!==true)
+    return {status:'disabled'}
+  if (!validMetaServerEvent(event,datasetId)
+    || typeof apiVersion!=='string' || !API_VERSION.test(apiVersion)
+    || typeof serverToken!=='string' || serverToken.length<24
+    || typeof authorized!=='function') return {status:'not_configured'}
+  let allowed=false
+  try {allowed=await authorized()} catch {return {status:'suppressed'}}
+  if (allowed!==true) return {status:'suppressed'}
+  // Authorization header, never put the access token in a URL or query string.
+  try {
+    const response=await fetchImpl(
+      `https://graph.facebook.com/${apiVersion}/${datasetId}/events`,{
+      method:'POST',redirect:'error',cache:'no-store',
+      signal:AbortSignal.timeout(6000),
+      headers:{authorization:'Bearer '+serverToken,'content-type':'application/json',
+        accept:'application/json'},
+      body:JSON.stringify({data:[event]}),
+    })
+    if (!response?.ok) return {status:'provider_error'}
+    const receipt=await response.json()
+    return receipt?.events_received===1
+      ? {status:'accepted'} : {status:'provider_error'}
+  } catch {return {status:'unavailable'}}
+}
