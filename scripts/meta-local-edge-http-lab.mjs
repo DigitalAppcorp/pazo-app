@@ -60,16 +60,20 @@ export async function runMetaLocalEdgeHttpLab({api,key,ownerId,token,dbUrl}={}){
  console.log('META_EDGE_HTTP_PHASE auth_and_origin_denials')
  const before=sql(`SELECT decision||'|'||sharing_opt_out||'|'||gpc_at_last_request
  FROM marketing_private.meta_purpose_candidate WHERE owner_id=${q}`)
+ console.log('META_EDGE_HTTP_PHASE preexisting_sql_withdrawal_check')
  assert.equal(before,'withdrawn|t|t')
  const gpc=await request('receipt',{body:{},
   extraHeaders:{'sec-gpc':'1'}})
+ console.log('META_EDGE_HTTP_DIAG gpc_status='+gpc.status)
  assert.equal(gpc.status,403)
  assert.deepEqual(gpc.data,{status:'not_available'})
  const explicit=await request('withdraw',{body:{action:'withdraw'}})
+ console.log('META_EDGE_HTTP_DIAG withdrawal_status='+explicit.status)
  assert.equal(explicit.status,200)
  assert.deepEqual(explicit.data,{status:'withdrawn'})
  const after=sql(`SELECT decision||'|'||sharing_opt_out||'|'||gpc_at_last_request
  FROM marketing_private.meta_purpose_candidate WHERE owner_id=${q}`)
+ console.log('META_EDGE_HTTP_PHASE persistent_sql_after_deno')
  assert.equal(after,before,'GPC/withdrawal must persist across real Edge HTTP')
  assert.equal(sql(`SELECT status FROM marketing_private.meta_outbox_candidate
  WHERE owner_id=${q}`),'suppressed')
