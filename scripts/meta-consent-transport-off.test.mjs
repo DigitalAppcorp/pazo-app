@@ -51,7 +51,10 @@ function fixture(){
       },body:JSON.stringify(options.body),
     })
     const reply=await handler(req)
-    return {data:await reply.json(),error:reply.ok?null:{status:reply.status}}
+    const data=await reply.json()
+    calls[calls.length-1].httpStatus=reply.status
+    calls[calls.length-1].responseStatus=data?.status
+    return {data,error:reply.ok?null:{status:reply.status}}
   }}}
   const settings={released:true,privacyApproved:true,supabaseClient:client,
     getSessionSnapshot:()=>session,stillPermitted:()=>permitted,browser}
@@ -79,7 +82,7 @@ test('real isolated Edge grant and receipt handlers accept canonical Supabase in
  const g=await t.requestGrant({
    accessToken:token,body:{action:'grant',noticeVersion:'pazo-meta-conversions-v1'},
  })
- assert.deepEqual(g,{status:'granted'})
+ assert.deepEqual(g,{status:'granted'},JSON.stringify(f.calls.map(x=>({name:x.name,http:x.httpStatus,status:x.responseStatus}))))
  const r=await t.requestReceipt({accessToken:token,body:{}})
  assert.deepEqual(r,{status:'verified',eventName:'CompleteRegistration',
    eventId,datasetId})
