@@ -146,3 +146,18 @@ test('explicit non-production CAPI Test Events request carries code only in payl
   assert.equal(endpoint.includes('TESTSYNTH01'),false)
   assert.equal(headers.authorization,'Bearer synthetic_private_token_1234567890')
 })
+
+test('Meta API acceptance with Test Events warning is not clean test validation',async()=>{
+ const p=proof()
+ const result=await sendMetaCapi({
+   releaseEnabled:true,privacyGateApproved:true,claimWasInserted:true,
+   event:p.server,datasetId,apiVersion:'v26.0',
+   serverToken:'synthetic_private_token_1234567890',
+   testModeEnabled:true,testEventCode:'TESTSYNTH01',nonProduction:true,
+   authorized:async()=>true,
+   fetchImpl:async()=>({ok:true,json:async()=>({
+     events_received:1,messages:['test_event_code does not match active Test Events session']
+   })}),
+ })
+ assert.deepEqual(result,{status:'accepted_with_warnings'})
+})
