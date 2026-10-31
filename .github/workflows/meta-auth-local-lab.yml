@@ -9,6 +9,10 @@ on:
       - 'scripts/meta-local-edge-http-lab.mjs'
       - 'scripts/meta-local-browser-playwright.mjs'
       - 'scripts/meta-browser-supabase-client.mjs'
+      - 'src/features/marketing/metaConsentController.mjs'
+      - 'src/features/marketing/metaConsentRegistrationFlow.mjs'
+      - 'src/features/marketing/metaConsentTransport.mjs'
+      - 'src/features/marketing/metaGpcSync.mjs'
       - 'supabase/tests/marketing/meta-local-edge-entry.ts'
       - 'supabase/tests/marketing/meta-local-gotrue-prerequisites.sql'
       - 'supabase/tests/marketing/meta-outbox-candidate.sql'
@@ -109,6 +113,7 @@ jobs:
         run: |
           node --check scripts/meta-local-browser-playwright.mjs
           node --check scripts/meta-browser-supabase-client.mjs
+          node --check src/features/marketing/metaConsentController.mjs
       - name: Verify test-only HTTP suite syntax
         shell: bash
         run: node --check scripts/meta-local-edge-http-lab.mjs
