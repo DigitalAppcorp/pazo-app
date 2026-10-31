@@ -4,7 +4,10 @@
 import assert from 'node:assert/strict'
 import {randomUUID} from 'node:crypto'
 import {createRequire} from 'node:module'
-import {createServer} from 'vite'
+import {build} from 'vite'
+import {mkdtempSync,readFileSync,rmSync} from 'node:fs'
+import {tmpdir} from 'node:os'
+import {join,resolve} from 'node:path'
 import {localPsql} from './meta-local-gotrue-sql-lab.mjs'
 const {chromium}=createRequire(import.meta.url)('playwright')
 const ORIGIN='https://pazo-app.vercel.app'
@@ -41,14 +44,22 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
  assert.equal(sql(`INSERT INTO marketing_private.acquisition(owner_id,signup_verified_at)
   SELECT id,email_confirmed_at FROM auth.users WHERE id=${ownerSql}
   RETURNING owner_id::text`),ownerId)
- const vite=await createServer({logLevel:'error',
-  server:{host:'127.0.0.1',port:5389,strictPort:true,
-    cors:{origin:ORIGIN}},
- })
+ // Bundle supabase-js into one JS file and serve BOTH HTML and JS only
+ // through the intercepted PAZO-origin page. No real PAZO network access.
+ const temp=mkdtempSync(join(tmpdir(),'pazo-meta-chromium-'))
  let browser
  let blocked=0
  try{
-  await vite.listen()
+  await build({configFile:false,logLevel:'error',build:{
+    outDir:temp,emptyOutDir:true,minify:false,
+    rollupOptions:{
+      input:resolve('scripts/meta-browser-supabase-client.mjs'),
+      output:{entryFileNames:'browser-lab.js',
+        chunkFileNames:'chunks/[name]-[hash].js'},
+    },
+  }})
+  const bundled=readFileSync(join(temp,'browser-lab.js'),'utf8')
+  assert.ok(bundled.includes('__runPazoMetaBrowserLab'))
   browser=await chromium.launch({headless:true,args:['--no-sandbox']})
   const context=await browser.newContext({
     viewport:{width:390,height:844},serviceWorkers:'block',
@@ -59,20 +70,25 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
     const u=new URL(route.request().url())
     if(u.origin===ORIGIN&&u.pathname==='/__meta_browser_lab/'){
       return route.fulfill({status:200,contentType:'text/html; charset=utf-8',
-        body:'<!doctype html><meta charset="utf-8"><title>local synthetic contract</title><script type="module" src="http://127.0.0.1:5389/scripts/meta-browser-supabase-client.mjs"></script>'})
+        body:'<!doctype html><meta charset="utf-8"><title>local synthetic contract</title><script type="module" src="/__meta_browser_lab/browser-lab.js"></script>'})
     }
+    if(u.origin===ORIGIN&&u.pathname==='/__meta_browser_lab/browser-lab.js'){
+      return route.fulfill({status:200,contentType:'text/javascript; charset=utf-8',
+        body:bundled})
+    }
+    if(u.origin===ORIGIN&&u.pathname==='/favicon.ico')
+      return route.fulfill({status:204,body:''})
     if(u.protocol==='http:'&&u.hostname==='127.0.0.1'
-      && ((u.port==='5389'&&u.pathname.startsWith('/'))
-        ||(u.port==='54321'&&(
-          u.pathname.startsWith('/auth/v1/')
-          ||u.pathname.startsWith('/functions/v1/pazo-meta-lab/')))))
+       &&u.port==='54321'&&(
+         u.pathname.startsWith('/auth/v1/')
+         ||u.pathname.startsWith('/functions/v1/pazo-meta-lab/')))
       return route.continue()
     blocked++
     return route.abort('blockedbyclient')
   })
   await page.goto(ORIGIN+'/__meta_browser_lab/',{waitUntil:'domcontentloaded'})
   await page.waitForFunction(()=>typeof window.__runPazoMetaBrowserLab==='function',
-    {timeout:25000})
+    null,{timeout:15000})
   const result=await page.evaluate(args=>
     window.__runPazoMetaBrowserLab(args),{api:base,key,email,password})
   assert.equal(result.status,'REAL_BROWSER_SUPABASE_JS_META_OFF_PASS')
@@ -99,6 +115,6 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
     metaRequests:0,productionRequests:0}
  }finally{
   if(browser)await browser.close()
-  await vite.close()
+  rmSync(temp,{recursive:true,force:true})
  }
 }
