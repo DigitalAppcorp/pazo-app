@@ -72,3 +72,39 @@ test('late GPC overrides stored grant in the network-time privacy recheck',async
  assert.equal(net,0)
  assert.equal(checks,2)
 })
+
+test('invalid test-mode combinations perform zero secret reads, leases and network calls',async()=>{
+ let reads=0,leases=0,network=0
+ for(const patch of [
+  {testModeEnabled:true,testEventCode:null,nonProduction:true},
+  {testModeEnabled:true,testEventCode:'TEST3982',nonProduction:false},
+  {testModeEnabled:false,testEventCode:'TEST3982',nonProduction:true},
+  {testModeEnabled:true,testEventCode:'BAD123',nonProduction:true},
+ ]) {
+  const out=await runMetaCapiWorker({
+    releaseEnabled:true,privacyGateApproved:true,
+    repository:{leaseOne:async()=>{leases++;return null}},
+    readSecret:()=>{reads++;return undefined},
+    fetchImpl:async()=>{network++;throw Error('provider forbidden')},
+    apiVersion:'v24.0',...patch,
+  })
+  assert.deepEqual(out,{status:'not_configured'})
+ }
+ assert.equal(reads+leases+network,0)
+})
+test('approved synthetic worker sends a Test Events code without changing event id',async()=>{
+ const requests=[]
+ const result=await runMetaCapiWorker({
+  ...base,testModeEnabled:true,testEventCode:'TEST3982',nonProduction:true,
+  fetchImpl:async(uri,req)=>{
+    requests.push({uri,body:JSON.parse(req.body),headers:req.headers})
+    return {ok:true,json:async()=>({events_received:1})}
+  },
+ })
+ assert.equal(result.status,'accepted')
+ assert.equal(requests.length,1)
+ assert.equal(requests[0].body.test_event_code,'TEST3982')
+ assert.equal(requests[0].body.data[0].event_id,eventId)
+ assert.equal(requests[0].uri.includes('TEST3982'),false)
+ assert.equal(requests[0].headers.authorization,'Bearer '+fixture.META_CAPI_ACCESS_TOKEN)
+})
