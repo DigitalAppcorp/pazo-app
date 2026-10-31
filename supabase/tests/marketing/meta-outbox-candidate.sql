@@ -28,6 +28,19 @@ ALTER TABLE marketing_private.meta_purpose_candidate FORCE ROW LEVEL SECURITY;
 REVOKE ALL ON marketing_private.meta_purpose_candidate
  FROM PUBLIC,anon,authenticated,service_role;
 
+-- Independent kill switch. New provider-conversion records are OFF even if
+-- first-party PAZO acquisition is active and a consent record is present.
+CREATE TABLE marketing_private.meta_release_gate_candidate(
+ singleton boolean PRIMARY KEY DEFAULT true CHECK(singleton),
+ enabled boolean NOT NULL DEFAULT false
+);
+INSERT INTO marketing_private.meta_release_gate_candidate(singleton,enabled)
+ VALUES(true,false);
+ALTER TABLE marketing_private.meta_release_gate_candidate ENABLE ROW LEVEL SECURITY;
+ALTER TABLE marketing_private.meta_release_gate_candidate FORCE ROW LEVEL SECURITY;
+REVOKE ALL ON marketing_private.meta_release_gate_candidate
+ FROM PUBLIC,anon,authenticated,service_role;
+
 -- Child of the existing 14-day attribution row: it is automatically erased
 -- by existing marketing withdrawal, retention purge and account deletion.
 -- The purpose/opt-out row above is separate and is retained as appropriate
@@ -53,51 +66,41 @@ ALTER TABLE marketing_private.meta_outbox_candidate FORCE ROW LEVEL SECURITY;
 REVOKE ALL ON marketing_private.meta_outbox_candidate
  FROM PUBLIC,anon,authenticated,service_role;
 
--- An event is minted only ONCE after a previously verified acquisition,
--- with prior specific permission. Opt-in after verification never backfills.
--- Neither account age nor an arbitrary browser boolean is the authority.
-CREATE FUNCTION marketing_private.claim_meta_candidate(p_owner uuid)
-RETURNS uuid LANGUAGE plpgsql VOLATILE SECURITY INVOKER SET search_path=''
-AS $$
-DECLARE v_event uuid;
+-- The only event mint is an AFTER INSERT trigger on first-party acquisition.
+-- Its outbox insert is in the same transaction and rolls back with registration.
+-- Existing/historic rows and duplicate first-party attempts do not fire it.
+-- No provider calls or user-data hashes happen in PostgreSQL.
+CREATE FUNCTION marketing_private.meta_on_verified_candidate()
+RETURNS trigger LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
+AS $enqueue$
 BEGIN
- IF p_owner IS NULL OR NOT marketing_private.is_eligible_owner(p_owner)
-    OR NOT EXISTS(
-      SELECT 1 FROM marketing_private.collection_gate g
-      WHERE g.singleton AND g.enabled
-        AND marketing_private.retention_ready(g.retention_days,g.policy_version)
-    ) THEN RETURN NULL; END IF;
+ IF NOT EXISTS(
+   SELECT 1 FROM marketing_private.meta_release_gate_candidate g
+   WHERE g.singleton AND g.enabled
+ ) OR NOT marketing_private.is_eligible_owner(NEW.owner_id)
+   OR NEW.signup_verified_at > statement_timestamp()
+ THEN RETURN NEW; END IF;
+
  INSERT INTO marketing_private.meta_outbox_candidate(owner_id,event_time)
- SELECT a.owner_id,a.signup_verified_at
- FROM marketing_private.acquisition a
- JOIN marketing_private.meta_purpose_candidate p ON p.owner_id=a.owner_id
- WHERE a.owner_id=p_owner
-   AND a.signup_verified_at<=statement_timestamp()
-   AND a.signup_verified_at>=statement_timestamp()-interval '10 minutes'
+ SELECT NEW.owner_id,NEW.signup_verified_at
+ FROM marketing_private.meta_purpose_candidate p
+ WHERE p.owner_id=NEW.owner_id
    AND p.purpose='meta_conversions_v1'
    AND p.version='pazo-meta-conversions-v1'
    AND p.decision='granted'
    AND p.withdrawn_at IS NULL
    AND p.gpc_at_last_request IS FALSE
    AND p.sharing_opt_out IS FALSE
-   AND p.decided_at<=a.signup_verified_at
- ON CONFLICT(owner_id) DO NOTHING
- RETURNING event_id INTO v_event;
- RETURN v_event;
-END $$;
-REVOKE ALL ON FUNCTION marketing_private.claim_meta_candidate(uuid)
+   AND p.decided_at<=NEW.signup_verified_at
+ ON CONFLICT(owner_id) DO NOTHING;
+ RETURN NEW;
+END
+$enqueue$;
+REVOKE ALL ON FUNCTION marketing_private.meta_on_verified_candidate()
  FROM PUBLIC,anon,authenticated,service_role;
-
--- Service-only adapter. Edge must independently authenticate the user and
--- bind p_owner to trusted Supabase Auth before invoking this bridge.
-CREATE FUNCTION public.pazo_meta_claim_candidate(p_owner uuid)
-RETURNS uuid LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=''
-AS $$ SELECT marketing_private.claim_meta_candidate(p_owner) $$;
-REVOKE ALL ON FUNCTION public.pazo_meta_claim_candidate(uuid)
- FROM PUBLIC,anon,authenticated,service_role;
-GRANT EXECUTE ON FUNCTION public.pazo_meta_claim_candidate(uuid)
- TO service_role;
-
+CREATE TRIGGER meta_once_on_verified_candidate
+ AFTER INSERT ON marketing_private.acquisition
+ FOR EACH ROW EXECUTE FUNCTION marketing_private.meta_on_verified_candidate();
 
 -- A worker can reserve only a verified, opt-in, non-QA event. Never send
 -- delayed events after explicit withdrawal or after the event's freshness TTL.
@@ -110,8 +113,9 @@ AS $policy$
    JOIN marketing_private.meta_purpose_candidate p ON p.owner_id=o.owner_id
    JOIN marketing_private.acquisition a ON a.owner_id=o.owner_id
    JOIN marketing_private.collection_gate g ON g.singleton
+   JOIN marketing_private.meta_release_gate_candidate m ON m.singleton
    WHERE o.owner_id=p_owner
-     AND g.enabled
+     AND g.enabled AND m.enabled
      AND marketing_private.retention_ready(g.retention_days,g.policy_version)
      AND marketing_private.is_eligible_owner(o.owner_id)
      AND a.signup_verified_at=o.event_time
