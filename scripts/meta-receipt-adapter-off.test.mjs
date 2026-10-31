@@ -28,6 +28,8 @@ const createFake=({autoconfirm=false,receipt=true}={})=>{
     if(path.endsWith('/auth/v1/settings'))return new Response(JSON.stringify({
       mailer_autoconfirm:autoconfirm
     }),{status:200})
+    if(path.endsWith('/rpc/pazo_meta_withdraw_candidate'))
+      return new Response('true',{status:200})
     if(path.endsWith('/rpc/pazo_meta_take_pixel_receipt_candidate')){
       if(!receipt||taken)return new Response('[]',{status:200})
       taken=true
@@ -67,7 +69,7 @@ test('authenticated verified owner gets one server-claimed receipt, not two',asy
  assert.deepEqual(JSON.parse(f.calls[2].init.body),{p_owner:owner})
  assert.equal(f.calls[2].init.body.includes(serviceKey),false)
 })
-test('no authenticated verified email or blocked GPC means no service RPC',async()=>{
+test('unverified email blocks receipt; GPC persists opt-out instead of claiming Pixel',async()=>{
  const f=createFake({autoconfirm:true})
  const handler=createMetaReceiptHandler({released:true,privacyReviewed:true,...f.provider})
  assert.equal((await handler(makeReq())).status,403)
@@ -75,7 +77,12 @@ test('no authenticated verified email or blocked GPC means no service RPC',async
  const normal=createFake()
  const h=createMetaReceiptHandler({released:true,privacyReviewed:true,...normal.provider})
  assert.equal((await h(makeReq({'sec-gpc':'1'}))).status,403)
- assert.equal(normal.calls.length,0)
+ assert.deepEqual(normal.calls.map(x=>x.path),[
+   url+'/auth/v1/user',url+'/auth/v1/settings',
+   url+'/rest/v1/rpc/pazo_meta_withdraw_candidate',
+ ])
+ assert.deepEqual(JSON.parse(normal.calls[2].init.body),{p_owner:owner})
+ assert.equal(normal.calls.some(x=>x.path.includes('take_pixel_receipt')),false)
 })
 test('replay, absent claim and disabled release fail closed',async()=>{
  const f=createFake({receipt:false})
