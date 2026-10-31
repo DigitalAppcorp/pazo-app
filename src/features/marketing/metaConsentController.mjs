@@ -23,6 +23,9 @@ export function createMetaConsentController({
   if(!UUID.test(ownerId||'')||typeof accessToken!=='string'
      ||accessToken.length<12||typeof getSessionSnapshot!=='function'
      ||typeof stillPermitted!=='function')return null
+  // A local withdrawal veto takes effect immediately, even if its durable
+  // server write is delayed or fails. Never resurrect a pending Pixel load.
+  let localWithdrawal=false
   const sameSession=()=>{
     try {
       const current=getSessionSnapshot()
@@ -31,14 +34,14 @@ export function createMetaConsentController({
   }
   const affirmativeAllowed=()=>{
     try {
-      return sameSession() && stillPermitted()===true
+      return !localWithdrawal && sameSession() && stillPermitted()===true
         && browser?.navigator?.globalPrivacyControl!==true
     }catch{return false}
   }
   const optIn=releaseEnabled===true && privacyApproved===true
     ?createMetaConsentTransport({
       released:true,privacyApproved:true,supabaseClient,ownerId,
-      getSessionSnapshot,stillPermitted,browser,
+      getSessionSnapshot,stillPermitted:affirmativeAllowed,browser,
     }):null
   const withdrawal=createMetaWithdrawalTransport({
     withdrawalReleased,supabaseClient,ownerId,getSessionSnapshot,
@@ -55,7 +58,7 @@ export function createMetaConsentController({
     const task=completeExplicitMetaOptIn({
       releaseEnabled:true,privacyApproved:true,deliberateOptIn:true,
       ownerId,accessToken,getActiveSession:getSessionSnapshot,
-      browser,dom,stillPermitted,
+      browser,dom,stillPermitted:affirmativeAllowed,
       requestGrant:async request=>{
         const reply=await optIn.requestGrant(request)
         serverGranted=reply?.status==='granted'
@@ -80,6 +83,8 @@ export function createMetaConsentController({
     return task
   }
   const onWithdraw=async()=>{
+    localWithdrawal=true
+    confirmedGrant=false
     if(!withdrawal)return false
     try{
       const result=await withdrawal.requestWithdraw({
@@ -93,12 +98,18 @@ export function createMetaConsentController({
     }catch{return false}
   }
   // Authenticated, opt-out-only sync; it never calls grant/receipt/Pixel.
-  const syncGpc=()=>syncMetaGpcWithdrawal({
+  const syncGpc=()=>{
+    if(browser?.navigator?.globalPrivacyControl===true){
+      localWithdrawal=true
+      confirmedGrant=false
+    }
+    return syncMetaGpcWithdrawal({
     withdrawalReleased,browser,ownerId,accessToken,
     getSessionSnapshot,requestWithdraw:withdrawal?.requestWithdraw,
   }).then(result=>{
     if(result.status==='withdrawn')confirmedGrant=false
     return result
   })
+  }
   return Object.freeze({onGrant,onWithdraw,syncGpc})
 }
