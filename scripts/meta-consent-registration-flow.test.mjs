@@ -114,3 +114,63 @@ test('late preference change is still vetoed by Pixel callback',async()=>{
  })
  assert.deepEqual(out,{status:'suppressed'})
 })
+
+test('post-grant GPC requests durable withdrawal before receipt or Pixel',async()=>{
+ const f=make()
+ const out=await completeExplicitMetaOptIn({...f.base,
+   requestGrant:async request=>{
+     f.calls.push(['grant',request]);f.changeGpc()
+     return {status:'granted'}
+   },
+   requestWithdraw:async request=>{
+     f.calls.push(['withdraw',request])
+     return {status:'withdrawn'}
+   },
+ })
+ assert.deepEqual(out,{status:'suppressed'})
+ assert.deepEqual(f.calls.map(x=>x[0]),['grant','withdraw'])
+ assert.deepEqual(f.calls[1][1],{accessToken,body:{action:'withdraw'}})
+})
+test('after a possibly committed grant, failing opt-out is explicitly unconfirmed',async()=>{
+ for(const outcome of ['not_configured','throw']){
+   const f=make()
+   const out=await completeExplicitMetaOptIn({...f.base,
+     requestGrant:async request=>{
+       f.calls.push(['grant',request]);f.changeGpc()
+       return {status:'granted'}
+     },
+     requestWithdraw:async request=>{
+       f.calls.push(['withdraw',request])
+       if(outcome==='throw')throw Error('server unavailable')
+       return {status:'not_available'}
+     },
+   })
+   assert.deepEqual(out,{status:'withdrawal_unconfirmed'})
+   assert.deepEqual(f.calls.map(x=>x[0]),['grant','withdraw'])
+ }
+})
+test('account switch after grant never withdraws on behalf of another owner',async()=>{
+ const f=make()
+ const out=await completeExplicitMetaOptIn({...f.base,
+   requestGrant:async request=>{
+     f.calls.push(['grant',request]);f.switchAccount()
+     return {status:'granted'}
+   },
+   requestWithdraw:async request=>{
+     f.calls.push(['withdraw',request]);return {status:'withdrawn'}
+   },
+ })
+ assert.deepEqual(out,{status:'withdrawal_unconfirmed'})
+ assert.deepEqual(f.calls.map(x=>x[0]),['grant'])
+})
+test('privacy veto before any request requires no withdrawal',async()=>{
+ const f=make()
+ f.changeGpc()
+ const out=await completeExplicitMetaOptIn({...f.base,
+   requestWithdraw:async request=>{
+     f.calls.push(['withdraw',request]);return {status:'withdrawn'}
+   },
+ })
+ assert.deepEqual(out,{status:'suppressed'})
+ assert.equal(f.calls.length,0)
+})
