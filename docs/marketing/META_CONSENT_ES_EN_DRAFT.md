@@ -1,6 +1,9 @@
 # PAZO / Meta Conversion Consent — ES/EN candidate (NOT PUBLISHED)
 
 **Status:** Copy and product-flow candidate, awaiting legal and Design OS review.
+
+> **Actualización 31-oct-2026 — alcance aprobado por el PO, no despliegue:** El documento vigente para revisión de los campos propuestos y el borrador completo ES/EN es [META_NOTICE_SCOPE_APPROVED_20261031.md](META_NOTICE_SCOPE_APPROVED_20261031.md). El PO autorizó **preparar** esta finalidad (registro confirmado, UUIDv4, SHA-256 email, User-Agent y datos de conexión Pixel), NO publicar, desplegar, compartir datos o liberar el worker. Los textos de ejemplo más abajo son históricos y no prevalecen sobre el documento nuevo. Revisión jurídica, SDK y retención siguen pendientes.
+
 The live [privacy policy](../../src/features/legal/legalCopy.ts) still says **no individual conversions are sent to Meta**. It MUST be updated, published and date-stamped **before** Meta is activated. Do not claim that draft text is already the user's current privacy policy.
 
 ## Proposed first verified session UX (without interrupting first-party signup)
