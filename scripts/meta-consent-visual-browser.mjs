@@ -182,6 +182,10 @@ try{
      assert.equal(await section.getByRole('button',{name:lang==='es'?'Permitir medición':'Allow measurement'}).count(),0)
      if(scenario==='gpc-error'){
       await section.getByRole('alert').waitFor()
+      // Capture the actual failed-persistence UI before recovery.
+      // Initial/result alone can hide an inaccessible error state.
+      await page.screenshot({path:DIR+'/'+lang+'-'+width+'-'+scenario+'-error.png',
+        fullPage:true})
       await section.getByRole('button',{name:lang==='es'?'Reintentar guardar':'Retry saving'}).click()
       await section.getByText(lang==='es'?'Tu preferencia de no compartir quedó guardada en PAZO.':'Your do-not-share preference has been saved in PAZO.').waitFor()
       assert.equal(await page.evaluate(()=>window.__metaLab.withdrawCalls),2)
@@ -190,6 +194,10 @@ try{
       assert.equal(await page.evaluate(()=>window.__metaLab.withdrawCalls),1)
      }
     }
+    // Browser exceptions, local 4xx/5xx responses and console errors are
+    // failures even when the rendered DOM happens to look correct.
+    assert.deepEqual(pageIssues,[],
+      'browser_console_or_local_request_failure_'+lang+'_'+width+'_'+scenario)
     // Proof of the rendered state, not aesthetic approval.
     const evidence=DIR+'/'+lang+'-'+width+'-'+scenario+'-result.png'
     await page.screenshot({path:evidence,fullPage:true})
@@ -203,12 +211,12 @@ try{
   candidateOnly:true,viewportWidths:[320,390,430],
   languages:['es','en'],
   scenarios:['default','gpc','gpc-error','grant-error'],
-  screenshots:48,externalRequests:blocked,findings,
+  screenshots:54,externalRequests:blocked,findings,
   limitations:['No hosted PAZO runtime or signed-in real-user UX',
    'No legal approval or independent human visual acceptance',
    'No actual Meta SDK, CAPI or consent provider network'],
  },null,2))
- console.log('META_CONSENT_VISUAL_DOM_PASS screenshots=48 no_external_requests')
+ console.log('META_CONSENT_VISUAL_DOM_PASS screenshots=54 no_external_requests')
 }finally{
  if(browser)await browser.close()
  await server.close()
