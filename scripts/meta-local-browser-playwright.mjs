@@ -28,6 +28,7 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
  // withdrew permanently in the earlier real-JWT/SQL test. Never re-grant.
  const email='pazo-browser-'+randomUUID().slice(0,12)+'@example.invalid'
  const password='PazoBrowser!4'+randomUUID().replaceAll('-','')
+ console.log('META_BROWSER_PHASE create_local_synthetic_user')
  const create=await fetch(base+'/auth/v1/admin/users',{
   method:'POST',redirect:'manual',signal:AbortSignal.timeout(12000),
   headers:{apikey:serviceKey,authorization:'Bearer '+serviceKey,
@@ -36,6 +37,7 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
  })
  assert.ok([200,201].includes(create.status),'local_admin_synthetic_user_create_failed')
  const data=await create.json()
+ console.log('META_BROWSER_PHASE local_auth_created')
  const ownerId=data.user?.id||data.id
  assert.match(String(ownerId),/^[0-9a-f-]{36}$/i)
  assert.ok(data.email_confirmed_at||data.user?.email_confirmed_at,
@@ -46,10 +48,12 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
   RETURNING owner_id::text`),ownerId)
  // Bundle supabase-js into one JS file and serve BOTH HTML and JS only
  // through the intercepted PAZO-origin page. No real PAZO network access.
+ console.log('META_BROWSER_PHASE local_sql_attribution_inserted')
  const temp=mkdtempSync(join(tmpdir(),'pazo-meta-chromium-'))
  let browser
  let blocked=0
  try{
+  console.log('META_BROWSER_PHASE vite_bundle_begin')
   await build({configFile:false,logLevel:'error',build:{
     outDir:temp,emptyOutDir:true,minify:false,
     rollupOptions:{
@@ -60,7 +64,10 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
   }})
   const bundled=readFileSync(join(temp,'browser-lab.js'),'utf8')
   assert.ok(bundled.includes('__runPazoMetaBrowserLab'))
+  console.log('META_BROWSER_PHASE vite_bundle_loaded')
+  console.log('META_BROWSER_PHASE chromium_launch_begin')
   browser=await chromium.launch({headless:true,args:['--no-sandbox']})
+  console.log('META_BROWSER_PHASE chromium_launched')
   const context=await browser.newContext({
     viewport:{width:390,height:844},serviceWorkers:'block',
     ignoreHTTPSErrors:false,
@@ -87,10 +94,13 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
     return route.abort('blockedbyclient')
   })
   await page.goto(ORIGIN+'/__meta_browser_lab/',{waitUntil:'domcontentloaded'})
+  console.log('META_BROWSER_PHASE synthetic_page_loaded')
   await page.waitForFunction(()=>typeof window.__runPazoMetaBrowserLab==='function',
     null,{timeout:15000})
+  console.log('META_BROWSER_PHASE client_module_loaded')
   const result=await page.evaluate(args=>
     window.__runPazoMetaBrowserLab(args),{api:base,key,email,password})
+  console.log('META_BROWSER_PHASE browser_invocation_completed')
   assert.equal(result.status,'REAL_BROWSER_SUPABASE_JS_META_OFF_PASS')
   assert.equal(result.ownerId,ownerId)
   assert.match(result.eventId,UUID4)
