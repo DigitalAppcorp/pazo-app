@@ -100,3 +100,18 @@ The proposed purpose is to measure confirmed registrations originating from ad c
 - Verify the versioned ES/EN wording with legal counsel and Design OS. This is not the released text and must not be presented as effective.
 
 Official reference points (not an opinion about PAZO's applicability): https://cppa.ca.gov/faq and https://oag.ca.gov/privacy/ccpa/gpc .
+
+## Revisión de Design OS y GPC — 31-oct-2026 (candidata, OFF)
+
+**Hallazgo S1 de privacidad (corregido solo en candidato):** ocultar el botón positivo cuando `navigator.globalPrivacyControl` es verdadero no guarda por sí solo una retirada durable. El cliente previamente vetaba `requestGrant` y `requestReceipt`, de modo que no llegaba necesariamente una solicitud con `Sec-GPC:1` a los endpoints candidatos. No se debe declarar que la señal se respetó en la cuenta únicamente porque el checkbox desapareció.
+
+**Solución candidata aislada:**
+- `src/features/marketing/metaGpcSync.mjs` sincroniza una señal GPC después de contar con JWT de cuenta verificada, invocando solo el **endpoint first-party de retirada**, sin depender de Pixel/CAPI/grant. Distingue `withdrawn` confirmado de `unconfirmed` por fallo de red o cambio de identidad y no se importa desde el runtime productivo.
+- `src/features/marketing/MetaConsentChoice.tsx` mantiene el checkbox **desmarcado**, ofrece omitir sin castigo, y exige un callback `onWithdraw` para registrar la decisión negativa. Ante GPC, no permite grant, intenta persistir la retirada y muestra `guardado` solo tras confirmación del servidor; cuando falla, muestra error y botón de reintento. Continuar en PAZO no debe bloquearse por una caída de medición.
+- El texto no debe disfrazar un hash de correo como anonimización. El aviso candidato menciona señal de registro confirmado, datos técnicos de conexión (IP/navegador) y que cualquier identificador derivado de email requiere autorización específica. `metaConversion.mjs` aún exige un hash de correo en CAPI, cuyo origen/consentimiento está **BLOCKED**. Por tanto esta pantalla **no** puede publicarse todavía como consentimiento definitivo.
+
+**UX sobre la pantalla real — estado `NOT_TESTED`:** no se ha montado esta candidata en `App.tsx` ni en el onboarding de PAZO. Hay pruebas unitarias de React para ES/EN, checkbox inicial, omisión, GPC/retirada, error y reintento, pero falta prueba visual de 390/430px, foco y retorno, contraste medido y revisión humana del copy. No usar `DESIGN_QA_PASS` por el hecho de compilar o aprobar tests unitarios.
+
+**Regla de producto:** ofrecer esta decisión, si se aprueba, sin desviar al usuario que llegó por el QR de su tarea principal. El límite laboratorio de 15 minutos puede reducir la cobertura de registros de anuncios y necesita evaluación del PO con datos reales; nunca falsear tasas por excluir el segmento que no consintió. Un consentimiento dado para medir anuncios NO autoriza otra finalidad social ni datos de mascotas.
+
+**Documentación vinculada:** [inventario de datos y controles NO-GO](META_DATA_MINIMIZATION_REVIEW_20261031.md). Los criterios legales, política efectiva, preferencias permanentes, requisitos de Meta y destino del contacto de privacidad requieren revisión independiente antes de publicación.
