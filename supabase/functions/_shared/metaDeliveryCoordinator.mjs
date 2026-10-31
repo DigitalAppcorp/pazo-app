@@ -1,19 +1,22 @@
 // #169. Server-side composition for a future *durable database outbox*.
 // Not imported by any Edge endpoint. This never trusts a browser-provided
-// consent boolean or event ID. The transactional outbox is still NOT BUILT.
+// consent boolean or event ID. Database outbox exists only in PG17 laboratory.
 import {assessMetaPurpose} from './metaPurposePolicy.mjs'
 import {buildMetaRegistration} from './metaConversion.mjs'
 import {sendMetaCapi} from './metaCapi.mjs'
 const DEFAULTS=Object.freeze({allowed:false})
+const UUID4=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 /** Both repository methods MUST check an authenticated, recently confirmed
  * new account and issue/reuse a DB-stored UUIDv4 atomically.
- * leaseOne(): returns {eventId,eventTime,claimWasInserted,record,
+ * leaseOne(): returns {eventId,leaseId,eventTime,claimWasInserted,record,
  *  accountExcluded,qaOrAdmin,gpc,sharingOptOut,hashedEmail}
  * `kind: retry` is permissible ONLY when it leases the previously inserted,
  * unique verified event row, reusing its original eventId. claimWasInserted
  * attests existence of that original row, NOT an INSERT in this attempt.
  * or null. IDs and email hashes may NEVER be built by the browser.
- * settle(): acknowledgements must be atomic and idempotent; a lease that fails
+ * settle(eventId, leaseId, status): acknowledgement MUST compare both IDs
+ * against the current DB lease. A stale worker may never settle a newer lease.
+ * Acknowledgements must be atomic and idempotent; a lease that fails
  * remains retryable using the SAME event ID, never a fresh conversion.
  */
 export async function deliverVerifiedMetaRegistration({
@@ -29,11 +32,13 @@ export async function deliverVerifiedMetaRegistration({
     return {status:'not_configured'}
   let claim
   try { claim=await repository.leaseOne() } catch {return {status:'unavailable'}}
-  if (!claim || !['new','retry'].includes(claim.kind) || claim.claimWasInserted!==true)
+  if (!claim || !['new','retry'].includes(claim.kind) || claim.claimWasInserted!==true
+      || typeof claim.eventId!=='string' || !UUID4.test(claim.eventId)
+      || typeof claim.leaseId!=='string' || !UUID4.test(claim.leaseId))
     return {status:'not_eligible'}
   const settle=async status=>{
-    try { await repository.settle(claim.eventId,status) } catch { return false }
-    return true
+    try { return await repository.settle(claim.eventId,claim.leaseId,status)===true }
+    catch { return false }
   }
   let privacy=DEFAULTS
   try {privacy=await repository.checkPrivacy(claim.eventId)}
