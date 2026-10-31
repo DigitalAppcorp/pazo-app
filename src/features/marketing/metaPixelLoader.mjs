@@ -4,6 +4,7 @@
 import {canUseMetaPixel,dispatchMetaPixel} from './metaPixel.mjs'
 const PIXEL_URL='https://connect.facebook.net/en_US/fbevents.js'
 const DATASET=/^[1-9][0-9]{5,24}$/
+const UUID4=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 export async function loadMetaPixelForVerifiedSignup({
   releaseEnabled=false,privacyGateApproved=false,explicitConsent=false,
   accountExcluded=true,qaOrAdmin=true,optedOut=true,verifiedRegistration=false,
@@ -13,10 +14,11 @@ export async function loadMetaPixelForVerifiedSignup({
   if (!canUseMetaPixel({
     releaseEnabled,privacyGateApproved,explicitConsent,
     excluded:accountExcluded,qaOrAdmin,optedOut,
-    globalPrivacyControl:browser?.navigator?.globalPrivacyControl!==false,
+    globalPrivacyControl:browser?.navigator?.globalPrivacyControl===true,
     verifiedRegistration,
   }) || !DATASET.test(String(datasetId)) || !browser?.document
      || dom!==browser.document || typeof dom.createElement!=='function'
+     || typeof eventId!=='string' || !UUID4.test(eventId)
      || typeof stillAllowed!=='function' || stillAllowed()!==true)
     return {status:'suppressed'}
   // A different / pre-existing Pixel bootstrap would make ownership ambiguous.
@@ -48,7 +50,7 @@ export async function loadMetaPixelForVerifiedSignup({
       finish({status:'unavailable'})
     }
     script.onload=()=>{
-      if (stillAllowed()!==true || browser.navigator?.globalPrivacyControl!==false){
+      if (stillAllowed()!==true || browser.navigator?.globalPrivacyControl===true){
         fbq('consent','revoke')
         return finish({status:'suppressed'})
       }
