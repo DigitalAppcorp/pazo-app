@@ -276,7 +276,7 @@ GRANT EXECUTE ON FUNCTION public.pazo_meta_lease_candidate() TO service_role;
 CREATE FUNCTION public.pazo_meta_settle_candidate(
  p_event uuid,p_lease uuid,p_status text
 ) RETURNS boolean LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=''
-AS $ SELECT marketing_private.meta_settle_candidate(p_event,p_lease,p_status) $;
+AS $meta_settle_rpc$ SELECT marketing_private.meta_settle_candidate(p_event,p_lease,p_status) $meta_settle_rpc$;
 REVOKE ALL ON FUNCTION public.pazo_meta_settle_candidate(uuid,uuid,text)
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_meta_settle_candidate(uuid,uuid,text)
