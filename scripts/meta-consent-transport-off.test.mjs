@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {createMetaConsentTransport}
+import {createMetaConsentTransport,createMetaWithdrawalTransport}
   from '../src/features/marketing/metaConsentTransport.mjs'
 import {completeExplicitMetaOptIn}
   from '../src/features/marketing/metaConsentRegistrationFlow.mjs'
@@ -21,7 +21,7 @@ const user={id:owner,is_anonymous:false,email_confirmed_at:new Date().toISOStrin
 
 function fixture(){
   let session={id:owner,accessToken:token}
-  let gpc=false,permitted=true,granted=false,taken=false
+  let gpc=false,permitted=true,granted=false,taken=false,withdrawn=false
   const calls=[],effects=[]
   const browser={navigator:{get globalPrivacyControl(){return gpc}}}
   const grant=createMetaGrantHandler({released:true,privacyReviewed:true,
@@ -31,7 +31,7 @@ function fixture(){
   const receipt=createMetaReceiptHandler({released:true,privacyReviewed:true,
     authenticate:async current=>current===token?user:null,
     lookupReceipt:async id=>{
-      if(id!==owner||!granted||taken)return null
+      if(id!==owner||!granted||withdrawn||taken)return null
       taken=true
       return {authorized:true,ownerId:owner,verifiedRegistration:true,
         excluded:false,gpc:false,sharingOptOut:false,withdrawn:false,
@@ -39,10 +39,18 @@ function fixture(){
         eventTime:Math.floor(Date.now()/1000)}
     },
   })
+  const withdrawal=createMetaWithdrawalHandler({released:true,
+    authenticate:async current=>current===token?user:null,
+    withdraw:async id=>{
+      if(id!==owner)return false
+      withdrawn=true;granted=false;return true
+    },
+  })
   const client={functions:{invoke:async(name,options)=>{
     calls.push({name,options})
     const handler=name==='pazo-meta-grant'?grant:
-      name==='pazo-meta-receipt'?receipt:null
+      name==='pazo-meta-receipt'?receipt:
+      name==='pazo-meta-consent'?withdrawal:null
     if(!handler)throw Error('unknown function')
     const req=new Request('https://pazo.invalid/functions/v1/'+name,{
       method:'POST',headers:{
@@ -59,7 +67,7 @@ function fixture(){
   const settings={released:true,privacyApproved:true,supabaseClient:client,
     ownerId:owner,getSessionSnapshot:()=>session,
     stillPermitted:()=>permitted,browser}
-  return {settings,calls,effects,browser,
+  return {settings,calls,effects,browser,wasWithdrawn:()=>withdrawn,
     changeUser:()=>{session={id:other,accessToken:token}},
     withdraw:()=>{permitted=false},
     setGpc:()=>{gpc=true},
@@ -163,19 +171,78 @@ test('GPC introduced while grant is pending prevents receipt and Pixel',async()=
    return result
  }
  const transport=createMetaConsentTransport(f.settings)
+ const withdrawn=createMetaWithdrawalTransport({
+   withdrawalReleased:true,supabaseClient:f.settings.supabaseClient,
+   ownerId:owner,getSessionSnapshot:f.getSnapshot,
+ })
  let pixel=0
  const out=await completeExplicitMetaOptIn({
    releaseEnabled:true,privacyApproved:true,deliberateOptIn:true,
    ownerId:owner,accessToken:token,getActiveSession:f.getSnapshot,
    stillPermitted:()=>true,browser:f.browser,dom:{},
    requestGrant:transport.requestGrant,requestReceipt:transport.requestReceipt,
+   requestWithdraw:withdrawn.requestWithdraw,
    pixelLoader:async()=>{pixel++;return {status:'queued'}},
  })
  assert.equal(out.status,'suppressed')
  assert.equal(pixel,0)
- assert.deepEqual(f.calls.map(x=>x.name),['pazo-meta-grant'])
- // In-flight grant may commit before the browser learns about new GPC.
- // Production must honor GPC in the server's persistent preference too.
+ assert.deepEqual(f.calls.map(x=>x.name),[
+   'pazo-meta-grant','pazo-meta-consent',
+ ])
+ assert.equal(f.wasWithdrawn(),true)
+})
+
+test('withdrawal stays available when Meta grant and SDK remain OFF',async()=>{
+ const f=fixture()
+ assert.equal(createMetaConsentTransport({...f.settings,released:false}),null)
+ const transport=createMetaWithdrawalTransport({
+   withdrawalReleased:true,supabaseClient:f.settings.supabaseClient,
+   ownerId:owner,getSessionSnapshot:f.getSnapshot,
+ })
+ f.setGpc()
+ const result=await transport.requestWithdraw({accessToken:token,
+   body:{action:'withdraw'}})
+ assert.deepEqual(result,{status:'withdrawn'})
+ assert.equal(f.wasWithdrawn(),true)
+ assert.deepEqual(f.calls.map(x=>x.name),['pazo-meta-consent'])
+ assert.deepEqual(f.calls[0].options.body,{action:'withdraw'})
+})
+test('withdrawal cannot target another owner or send extra fields',async()=>{
+ const f=fixture()
+ for(const ownerId of [null,'bad']){
+   assert.equal(createMetaWithdrawalTransport({
+     withdrawalReleased:true,supabaseClient:f.settings.supabaseClient,
+     ownerId,getSessionSnapshot:f.getSnapshot,
+   }),null)
+ }
+ const transport=createMetaWithdrawalTransport({
+   withdrawalReleased:true,supabaseClient:f.settings.supabaseClient,
+   ownerId:owner,getSessionSnapshot:f.getSnapshot,
+ })
+ assert.equal((await transport.requestWithdraw({accessToken:token,
+   body:{action:'withdraw',ownerId:other}})).status,'not_available')
+ assert.equal((await transport.requestWithdraw({accessToken:token,
+   body:{action:'grant'}})).status,'not_available')
+ f.changeUser()
+ assert.equal((await transport.requestWithdraw({accessToken:token,
+   body:{action:'withdraw'}})).status,'not_available')
+ assert.equal(f.calls.length,0)
+})
+test('failed server withdrawal is not falsely reported as persisted',async()=>{
+ const f=fixture()
+ const client=f.settings.supabaseClient
+ const actual=client.functions.invoke
+ client.functions.invoke=async(name,options)=>{
+   if(name==='pazo-meta-consent')return {data:null,error:{status:503}}
+   return actual(name,options)
+ }
+ const transport=createMetaWithdrawalTransport({
+   withdrawalReleased:true,supabaseClient:client,
+   ownerId:owner,getSessionSnapshot:f.getSnapshot,
+ })
+ assert.deepEqual(await transport.requestWithdraw({accessToken:token,
+   body:{action:'withdraw'}}),{status:'not_available'})
+ assert.equal(f.wasWithdrawn(),false)
 })
 test('preflight accepts Supabase x-client-info only on trusted origin and never opts in',async()=>{
  const cases=[
