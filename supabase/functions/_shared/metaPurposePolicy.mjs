@@ -25,7 +25,8 @@ export function assessMetaPurpose({
     || record.withdrawnAt!==null || record.revokedAt!==null)
     return {allowed:false,reason:'blocked'}
   const t=Date.parse(record.decidedAt)
-  if (t>now || t<now-14*24*3600*1000)
+  if (t>now || (record.expiresAt!==undefined
+    && (!validDate(record.expiresAt) || Date.parse(record.expiresAt)<=now)))
     return {allowed:false,reason:'blocked'}
   return {allowed:true,reason:'approved'}
 }
