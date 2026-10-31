@@ -92,6 +92,16 @@ try{
  const result=await page.evaluate(async({DATASET,EVENT})=>{
   const {loadMetaPixelForVerifiedSignup,revokeOwnedMetaPixelConsent}
    =await import('/src/features/marketing/metaPixelLoader.mjs')
+  // Capture the queue BEFORE loading the real SDK, which consumes or
+  // replaces it during bootstrap. Never inspect it post-load as proof.
+  const originalAppend=document.head.appendChild
+  let beforeVendorSdk=[]
+  document.head.appendChild=function(node){
+   if(node?.src==='https://connect.facebook.net/en_US/fbevents.js'){
+    beforeVendorSdk=(window.fbq?.queue||[]).map(x=>Array.from(x))
+   }
+   return originalAppend.call(this,node)
+  }
   const result=await loadMetaPixelForVerifiedSignup({
    releaseEnabled:true,privacyGateApproved:true,explicitConsent:true,
    accountExcluded:false,qaOrAdmin:false,optedOut:false,
@@ -99,11 +109,19 @@ try{
    browser:window,dom:document,stillAllowed:()=>true,
    sdkTimeoutMs:15000,
   })
+  document.head.appendChild=originalAppend
+  // Let the authentic vendor SDK try to emit the synthetic event first;
+  // all event/beacon/network destinations are intercepted and ABORTED
+  // by the Playwright route above, so no provider event is delivered.
+  await new Promise(resolve=>setTimeout(resolve,1700))
   const revoke=revokeOwnedMetaPixelConsent({browser:window})
   return {status:result.status,revoked:revoke,
-    automaticEventConfigDisabled:
-      window.fbq?.queue?.some(a=>a[0]==='set'&&a[1]==='autoConfig'
-        &&a[2]===false&&a[3]===DATASET)===true,
+    preloadCommandsCaptured:beforeVendorSdk.length,
+    consentInitiallyRevoked:beforeVendorSdk.some(a=>
+      a[0]==='consent'&&a[1]==='revoke'),
+    automaticEventConfigDisabled:beforeVendorSdk.some(a=>
+      a[0]==='set'&&a[1]==='autoConfig'
+        &&a[2]===false&&a[3]===DATASET),
     historyInstrumentationDisabled:window.fbq?.disablePushState===true}
  },{DATASET,EVENT})
  observed.scriptResult=result
