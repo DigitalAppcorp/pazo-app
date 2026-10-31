@@ -48,14 +48,14 @@ export interface UtilitySummary {
 }
 const object = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-const segments = new Set(['organic','perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en'])
+const segments = new Set(['organic','perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en','qr_v2_en','cuidados_v2_en','app_v2_en'])
 export function parseUtilitySummary(value: unknown): UtilitySummary {
   const fail = () => { throw Error('PAZO_INVALID_UTILITY_AGGREGATE') }
   if (!object(value) || !['paused','collecting'].includes(String(value.status)) ||
     ![7,30,90].includes(value.period_days as number) || value.effective_days !== Math.min(value.period_days as number,14) ||
     value.minimum_observational_sample !== 10 || typeof value.as_of !== 'string' || !Number.isFinite(Date.parse(value.as_of)) ||
     !(value.coverage_since === null || (typeof value.coverage_since === 'string' && Number.isFinite(Date.parse(value.coverage_since)))) ||
-    !Array.isArray(value.groups) || value.groups.length > 7 ||
+    !Array.isArray(value.groups) || value.groups.length > 10 ||
     Object.keys(value).some(k => !['status','period_days','effective_days','coverage_since','as_of','minimum_observational_sample','groups'].includes(k))) return fail()
   const seen = new Set<string>()
   for (const row of value.groups) {

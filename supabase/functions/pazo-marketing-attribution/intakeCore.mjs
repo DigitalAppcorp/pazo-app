@@ -2,10 +2,7 @@
 // No user ID, email, JWT, GPS, click ID, raw URL, IP or form data is logged.
 // All dependencies are injected to keep provider calls off in synthetic tests.
 import {readMarketingBody} from './requestBody.mjs'
-const CAMPAIGN = 'pazo_beta_local_202610'
-const CREATIVE = new Set([
-  'perfil_es', 'perfil_en', 'qr_es', 'qr_en', 'comunidad_es', 'comunidad_en',
-])
+import {validCampaignPair} from '../_shared/marketingCampaign.mjs'
 const KEYS = new Set(['utm_source','utm_medium','utm_campaign','utm_content','first_touch_at'])
 const MAX_BYTES = 768
 const MAX_AGE_MS = 72 * 60 * 60 * 1000
@@ -65,7 +62,7 @@ export function createMarketingIntakeHandler({
     if (Object.keys(body).length !== KEYS.size || Object.keys(body).some((key)=>!KEYS.has(key)))
       return response(FAILURE, 400, cors)
     if (body.utm_source !== 'meta' || body.utm_medium !== 'paid_social' ||
-      body.utm_campaign !== CAMPAIGN || !CREATIVE.has(body.utm_content))
+      !validCampaignPair(body.utm_campaign, body.utm_content))
       return response(FAILURE, 400, cors)
     if (!validDate(body.first_touch_at)) return response(FAILURE, 400, cors)
     const timestamp = Date.parse(body.first_touch_at)

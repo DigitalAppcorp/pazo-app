@@ -92,8 +92,9 @@ const browser=await chromium.launch({headless:true,args:['--no-sandbox'],...(pro
 const out=process.env.PAZO_MARKETING_SCREENSHOTS||'/tmp/pazo-marketing-ui';mkdirSync(out,{recursive:true})
 let checks=0;const check=(v,m)=>{assert.ok(v,m);checks++}
 try{
- const cases=[{width:390,lang:'es',enabled:false},...[390,1440].flatMap(width=>['es','en'].map(lang=>({width,lang,enabled:true})))]
- for(const {width,lang,enabled} of cases){
+ const ads2=process.env.PAZO_ADS2_BROWSER==='true'
+ const cases=ads2?[390,430].flatMap(width=>['es','en'].flatMap(lang=>['qr_v2_en','cuidados_v2_en','app_v2_en'].map(creative=>({width,lang,enabled:true,creative})))):[{width:390,lang:'es',enabled:false},...[390,1440].flatMap(width=>['es','en'].map(lang=>({width,lang,enabled:true})))]
+ for(const {width,lang,enabled,creative} of cases){
   owner=randomUUID();pet=null;user=null;failReport=false;delayReport=false;const beforeArrivals=arrivals,beforeIntakes=intakes
   const context=await browser.newContext({viewport:{width,height:844},serviceWorkers:'block',reducedMotion:'reduce'}),errors=[]
   let forbidden=0
@@ -132,7 +133,7 @@ try{
   })
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message))
   const openCampaigns=()=>width<1024?page.locator('#pazo-admin-section').selectOption('marketing'):page.getByRole('button',{name:lang==='es'?'Campañas':'Campaigns',exact:true}).click()
-  const utm='&utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_beta_local_202610&utm_content=perfil_es&fbclid=NEVER_STORE'
+  const utm='&utm_source=meta&utm_medium=paid_social&utm_campaign='+(ads2?'pazo_la_en_202611':'pazo_beta_local_202610')+'&utm_content='+(creative||'perfil_es')+'&fbclid=NEVER_STORE'
   await page.goto(origin+`/supabase/tests/marketing/browser-harness.html?lang=${lang}`+utm)
   if(!enabled){
    const reportCount=reports
@@ -156,7 +157,7 @@ try{
   await page.waitForFunction(()=>localStorage.getItem('pazo_marketing_firstparty_v1')===null)
   check(sql(`SELECT count(*) FROM marketing_private.acquisition WHERE owner_id=${q(owner)}`)==='1','Auth verified exactly once in real SQL')
   check(sql(`SELECT count(*) FROM marketing_private.cohort_snapshot() WHERE first_pet_within_7d>0`)!=='0','First pet derived server-side')
-  check(arrivals===beforeArrivals+1&&intakes===beforeIntakes+1,'One challenged landing / verified conversion')
+  check(arrivals===beforeArrivals+1&&intakes===beforeIntakes+1,`One challenged landing / verified conversion: arrivals=${arrivals-beforeArrivals}, intakes=${intakes-beforeIntakes}`)
   check(!(await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}))).includes('NEVER_STORE'),'No fbclid or raw URL retained')
   await page.getByRole('button',{name:'Fixture open admin'}).click()
   await openCampaigns()
@@ -164,7 +165,7 @@ try{
   check(intakes===beforeIntakes+1,'Switching to admin cannot reuse prior account attribution')
   check(await page.getByText(lang==='es'?'No son visitantes únicos':'Not unique visitors',{exact:true}).isVisible(),'Honest arrival semantics')
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Page fits mobile viewport')
-  await page.screenshot({path:`${out}/${width}-${lang}-marketing.png`,fullPage:true})
+  await page.screenshot({path:`${out}/${width}-${lang}-${creative||'legacy'}-marketing.png`,fullPage:true})
   failReport=true;await page.getByRole('button',{name:lang==='es'?'Actualizar métricas':'Refresh metrics'}).click();await page.getByRole('alert').waitFor()
   check(await (width<1024?page.locator('#pazo-admin-section'):page.getByRole('button',{name:lang==='es'?'Campañas':'Campaigns',exact:true})).isEnabled(),'Campaign error isolated from navigation')
   failReport=false;delayReport=true;await page.getByRole('button',{name:lang==='es'?'Actualizar métricas':'Refresh metrics'}).click()

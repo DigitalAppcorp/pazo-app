@@ -3,7 +3,7 @@ import {spawnSync,execFile} from 'node:child_process'
 import {readFileSync} from 'node:fs'
 import {promisify} from 'node:util'
 import assert from 'node:assert/strict'
-const execute=promisify(execFile),container='pazo-marketing-lab',db='pazo_marketing_synthetic'
+const execute=promisify(execFile),container=process.env.PAZO_ADS2_ISOLATED_LAB==='true'?'pazo-ads2-lab-168':'pazo-marketing-lab',db='pazo_marketing_synthetic'
 const ci=process.env.PAZO_MARKETING_PG_MODE==='ci'
 const allowedCiDatabase=process.env.PGDATABASE==='postgres'||
  (process.env.PGDATABASE==='issue142_contextual'&&process.env.PAZO_CONTEXTUAL_TEST==='true')||

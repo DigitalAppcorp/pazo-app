@@ -1,0 +1,53 @@
+name: Ads2 isolated contracts
+on:
+  pull_request:
+    branches: [main, feat/issue168-ads2-attribution]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ads2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: synthetic-ads2-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGDATABASE: postgres
+      PGPASSWORD: synthetic-ads2-only
+      PAZO_MARKETING_PG_MODE: ci
+      PAZO_PLAYWRIGHT_MODULE: playwright
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run test:marketing
+      - run: npm run test:governance
+      - run: npm run test:intelligence
+      - run: npm run test:admin-visual
+      - run: npm run build
+      - run: node scripts/ads2-pg17.mjs
+      - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: node scripts/ads2-browser.mjs
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: ads2-isolated-evidence
+          path: artifacts/ads2/
