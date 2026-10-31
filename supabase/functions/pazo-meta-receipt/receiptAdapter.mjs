@@ -19,6 +19,7 @@ export function createMetaReceiptProvider({
   const withdrawal=createMetaWithdrawalProvider({url,anonKey,serviceKey,fetchImpl})
  return {
     authenticate:source.authenticate,
+    authenticateGpc:withdrawal.authenticate,
     persistGpc:withdrawal.withdraw,
     lookupReceipt:async ownerId=>{
       if(typeof ownerId!=='string'||!UUID.test(ownerId))return null
