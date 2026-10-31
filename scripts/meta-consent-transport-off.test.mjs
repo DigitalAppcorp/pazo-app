@@ -57,7 +57,8 @@ function fixture(){
     return {data,error:reply.ok?null:{status:reply.status}}
   }}}
   const settings={released:true,privacyApproved:true,supabaseClient:client,
-    getSessionSnapshot:()=>session,stillPermitted:()=>permitted,browser}
+    ownerId:owner,getSessionSnapshot:()=>session,
+    stillPermitted:()=>permitted,browser}
   return {settings,calls,effects,browser,
     changeUser:()=>{session={id:other,accessToken:token}},
     withdraw:()=>{permitted=false},
@@ -74,6 +75,16 @@ test('default OFF: no SDK client, privacy, or session reads',async()=>{
  })
  assert.equal(no,null)
  assert.equal(called,0)
+})
+test('released transport requires an explicit owner UUID',async()=>{
+ const f=fixture()
+ assert.equal(createMetaConsentTransport({...f.settings,ownerId:null}),null)
+ assert.equal(createMetaConsentTransport({...f.settings,ownerId:'wrong'}),null)
+ const wrong=createMetaConsentTransport({...f.settings,ownerId:other})
+ assert.equal((await wrong.requestGrant({accessToken:token,
+   body:{action:'grant',noticeVersion:'pazo-meta-conversions-v1'}})).status,
+   'not_available')
+ assert.equal(f.calls.length,0)
 })
 test('real isolated Edge grant and receipt handlers accept canonical Supabase invoke body',async()=>{
  const f=fixture()
