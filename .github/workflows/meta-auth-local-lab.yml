@@ -1,7 +1,9 @@
 name: PAZO Meta independent local Auth lab (provider OFF)
 on:
-  push:
-    branches: [feat/issue169-meta-pixel-capi-off]
+  # Run once per candidate PR update, instead of duplicate push/PR Docker jobs.
+  # This makes the complete GoTrue/Edge/SQL/Chromium result a visible PR check.
+  pull_request:
+    branches: [feat/issue168-ads2-attribution]
     paths:
       - 'scripts/meta-local-auth-lab.mjs'
       - 'scripts/meta-local-auth-edge-flow.mjs'
