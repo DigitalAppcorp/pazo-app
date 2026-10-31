@@ -66,41 +66,116 @@ ALTER TABLE marketing_private.meta_outbox_candidate FORCE ROW LEVEL SECURITY;
 REVOKE ALL ON marketing_private.meta_outbox_candidate
  FROM PUBLIC,anon,authenticated,service_role;
 
--- The only event mint is an AFTER INSERT trigger on first-party acquisition.
--- Its outbox insert is in the same transaction and rolls back with registration.
--- Existing/historic rows and duplicate first-party attempts do not fire it.
--- No provider calls or user-data hashes happen in PostgreSQL.
-CREATE FUNCTION marketing_private.meta_on_verified_candidate()
-RETURNS trigger LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
+-- A confirmed, first-party attributed signup can be added to Meta's
+-- private outbox only in a deliberately short first-verified-session window.
+-- The owner may choose the Meta purpose either just BEFORE first-party
+-- acquisition is inserted or just AFTER it, while still recently verified.
+-- NEVER convert old/historical signups or use signup_requested as proof.
+CREATE FUNCTION marketing_private.meta_try_enqueue_candidate(p_owner uuid)
+RETURNS boolean LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
 AS $enqueue$
+DECLARE v_event uuid;
 BEGIN
- IF NOT EXISTS(
+ IF p_owner IS NULL OR NOT EXISTS(
    SELECT 1 FROM marketing_private.meta_release_gate_candidate g
    WHERE g.singleton AND g.enabled
- ) OR NOT marketing_private.is_eligible_owner(NEW.owner_id)
-   OR NEW.signup_verified_at > statement_timestamp()
- THEN RETURN NEW; END IF;
+ ) OR NOT marketing_private.is_eligible_owner(p_owner)
+ THEN RETURN FALSE; END IF;
 
  INSERT INTO marketing_private.meta_outbox_candidate(owner_id,event_time)
- SELECT NEW.owner_id,NEW.signup_verified_at
- FROM marketing_private.meta_purpose_candidate p
- WHERE p.owner_id=NEW.owner_id
+ SELECT a.owner_id,a.signup_verified_at
+ FROM marketing_private.acquisition a
+ JOIN marketing_private.meta_purpose_candidate p ON p.owner_id=a.owner_id
+ JOIN auth.users u ON u.id=a.owner_id
+ WHERE a.owner_id=p_owner AND u.email_confirmed_at IS NOT NULL
+   AND a.signup_verified_at=u.email_confirmed_at
+   AND a.signup_verified_at<=statement_timestamp()
+   AND a.signup_verified_at>=statement_timestamp()-interval '15 minutes'
+   AND a.created_at<=statement_timestamp()
+   AND a.created_at>=statement_timestamp()-interval '15 minutes'
    AND p.purpose='meta_conversions_v1'
    AND p.version='pazo-meta-conversions-v1'
-   AND p.decision='granted'
-   AND p.withdrawn_at IS NULL
-   AND p.gpc_at_last_request IS FALSE
-   AND p.sharing_opt_out IS FALSE
-   AND p.decided_at<=NEW.signup_verified_at
- ON CONFLICT(owner_id) DO NOTHING;
- RETURN NEW;
+   AND p.decision='granted' AND p.withdrawn_at IS NULL
+   AND p.gpc_at_last_request IS FALSE AND p.sharing_opt_out IS FALSE
+   AND p.decided_at<=statement_timestamp()
+ ON CONFLICT(owner_id) DO NOTHING
+ RETURNING event_id INTO v_event;
+ RETURN v_event IS NOT NULL;
 END
 $enqueue$;
+REVOKE ALL ON FUNCTION marketing_private.meta_try_enqueue_candidate(uuid)
+ FROM PUBLIC,anon,authenticated,service_role;
+
+-- The first-party acquisition trigger remains atomic, but a consent decision
+-- collected at first authenticated/confirmed login can invoke the same
+-- idempotent helper after attribution (within 15 minutes only).
+CREATE FUNCTION marketing_private.meta_on_verified_candidate()
+RETURNS trigger LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
+AS $trigger$
+BEGIN
+ PERFORM marketing_private.meta_try_enqueue_candidate(NEW.owner_id);
+ RETURN NEW;
+END
+$trigger$;
 REVOKE ALL ON FUNCTION marketing_private.meta_on_verified_candidate()
  FROM PUBLIC,anon,authenticated,service_role;
 CREATE TRIGGER meta_once_on_verified_candidate
  AFTER INSERT ON marketing_private.acquisition
  FOR EACH ROW EXECUTE FUNCTION marketing_private.meta_on_verified_candidate();
+
+-- An authenticated user's *explicit new choice* is persisted server-side.
+-- Never use Auth user_metadata or frontend localStorage as authority.
+-- This lab function takes a trusted owner and verified GPC=false signal; its
+-- server Edge adapter must check Origin, current Auth and notice version.
+-- No automatic re-grant after withdrawal; renewed consent would need
+-- its own specifically reviewed re-authorization flow.
+CREATE FUNCTION marketing_private.meta_grant_first_session_candidate(
+ p_owner uuid,p_notice text,p_gpc boolean
+) RETURNS boolean LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
+AS $grant$
+BEGIN
+ IF p_owner IS NULL OR p_gpc IS DISTINCT FROM FALSE
+    OR p_notice IS DISTINCT FROM 'pazo-meta-conversions-v1'
+    OR NOT marketing_private.is_eligible_owner(p_owner)
+    OR NOT EXISTS(
+      SELECT 1 FROM auth.users u
+      WHERE u.id=p_owner AND u.email_confirmed_at IS NOT NULL
+        AND u.email_confirmed_at>=statement_timestamp()-interval '15 minutes'
+        AND u.email_confirmed_at<=statement_timestamp()
+        AND u.created_at<=u.email_confirmed_at
+        AND u.created_at>=statement_timestamp()-interval '72 hours'
+    )
+    OR NOT EXISTS(
+      SELECT 1 FROM marketing_private.meta_release_gate_candidate g
+      WHERE g.singleton AND g.enabled
+    )
+ THEN RETURN FALSE; END IF;
+ INSERT INTO marketing_private.meta_purpose_candidate(
+  owner_id,purpose,version,decision,decided_at,withdrawn_at,
+  gpc_at_last_request,sharing_opt_out
+ ) VALUES(
+  p_owner,'meta_conversions_v1','pazo-meta-conversions-v1',
+  'granted',statement_timestamp(),NULL,false,false
+ )
+ ON CONFLICT(owner_id) DO NOTHING;
+ IF NOT FOUND THEN RETURN FALSE; END IF;
+ PERFORM marketing_private.meta_try_enqueue_candidate(p_owner);
+ RETURN TRUE;
+END
+$grant$;
+REVOKE ALL ON FUNCTION marketing_private.meta_grant_first_session_candidate(uuid,text,boolean)
+ FROM PUBLIC,anon,authenticated,service_role;
+
+CREATE FUNCTION public.pazo_meta_grant_first_session_candidate(
+ p_owner uuid,p_notice text,p_gpc boolean
+) RETURNS boolean LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=''
+AS $meta_grant_rpc$
+ SELECT marketing_private.meta_grant_first_session_candidate(p_owner,p_notice,p_gpc)
+$meta_grant_rpc$;
+REVOKE ALL ON FUNCTION public.pazo_meta_grant_first_session_candidate(uuid,text,boolean)
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_meta_grant_first_session_candidate(uuid,text,boolean)
+ TO service_role;
 
 -- A worker can reserve only a verified, opt-in, non-QA event. Never send
 -- delayed events after explicit withdrawal or after the event's freshness TTL.
