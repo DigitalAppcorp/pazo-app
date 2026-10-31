@@ -16,7 +16,8 @@ const repository=()=>({
   leaseOne:async()=>({kind:'new',claimWasInserted:true,
     eventId,leaseId,eventTime:Math.floor(now/1000),hashedEmail:'a'.repeat(64)}),
   checkPrivacy:async()=>privacy,
-  readApprovedMatchField:async()=> 'a'.repeat(64),
+  readApprovedMatchField:async()=> ({em:'a'.repeat(64),
+    clientUserAgent:'Mozilla/5.0 (PAZO Synthetic Consent Test)'}),
   settle:async()=>true,
 })
 const fixture={
