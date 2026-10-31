@@ -9,6 +9,7 @@ export async function runMetaCapiWorker({
   releaseEnabled=false,privacyGateApproved=false,
   repository=null,apiVersion=null,readSecret=()=>undefined,
   fetchImpl=fetch,clock=()=>Date.now(),
+  testModeEnabled=false,testEventCode=null,nonProduction=false,
 }={}) {
   if (releaseEnabled!==true || privacyGateApproved!==true)
     return {status:'disabled'}
@@ -22,5 +23,6 @@ export async function runMetaCapiWorker({
     releaseEnabled,privacyGateApproved,repository,clock,fetchImpl,
     datasetId:config.datasetId,apiVersion:config.apiVersion,
     serverToken:config.serverToken,
+    testModeEnabled,testEventCode,nonProduction,
   })
 }
