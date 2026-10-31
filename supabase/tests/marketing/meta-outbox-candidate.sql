@@ -241,23 +241,25 @@ REVOKE ALL ON FUNCTION marketing_private.meta_lease_candidate()
 -- Never allow an old lease to settle a re-leased event. A retryable event
 -- remains eligible only under live privacy authorization when leased again.
 CREATE FUNCTION marketing_private.meta_settle_candidate(
- p_event uuid,p_lease uuid,p_success boolean
+ p_event uuid,p_lease uuid,p_status text
 ) RETURNS boolean LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
 AS $settle$
 BEGIN
- IF p_event IS NULL OR p_lease IS NULL OR p_success IS NULL
+ IF p_event IS NULL OR p_lease IS NULL
+    OR p_status IS NULL OR p_status NOT IN ('sent','retryable','suppressed')
  THEN RETURN FALSE; END IF;
  UPDATE marketing_private.meta_outbox_candidate o
- SET status=CASE WHEN p_success THEN 'sent'
-                 WHEN o.attempts>=4 THEN 'suppressed'
-                 ELSE 'retryable' END,
+ SET status=CASE
+              WHEN p_status='sent' THEN 'sent'
+              WHEN p_status='suppressed' OR o.attempts>=4 THEN 'suppressed'
+              ELSE 'retryable' END,
      lease_id=NULL,leased_until=NULL
  WHERE o.event_id=p_event AND o.lease_id=p_lease AND o.status='leased'
-   AND (NOT p_success OR marketing_private.meta_send_eligible_candidate(o.owner_id));
+   AND (p_status<>'sent' OR marketing_private.meta_send_eligible_candidate(o.owner_id));
  RETURN FOUND;
 END
 $settle$;
-REVOKE ALL ON FUNCTION marketing_private.meta_settle_candidate(uuid,uuid,boolean)
+REVOKE ALL ON FUNCTION marketing_private.meta_settle_candidate(uuid,uuid,text)
  FROM PUBLIC,anon,authenticated,service_role;
 
 -- Bridge remains service_role ONLY, and MUST never be called directly from
@@ -272,12 +274,12 @@ REVOKE ALL ON FUNCTION public.pazo_meta_lease_candidate()
 GRANT EXECUTE ON FUNCTION public.pazo_meta_lease_candidate() TO service_role;
 
 CREATE FUNCTION public.pazo_meta_settle_candidate(
- p_event uuid,p_lease uuid,p_success boolean
+ p_event uuid,p_lease uuid,p_status text
 ) RETURNS boolean LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=''
-AS $$ SELECT marketing_private.meta_settle_candidate(p_event,p_lease,p_success) $$;
-REVOKE ALL ON FUNCTION public.pazo_meta_settle_candidate(uuid,uuid,boolean)
+AS $ SELECT marketing_private.meta_settle_candidate(p_event,p_lease,p_status) $;
+REVOKE ALL ON FUNCTION public.pazo_meta_settle_candidate(uuid,uuid,text)
  FROM PUBLIC,anon,authenticated,service_role;
-GRANT EXECUTE ON FUNCTION public.pazo_meta_settle_candidate(uuid,uuid,boolean)
+GRANT EXECUTE ON FUNCTION public.pazo_meta_settle_candidate(uuid,uuid,text)
  TO service_role;
 
 
@@ -321,6 +323,43 @@ REVOKE ALL ON FUNCTION public.pazo_meta_take_pixel_receipt_candidate(uuid)
   FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_meta_take_pixel_receipt_candidate(uuid)
   TO service_role;
+
+-- Enforce the *current* worker lease at each privacy recheck. A stale
+-- worker cannot authorize a Meta request after a new worker takes over.
+-- No email, IP address, user agent or matching field is exposed here.
+CREATE FUNCTION marketing_private.meta_check_claim_candidate(
+ p_event uuid,p_lease uuid
+) RETURNS TABLE(owner_id uuid,event_time timestamptz,purpose text,
+ version text,decision text,decided_at timestamptz,withdrawn_at timestamptz,
+ gpc boolean,sharing_opt_out boolean,eligible boolean)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path=''
+AS $check$
+ SELECT o.owner_id,o.event_time,p.purpose,p.version,p.decision,
+        p.decided_at,p.withdrawn_at,p.gpc_at_last_request,
+        p.sharing_opt_out,marketing_private.meta_send_eligible_candidate(o.owner_id)
+ FROM marketing_private.meta_outbox_candidate o
+ JOIN marketing_private.meta_purpose_candidate p ON p.owner_id=o.owner_id
+ JOIN auth.users u ON u.id=o.owner_id
+ WHERE o.event_id=p_event AND o.lease_id=p_lease
+   AND o.status='leased' AND o.leased_until>statement_timestamp()
+   AND u.email_confirmed_at=o.event_time
+   AND marketing_private.meta_send_eligible_candidate(o.owner_id)
+$check$;
+REVOKE ALL ON FUNCTION marketing_private.meta_check_claim_candidate(uuid,uuid)
+ FROM PUBLIC,anon,authenticated,service_role;
+
+CREATE FUNCTION public.pazo_meta_check_claim_candidate(p_event uuid,p_lease uuid)
+RETURNS TABLE(owner_id uuid,event_time timestamptz,purpose text,
+ version text,decision text,decided_at timestamptz,withdrawn_at timestamptz,
+ gpc boolean,sharing_opt_out boolean,eligible boolean)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path=''
+AS $check_rpc$
+ SELECT * FROM marketing_private.meta_check_claim_candidate(p_event,p_lease)
+$check_rpc$;
+REVOKE ALL ON FUNCTION public.pazo_meta_check_claim_candidate(uuid,uuid)
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_meta_check_claim_candidate(uuid,uuid)
+ TO service_role;
 
 -- Opt-out/withdrawal does NOT require the Meta release switch, a matching
 -- dataset, confirmed email, or an affirmative prior preference. The caller
