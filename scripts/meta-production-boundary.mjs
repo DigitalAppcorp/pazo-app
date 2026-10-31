@@ -25,7 +25,8 @@ export const OFF_FLAGS=Object.freeze({
   ['const META_WORKER_ENDPOINT_RELEASED=false',
    'const META_WORKER_PRIVACY_REVIEWED=false',
    'const META_WORKER_MATCH_FIELDS_APPROVED=false',
-   'const META_WORKER_PROVIDER_APPROVED=false'],
+   'const META_WORKER_PROVIDER_APPROVED=false',
+   'const META_WORKER_MATCH_SOURCE_APPROVED=false'],
  'src/features/marketing/MetaConsentChoice.tsx':
   ['export const META_CHOICES_RELEASED=false'],
 })
