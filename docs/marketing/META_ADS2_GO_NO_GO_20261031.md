@@ -122,3 +122,21 @@ Validado:
 **Alcance NO cubierto aún:** no se aplicaron las migraciones completas de PAZO en la misma instancia; el esquema auxiliar de atribución tiene reglas simplificadas. Los handlers corrieron dentro del test Node contra Auth/SQL reales, **no mediante un despliegue real de Edge**. No se validaron la interfaz real bilingüe, los avisos legales, la aprobación de campos de CAPI, ni el envío/deduplicación en Events Manager. No activar proveedores basándose en este PASS.
 
 **Costo:** sin nueva infraestructura Supabase facturable. Uso de runners GitHub Actions conforme a sus cuotas habituales. `META_PROVIDER_OFF / RELEASE_NOT_AUTHORIZED / NO_AD_SPEND`.
+
+## Supabase Edge Runtime HTTP real en laboratorio local — PASS
+
+**Evidencia ejecutada:** [GitHub Actions `PAZO Meta independent local Auth lab` — SUCCESS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/41179145285) sobre SHA `d5fa66515c263ba1d7fb0454bd9f4fac3b48b386`. Resultado del proceso: `LOCAL_REAL_EDGE_HTTP_META_PASS`, acompañado de `LOCAL_REAL_AUTH_SQL_META_PASS`, `LOCAL_AUTH_META_EDGE_CONTRACT_PASS` y limpieza `supabase stop --no-backup` SUCCESS.
+
+El workflow crea **solo en el directorio efímero del runner** `supabase/functions/pazo-meta-lab/index.ts`, a partir de `supabase/tests/marketing/meta-local-edge-entry.ts`, y copia los handlers candidatos sin modificar las funciones productivas `pazo-meta-*`. Inicia `supabase functions serve pazo-meta-lab --no-verify-jwt` **únicamente para este laboratorio**; la propia función valida los JWT haciendo `GET /auth/v1/user` contra Kong interno `http://kong:8000` y ejecuta RPC reales contra el PostgREST local con credenciales temporales de servicio. La URL interna es fija; jamás acepta un host Supabase enviado por el navegador. El puerto público del test es exclusivamente `127.0.0.1:54321`, con PostgreSQL `127.0.0.1:54322`.
+
+**Comprobado a través de HTTP real del runtime Edge local**, adicional a las pruebas previas de Node/SQL:
+
+- La función responde a través del proxy Kong y deniega la reactivación de una finalidad previamente retirada (`409`).
+- Un comprobante no puede emitirse después de la retirada (`404`); solicitudes desde origen no confiable (`403`) y JWT inválido (`401`) no modifican preferencias.
+- `Sec-GPC: 1` sobre el endpoint de recibo se registra en PostgreSQL y bloquea el recibo (`403`); una retirada explícita posterior es idempotente (`200`) y el outbox sigue `suppressed`.
+- El preflight OPTIONS devuelve `204`; en el proxy local el header `Access-Control-Allow-Origin` aparece como `*` (normalización de Kong), mientras que la solicitud POST del origen ajeno sigue denegada por el handler. Se exige `no-store` y que el test falle si el preflight no permite al origen PAZO.
+- Las peticiones con campos `ownerId` extras se rechazan (`400`). El callback Pixel sigue simulado; **ningún SDK ni endpoint Meta fue contactado**.
+
+**Limitaciones:** `--no-verify-jwt` está restringido al servidor local temporal, NO es una configuración propuesta para el despliegue. GoTrue autentica cada operación dentro del handler, pero esto NO prueba el middleware JWT de Supabase alojado. El esquema de atribución es un fixture mínimo, no toda la migración PAZO/QA/admin. No se ha publicado UI ES/EN ni la política de datos de terceros, y todavía no se ha validado la deduplicación en Events Manager. Se debe verificar el preflight y la política de credenciales con `supabase-js` real y el navegador antes de producción; la prueba actual utiliza fetch de Node con encabezados explícitos.
+
+**Costo/producción:** no se crearon ramas alojadas, ni nuevos proyectos, ni se modificaron migraciones o Edge alojados; son runners GitHub existentes sujetos a la cuota del plan. El PR sigue DRAFT y **PIXEL/CAPI OFF**, sin cambios de anuncios, suscripciones o presupuesto.
