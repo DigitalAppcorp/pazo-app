@@ -7,6 +7,9 @@ export const META_CANONICAL_URL = 'https://pazo-app.vercel.app/'
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const HEX_SHA256 = /^[a-f0-9]{64}$/
 const META_DATASET_ID = /^[1-9][0-9]{5,24}$/
+// Web CAPI needs an explicitly approved, authentic originating user agent.
+// Never infer this from the worker's own HTTP request or invent a value.
+const META_USER_AGENT = /^[\x20-\x7E]{20,512}$/
 
 export function eligibleMetaRegistration({
   releaseEnabled = false, explicitConsent = false, consentTrusted = false,
@@ -28,12 +31,13 @@ export function buildMetaRegistration({
   releaseEnabled = false, explicitConsent = false, consentTrusted = false,
   verifiedRegistration = false, excluded = true, globalPrivacyControl = true,
   optedOut = true, qaOrAdmin = true, eventId = null, eventTime = null,
-  datasetId = null, hashedEmail = null,
+  datasetId = null, hashedEmail = null, clientUserAgent = null,
 } = {}) {
   if (!eligibleMetaRegistration({releaseEnabled,explicitConsent,consentTrusted,
     verifiedRegistration,excluded,globalPrivacyControl,optedOut,qaOrAdmin,eventId})) return null
   if (typeof datasetId !== 'string' || !META_DATASET_ID.test(datasetId)
-    || typeof hashedEmail !== 'string' || !HEX_SHA256.test(hashedEmail)) return null
+    || typeof hashedEmail !== 'string' || !HEX_SHA256.test(hashedEmail)
+    || typeof clientUserAgent !== 'string' || !META_USER_AGENT.test(clientUserAgent)) return null
   if (!Number.isSafeInteger(eventTime) || eventTime <= 0
     || Math.abs(Math.floor(Date.now()/1000)-eventTime)>7*24*3600) return null
   return Object.freeze({
@@ -47,7 +51,7 @@ export function buildMetaRegistration({
       event_id:eventId,
       action_source:'website',
       event_source_url:META_CANONICAL_URL,
-      user_data:{em:[hashedEmail]},
+      user_data:{em:[hashedEmail],client_user_agent:clientUserAgent},
     },
   })
 }
