@@ -4,6 +4,7 @@
 // Only a trusted server worker may pass a durable outbox repository.
 import {resolveMetaServerConfig} from './metaServerConfig.mjs'
 import {deliverVerifiedMetaRegistration} from './metaDeliveryCoordinator.mjs'
+import {validMetaTestConfiguration} from './metaCapi.mjs'
 
 export async function runMetaCapiWorker({
   releaseEnabled=false,privacyGateApproved=false,
@@ -13,6 +14,9 @@ export async function runMetaCapiWorker({
 }={}) {
   if (releaseEnabled!==true || privacyGateApproved!==true)
     return {status:'disabled'}
+  // Refuse a misconfigured test mode before reading secrets or leasing an event.
+  if(!validMetaTestConfiguration({testModeEnabled,testEventCode,nonProduction}))
+    return {status:'not_configured'}
   // Missing dataset/secret/version always fails closed BEFORE leasing any
   // verified-registration event, so no work can be lost on misconfiguration.
   const config=resolveMetaServerConfig({
