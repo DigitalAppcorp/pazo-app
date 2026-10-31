@@ -203,4 +203,53 @@ REVOKE ALL ON FUNCTION public.pazo_meta_settle_candidate(uuid,uuid,boolean)
 GRANT EXECUTE ON FUNCTION public.pazo_meta_settle_candidate(uuid,uuid,boolean)
  TO service_role;
 
+
+-- Opt-out/withdrawal does NOT require the Meta release switch, a matching
+-- dataset, confirmed email, or an affirmative prior preference. The caller
+-- still MUST authenticate the owner through a trusted Edge server.
+-- This private write is atomic with cancellation of pending provider work.
+CREATE FUNCTION marketing_private.meta_withdraw_candidate(p_owner uuid)
+RETURNS boolean LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
+AS $withdraw$
+DECLARE v_now timestamptz := statement_timestamp();
+BEGIN
+ IF p_owner IS NULL OR NOT EXISTS(
+   SELECT 1 FROM auth.users u WHERE u.id=p_owner
+ ) THEN RETURN FALSE; END IF;
+
+ INSERT INTO marketing_private.meta_purpose_candidate(
+   owner_id,purpose,version,decision,decided_at,withdrawn_at,
+   gpc_at_last_request,sharing_opt_out
+ ) VALUES (
+   p_owner,'meta_conversions_v1','pazo-meta-conversions-v1',
+   'withdrawn',v_now,v_now,true,true
+ )
+ ON CONFLICT(owner_id) DO UPDATE SET
+   decision='withdrawn',
+   decided_at=CASE WHEN marketing_private.meta_purpose_candidate.decision='withdrawn'
+                   THEN marketing_private.meta_purpose_candidate.decided_at
+                   ELSE v_now END,
+   withdrawn_at=COALESCE(marketing_private.meta_purpose_candidate.withdrawn_at,v_now),
+   gpc_at_last_request=true,
+   sharing_opt_out=true;
+
+ UPDATE marketing_private.meta_outbox_candidate o SET
+   status='suppressed',lease_id=NULL,leased_until=NULL
+ WHERE o.owner_id=p_owner AND o.status <> 'sent';
+ RETURN TRUE;
+END
+$withdraw$;
+REVOKE ALL ON FUNCTION marketing_private.meta_withdraw_candidate(uuid)
+ FROM PUBLIC,anon,authenticated,service_role;
+
+-- Service-role-only bridge; never expose this from a public endpoint without
+-- server-verified getUser(jwt) and same-origin CSRF controls.
+CREATE FUNCTION public.pazo_meta_withdraw_candidate(p_owner uuid)
+RETURNS boolean LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=''
+AS $ SELECT marketing_private.meta_withdraw_candidate(p_owner) $;
+REVOKE ALL ON FUNCTION public.pazo_meta_withdraw_candidate(uuid)
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_meta_withdraw_candidate(uuid)
+ TO service_role;
+
 COMMIT;
