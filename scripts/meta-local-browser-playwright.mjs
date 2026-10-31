@@ -73,6 +73,17 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
     ignoreHTTPSErrors:false,
   })
   const page=await context.newPage()
+  page.on('console',msg=>{
+    if(msg.type()==='log'&&msg.text().startsWith('META_BROWSER_CLIENT_PHASE '))
+      console.log(msg.text())
+  })
+  page.on('requestfailed',req=>{
+    const u=new URL(req.url())
+    const scope=u.origin===ORIGIN?'synthetic_origin':
+      u.hostname==='127.0.0.1'?'loopback':'other'
+    console.log('META_BROWSER_REQUEST_FAILED scope='+scope
+      +' failure='+(/net::ERR_[A-Z_]+/.exec(req.failure()?.errorText||'')||[])[0])
+  })
   await page.route('**/*',async route=>{
     const u=new URL(route.request().url())
     if(u.origin===ORIGIN&&u.pathname==='/__meta_browser_lab/'){
@@ -98,8 +109,24 @@ export async function runMetaRealBrowser({api,key,serviceKey,dbUrl}={}){
   await page.waitForFunction(()=>typeof window.__runPazoMetaBrowserLab==='function',
     null,{timeout:15000})
   console.log('META_BROWSER_PHASE client_module_loaded')
-  const result=await page.evaluate(args=>
-    window.__runPazoMetaBrowserLab(args),{api:base,key,email,password})
+  let result
+  try{
+    result=await page.evaluate(args=>
+      window.__runPazoMetaBrowserLab(args),{api:base,key,email,password})
+  }catch(error){
+    // Never print arbitrary Playwright messages: they may contain a JWT.
+    const msg=String(error?.message||'')
+    const known=['outbound_browser_request_forbidden',
+      'not_local_auth_or_candidate','unknown_local_meta_endpoint',
+      'browser_gotrue_login_failed','browser_real_auth_verification_failed',
+      'browser_first_grant_receipt_failed','browser_repeat_conversion_accepted',
+      'browser_gpc_veto_failed','browser_durable_withdrawal_failed',
+      'browser_withdrawn_account_regranted']
+    const reason=known.find(x=>msg.includes(x))||
+      (/Failed to fetch/i.test(msg)?'browser_fetch_failed':'unknown_browser_failure')
+    console.log('META_BROWSER_FAILURE_CATEGORY '+reason)
+    throw Error('meta_browser_contract_failed')
+  }
   console.log('META_BROWSER_PHASE browser_invocation_completed')
   assert.equal(result.status,'REAL_BROWSER_SUPABASE_JS_META_OFF_PASS')
   assert.equal(result.ownerId,ownerId)
