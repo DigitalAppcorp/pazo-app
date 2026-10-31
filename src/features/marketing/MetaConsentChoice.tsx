@@ -102,7 +102,8 @@ export function MetaConsentChoice({
  }
  return (
   <section aria-labelledby="meta-consent-title"
-   className="mx-auto w-full max-w-md rounded-3xl bg-white p-5 text-[#204E4A]">
+   className="pazo-meta-consent mx-auto w-full max-w-md rounded-3xl bg-white p-5 text-[#204E4A]">
+   <style>{'.pazo-meta-consent :is(button,input):focus { box-shadow:0 0 0 3px #204E4A !important; } .pazo-meta-consent button[data-dark-action]:focus { box-shadow:0 0 0 3px #E1E53F !important; }'}</style>
    <h2 id="meta-consent-title" className="text-xl font-extrabold leading-snug">{t.title}</h2>
    <p className="mt-3 text-[15px] leading-relaxed">{t.description}</p>
    <p className="mt-3 text-[15px] font-medium">{t.optional}</p>
@@ -128,7 +129,7 @@ export function MetaConsentChoice({
      <span>{t.toggle}</span>
     </label>}
    {failed && <p role="alert" className="my-2 text-[15px]">{t.error}</p>}
-   {!gpc && <button type="button" disabled={disabled||!selected}
+   {!gpc && <button type="button" data-dark-action="" disabled={disabled||!selected}
      onClick={()=>{void accept()}}
      className="mt-2 min-h-12 w-full rounded-full bg-[#204E4A] px-5 text-[16px] font-bold text-white disabled:opacity-40 focus-visible:shadow-[0_0_0_4px_#E1E53F] focus:shadow-[0_0_0_4px_#E1E53F] focus-visible:underline focus-visible:underline-offset-4">
      {t.grant}
