@@ -19,7 +19,7 @@ const secrets={
  META_DATASET_ID:'1438916858347709',
  META_CAPI_ACCESS_TOKEN:'synthetic_access_token_not_a_real_meta_token_12345',
 }
-function fake({privacy=purpose,claimed=true,match='a'.repeat(64)}={}) {
+function fake({privacy=purpose,claimed=true,match={em:'a'.repeat(64),clientUserAgent:'Mozilla/5.0 (PAZO Synthetic Consent Test)'}}={}) {
  const calls=[]
  let matchingReads=0
  let available=claimed
@@ -58,7 +58,7 @@ test('OFF and missing privacy/approved field reader cause zero DB operations',as
    {url:'https://foreign.invalid'},{serviceKey:'bad'}]) {
    const r=createMetaOutboxRepository({
      enabled:true,privacyApproved:true,matchFieldsApproved:true,
-     url,serviceKey,readApprovedMatchField:async()=>{matching++;return 'a'.repeat(64)},
+     url,serviceKey,readApprovedMatchField:async()=>{matching++;return {em:'a'.repeat(64),clientUserAgent:'Mozilla/5.0 (PAZO Synthetic Consent Test)'}},
      fetchImpl:async()=>{requests++;throw Error('should never call')},
      ...patch,
    })
@@ -79,7 +79,8 @@ test('server-only lease, current lease privacy, typed settle; no PII in RPC requ
  assert.equal(p.verifiedRegistration,true)
  assert.equal(p.record.decision,'granted')
  const approved=await f.repository.readApprovedMatchField(eventId,leaseId)
- assert.equal(approved,'a'.repeat(64))
+ assert.deepEqual(approved,{em:'a'.repeat(64),
+  clientUserAgent:'Mozilla/5.0 (PAZO Synthetic Consent Test)'})
  assert.equal(f.matchingReads(),1)
  assert.equal(await f.repository.settle(eventId,leaseId,'sent'),true)
  assert.deepEqual(f.calls.map(x=>x.name),[
