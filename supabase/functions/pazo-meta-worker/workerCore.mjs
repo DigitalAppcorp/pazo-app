@@ -28,11 +28,9 @@ export function createMetaWorkerHandler({
     const token=request.headers.get('authorization')||''
     if(!/^Bearer [A-Za-z0-9_~.\-]{32,256}$/.test(token))
       return reply('not_available',401)
-    // Require strictly empty request body; never accept owner/event/consent.
-    try {
-      const body=await request.text()
-      if(body!=='')return reply('not_available',400)
-    }catch{return reply('not_available',400)}
+    // A worker request has no body stream; reject it without reading any
+    // untrusted bytes (prevents oversized/chunked request memory exhaustion).
+    if(request.body!==null)return reply('not_available',400)
     let allowed=false
     try{allowed=await authenticate(token.slice(7))===true}
     catch{return reply('not_available',401)}
