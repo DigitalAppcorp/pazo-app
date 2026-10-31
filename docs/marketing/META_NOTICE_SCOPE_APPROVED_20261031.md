@@ -11,7 +11,7 @@
 ### ES
 **Título:** Tú decides qué compartir
 
-**Descripción:** Si aceptas, PAZO informará a Meta que confirmaste tu registro para medir anuncios. Podrá enviar un identificador aleatorio del evento, una versión SHA-256 de tu correo (sigue siendo dato personal) y el identificador de tu navegador (User-Agent). Al cargar Meta Pixel, Meta también podría recibir tu dirección IP y otros datos técnicos de conexión.
+**Descripción:** Si aceptas, PAZO informará a Meta que confirmaste tu registro para medir anuncios. Podrá enviar un identificador aleatorio del evento, una versión SHA-256 de tu correo (sigue siendo dato personal) y datos técnicos de tu navegador (User-Agent). Al cargar Meta Pixel, Meta también podría recibir tu dirección IP y otros datos técnicos de conexión.
 
 **Casilla desmarcada:** Sí, permito medir mi registro con Meta.
 
@@ -24,7 +24,7 @@
 ### EN
 **Title:** You decide what to share
 
-**Description:** If you agree, PAZO will tell Meta you confirmed your registration to measure ads. It may send a random event identifier, a SHA-256 hash of your email (still personal data), and your browser identifier (User-Agent). When Meta Pixel loads, Meta may also receive your IP address and other technical connection data.
+**Description:** If you agree, PAZO will tell Meta you confirmed your registration to measure ads. It may send a random event identifier, a SHA-256 hash of your email (still personal data), and technical information about your browser (User-Agent). When Meta Pixel loads, Meta may also receive your IP address and other technical connection data.
 
 **Unchecked checkbox:** Yes, I allow Meta to measure my registration.
 
