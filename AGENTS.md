@@ -1,3 +1,13 @@
+## Revisión transversal de criterio experto — EEP (29-oct-2026)
+
+**Regla general para PAZO:** usar [Expert Evidence Protocol de Project Brain OS](https://github.com/DigitalAppcorp/project-brain-os/blob/main/patterns/EXPERT_EVIDENCE_PROTOCOL.md), vía skill local [`expert-evidence-review`](.agents/skills/expert-evidence-review/SKILL.md), en trabajos de ingeniería, producto, marketing, UI/UX y video. Cuatro cuestiones: estándar profesional aplicable, fuentes originales revisadas, método adecuado, prueba falsable/externa del resultado. Esfuerzo LIGHT / STANDARD / CRITICAL según riesgo; la evaluación interna del agente no constituye revisión independiente.
+
+**Guardas:** no reemplaza `AGENTS.md`, gates de producto, seguridad/privacidad, Design OS, Video OS, Marketing Brain, autorizaciones de publicación ni condiciones de pago. Un cambio documental no aprueba mutaciones de aplicación, Supabase, Meta Ads, PayPal o producción. Distinguir `OBSERVED`, `SOURCED`, `INFERRED`, `UNKNOWN`, `NOT_TESTED`; declarar explícitamente fallos y límites. No transformar preguntas internas de trabajo en interfaz pública. No afirmar que actualizar una skill entrena el modelo o demuestra mejoras de calidad; probarlo con casos y resultados.
+
+**Este cambio:** solo documentación y skill, sin nuevas funciones de PAZO ni activación de servicios. Los bloques históricos inferiores conservan sus autorizaciones y estado por fecha.
+
+---
+
 ## Producción vigente — Administración visual y confiabilidad #161 (29-oct-2026)
 
 GO explícito del PO: «sube todo a produccion». PR162 **merged**; runtime de producción `16b705d65e8de54afa2c1600a24e2bb23802b99a`, Vercel `dpl_BJ3xLUNFJf6HQJiQ5XydywM9pcHj` READY/production, alias `pazo-app.vercel.app`. [Acta de lanzamiento](docs/admin-visual/PRODUCTION_RELEASE_20261029.md) y [registro instalado](docs/admin-visual/PRODUCTION_RELEASE.json) son la referencia actual.
