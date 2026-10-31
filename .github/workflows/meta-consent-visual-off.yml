@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/meta-consent-visual-off.yml'
       - 'scripts/meta-consent-visual-browser.mjs'
+      - 'scripts/meta-consent-lab-entry.tsx'
       - 'src/features/marketing/MetaConsentChoice.tsx'
       - 'src/index.css'
       - 'package-lock.json'
@@ -13,6 +14,7 @@ on:
     paths:
       - '.github/workflows/meta-consent-visual-off.yml'
       - 'scripts/meta-consent-visual-browser.mjs'
+      - 'scripts/meta-consent-lab-entry.tsx'
       - 'src/features/marketing/MetaConsentChoice.tsx'
       - 'src/index.css'
   workflow_dispatch:
