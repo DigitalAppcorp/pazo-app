@@ -91,6 +91,24 @@ assert.equal(sql(`SELECT event_time=(SELECT email_confirmed_at FROM auth.users
  WHERE id='${owner}') FROM marketing_private.meta_outbox_candidate
  WHERE owner_id='${owner}'`),'t','event time is trusted verified time')
 
+// One browser proof for the SAME server event, despite concurrent tabs.
+const browserReceipts=await Promise.all(Array.from({length:8},
+ ()=>sqlAsync(`SET ROLE service_role;
+ SELECT * FROM public.pazo_meta_take_pixel_receipt_candidate('${owner}')`)))
+const browserClaims=browserReceipts.filter(Boolean)
+assert.equal(browserClaims.length,1,'only one verified browser receipt under concurrency')
+assert.equal(browserClaims[0].split('|')[0],eventId,
+ 'Pixel receives the existing CAPI event_id')
+assert.equal(sql(`SET ROLE service_role;
+ SELECT * FROM public.pazo_meta_take_pixel_receipt_candidate('${owner}')`),'',
+ 'refresh/revisit cannot return a second browser receipt')
+assert.equal(sql(`SELECT pixel_receipt_claimed_at IS NOT NULL
+ FROM marketing_private.meta_outbox_candidate WHERE owner_id='${owner}'`),'t')
+assert.throws(()=>sql(`SET ROLE anon;
+ SELECT * FROM public.pazo_meta_take_pixel_receipt_candidate('${owner}')`))
+assert.throws(()=>sql(`SET ROLE authenticated;
+ SELECT * FROM public.pazo_meta_take_pixel_receipt_candidate('${owner}')`))
+
 create(inactive);pref(inactive)
 sql(`UPDATE marketing_private.meta_purpose_candidate SET
  gpc_at_last_request=true WHERE owner_id='${inactive}'`)
@@ -224,5 +242,6 @@ assert.equal(sql('SELECT row_to_json(g) FROM marketing_private.collection_gate g
 console.log(JSON.stringify({status:'PASS',environment:'disposable PG17',
  atomicSignupAndEvent:true,concurrentFirstParty:8,concurrentLeases:8,
  oneTimeClaims:1,leaseFence:true,stableRetryId:true,revocationStopsPending:true,withdrawalIdempotent:true,serverOnlyWithdrawal:true,
+ singleUseBrowserReceipt:true,concurrentBrowserReceiptClaims:8,
  independentGateDefaultsOff:true,gpcExclusion:true,qaExclusion:true,
  noBackfill:true,verifiedSessionGrant:true,explicitNotice:true,grantGpcGate:true,grantNoReversal:true,rlsForced:true,retentionCascade:true,hostedWrites:0}))
