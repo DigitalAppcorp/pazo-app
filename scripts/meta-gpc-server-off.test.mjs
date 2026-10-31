@@ -133,8 +133,9 @@ test('real candidate adapters route a GPC POST to private withdrawal RPC only',a
    createMetaReceiptHandler({released:true,privacyReviewed:true,...provider})
   assert.equal((await handler(get(type))).status,403)
   assert.deepEqual(calls.map(x=>x.path.split('/').slice(-2).join('/')),[
-   'v1/user','v1/settings','rpc/pazo_meta_withdraw_candidate'])
-  const call=calls[2]
+   'v1/user','rpc/pazo_meta_withdraw_candidate'],
+   'GPC withdrawal must not depend on signup confirmation settings')
+  const call=calls[1]
   assert.deepEqual(JSON.parse(call.opts.body),{p_owner:owner})
   assert.equal(call.opts.headers.authorization,'Bearer '+serviceKey)
   assert.equal(call.opts.body.includes(serviceKey),false)
