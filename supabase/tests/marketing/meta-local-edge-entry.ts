@@ -95,13 +95,32 @@ const receipt=createMetaReceiptHandler({
 const optOut=createMetaWithdrawalHandler({
  released:setup,authenticate,withdraw,
 })
+// Local browser origin is NOT the production allowlist. Only inside this
+// disposable harness, adapt its loopback Origin to the validated PAZO Origin
+// before calling unchanged candidate handlers and adapt the CORS reply back.
+// All other Origins pass through unmodified and retain strict rejection.
+const LAB_ORIGIN='http://127.0.0.1:5389'
+const PUBLIC_ORIGIN='https://pazo-app.vercel.app'
 Deno.serve(async(req:Request)=>{
- // The entire function is TEST-ONLY; it must never be deployed or published.
- // The first segment maps to candidate core handlers, not provider APIs.
+ const browserLab=req.headers.get('origin')===LAB_ORIGIN
+ let candidateRequest=req
+ if(browserLab){
+   const headers=new Headers(req.headers)
+   headers.set('origin',PUBLIC_ORIGIN)
+   candidateRequest=new Request(req,{headers})
+ }
  const path=new URL(req.url).pathname
- if(path.endsWith('/grant'))return grant(req)
- if(path.endsWith('/receipt'))return receipt(req)
- if(path.endsWith('/withdraw'))return optOut(req)
- return new Response(JSON.stringify({status:'not_available'}),{
-  status:404,headers:{'content-type':'application/json'}})
+ let res:Response
+ if(path.endsWith('/grant'))res=await grant(candidateRequest)
+ else if(path.endsWith('/receipt'))res=await receipt(candidateRequest)
+ else if(path.endsWith('/withdraw'))res=await optOut(candidateRequest)
+ else res=new Response(JSON.stringify({status:'not_available'}),{
+   status:404,headers:{'content-type':'application/json'}})
+ if(!browserLab)return res
+ const headers=new Headers(res.headers)
+ if(headers.get('access-control-allow-origin')===PUBLIC_ORIGIN)
+   headers.set('access-control-allow-origin',LAB_ORIGIN)
+ return new Response(res.body,{
+   status:res.status,statusText:res.statusText,headers,
+ })
 })
