@@ -5,6 +5,21 @@ import {canUseMetaPixel,dispatchMetaPixel} from './metaPixel.mjs'
 const PIXEL_URL='https://connect.facebook.net/en_US/fbevents.js'
 const DATASET=/^[1-9][0-9]{5,24}$/
 const UUID4=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const ownedPixelQueues=new WeakMap()
+/** Revoke ONLY the Pixel bootstrap PAZO created after consent. Avoid
+ * touching an independently installed Facebook Pixel or stale session.
+ * This revokes future SDK sends, not disclosures already made.
+ */
+export function revokeOwnedMetaPixelConsent({browser=null}={}) {
+  if(!browser || (typeof browser!=='object'&&typeof browser!=='function'))
+    return false
+  const owned=ownedPixelQueues.get(browser)
+  if(typeof owned!=='function'||browser.fbq!==owned||browser._fbq!==owned)
+    return false
+  try{owned('consent','revoke');return true}
+  catch{return false}
+}
+
 export async function loadMetaPixelForVerifiedSignup({
   releaseEnabled=false,privacyGateApproved=false,explicitConsent=false,
   accountExcluded=true,qaOrAdmin=true,optedOut=true,verifiedRegistration=false,
@@ -39,6 +54,7 @@ export async function loadMetaPixelForVerifiedSignup({
   fbq.push=fbq
   browser.fbq=fbq
   browser._fbq=fbq
+  ownedPixelQueues.set(browser,fbq)
   // Queue privacy safeguard before initialization. No automatic PageView.
   fbq('consent','revoke')
   fbq('init',datasetId)
