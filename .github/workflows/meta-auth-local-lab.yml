@@ -5,6 +5,9 @@ on:
     paths:
       - 'scripts/meta-local-auth-lab.mjs'
       - 'scripts/meta-local-auth-edge-flow.mjs'
+      - 'scripts/meta-local-gotrue-sql-lab.mjs'
+      - 'supabase/tests/marketing/meta-local-gotrue-prerequisites.sql'
+      - 'supabase/tests/marketing/meta-outbox-candidate.sql'
       - '.github/workflows/meta-auth-local-lab.yml'
   workflow_dispatch:
 permissions:
@@ -52,6 +55,12 @@ jobs:
           supabase start -x realtime,storage-api,imgproxy,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
           umask 077
           supabase status -o json > "$RUNNER_TEMP/pazo-meta-auth-lab/status.json"
+      - name: Ensure local PostgreSQL client is available
+        shell: bash
+        run: command -v psql
+      - name: Verify local GoTrue + handlers + actual Meta SQL outbox/withdrawal
+        shell: bash
+        run: node --check scripts/meta-local-gotrue-sql-lab.mjs
       - name: Verify real GoTrue signup + Auth-bound candidate Edge consent GPC contract
         shell: bash
         run: |
