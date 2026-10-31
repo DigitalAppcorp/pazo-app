@@ -98,7 +98,9 @@ export async function deliverVerifiedMetaRegistration({
         }).allowed
     },
   })
-  const saved=await settle(response.status==='accepted'?'sent':
+  // An API-accepted event is terminal even if Meta warns that its QA
+  // Test Events session was invalid. Never resend a received conversion.
+  const saved=await settle(['accepted','accepted_with_warnings'].includes(response.status)?'sent':
     response.status==='suppressed'?'suppressed':'retryable')
   return {status:saved?response.status:'unavailable'}
 }
