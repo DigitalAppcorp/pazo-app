@@ -1,7 +1,8 @@
 name: PAZO Meta QA vendor SDK egress audit (NO event delivery)
 on:
-  push:
-    branches: [feat/issue169-meta-pixel-capi-off]
+  # Run once as a visible PR check; never from PAZO production.
+  pull_request:
+    branches: [feat/issue168-ads2-attribution]
     paths:
       - '.github/workflows/meta-vendor-egress-audit-off.yml'
       - 'scripts/meta-vendor-egress-browser.mjs'
