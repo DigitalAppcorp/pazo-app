@@ -9,12 +9,14 @@ const UUID4=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12
 /** Both repository methods MUST check an authenticated, recently confirmed
  * new account and issue/reuse a DB-stored UUIDv4 atomically.
  * leaseOne(): returns {eventId,leaseId,eventTime,claimWasInserted,record,
- *  accountExcluded,qaOrAdmin,gpc,sharingOptOut,hashedEmail}
+ *  accountExcluded,qaOrAdmin,gpc,sharingOptOut}. No matching PII is read at lease time.
  * `kind: retry` is permissible ONLY when it leases the previously inserted,
  * unique verified event row, reusing its original eventId. claimWasInserted
  * attests existence of that original row, NOT an INSERT in this attempt.
  * or null. IDs and email hashes may NEVER be built by the browser.
  * checkPrivacy(eventId, leaseId): reject stale/mismatched leases.
+ * readApprovedMatchField(eventId, leaseId): may access approved matching
+ * data ONLY after current privacy is affirmed. Must revalidate lease+consent.
  * settle(eventId, leaseId, status): acknowledgement MUST compare both IDs
  * against the current DB lease. A stale worker may never settle a newer lease.
  * Acknowledgements must be atomic and idempotent; a lease that fails
@@ -29,7 +31,8 @@ export async function deliverVerifiedMetaRegistration({
     return {status:'disabled'}
   if (!repository || typeof repository.leaseOne!=='function'
       || typeof repository.settle!=='function'
-      || typeof repository.checkPrivacy!=='function')
+      || typeof repository.checkPrivacy!=='function'
+      || typeof repository.readApprovedMatchField!=='function')
     return {status:'not_configured'}
   let claim
   try { claim=await repository.leaseOne() } catch {return {status:'unavailable'}}
@@ -53,11 +56,16 @@ export async function deliverVerifiedMetaRegistration({
     await settle('suppressed')
     return {status:'suppressed'}
   }
+  // Privacy must pass BEFORE any matching field is read. A new lease or
+  // withdrawal invalidates the reader; missing approval stays retryable.
+  let hashedEmail=null
+  try {hashedEmail=await repository.readApprovedMatchField(claim.eventId,claim.leaseId)}
+  catch {/* failed privacy or approved-match lookup cannot authorize delivery */}
   const event=buildMetaRegistration({
     releaseEnabled,explicitConsent:true,consentTrusted:true,
     verifiedRegistration:true,excluded:false,globalPrivacyControl:false,
     optedOut:false,qaOrAdmin:false,eventId:claim.eventId,
-    eventTime:claim.eventTime,datasetId,hashedEmail:claim.hashedEmail,
+    eventTime:claim.eventTime,datasetId,hashedEmail,
   })
   if (!event) {await settle('retryable');return {status:'not_configured'}}
   const response=await sendMetaCapi({
