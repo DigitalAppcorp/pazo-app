@@ -1,0 +1,140 @@
+name: PAZO Meta independent local Auth lab (provider OFF)
+on:
+  # Run once per candidate PR update, instead of duplicate push/PR Docker jobs.
+  # This makes the complete GoTrue/Edge/SQL/Chromium result a visible PR check.
+  pull_request:
+    branches: [feat/issue168-ads2-attribution]
+    paths:
+      - 'scripts/meta-local-auth-lab.mjs'
+      - 'scripts/meta-local-auth-edge-flow.mjs'
+      - 'scripts/meta-local-gotrue-sql-lab.mjs'
+      - 'scripts/meta-local-edge-http-lab.mjs'
+      - 'scripts/meta-local-browser-playwright.mjs'
+      - 'scripts/meta-browser-supabase-client.mjs'
+      - 'src/features/marketing/metaConsentController.mjs'
+      - 'src/features/marketing/metaConsentRegistrationFlow.mjs'
+      - 'src/features/marketing/metaConsentTransport.mjs'
+      - 'src/features/marketing/metaGpcSync.mjs'
+      - 'supabase/tests/marketing/meta-local-edge-entry.ts'
+      - 'supabase/tests/marketing/meta-local-gotrue-prerequisites.sql'
+      - 'supabase/tests/marketing/meta-outbox-candidate.sql'
+      - '.github/workflows/meta-auth-local-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-auth-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: supabase/setup-cli@v3
+        with:
+          version: '2.81.3'
+      - name: Install locked app libraries and pinned Playwright for real browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx --no-install playwright install --with-deps chromium
+      - name: Prepare a fresh local-only Supabase stack, confirmed email enabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/pazo-meta-auth-lab"
+          cd "$RUNNER_TEMP/pazo-meta-auth-lab"
+          supabase init
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          config=Path('supabase/config.toml')
+          data=config.read_text()
+          data=re.sub(r'^project_id\s*=.*$', 'project_id = "pazo-meta-auth-lab"', data, count=1, flags=re.M)
+          section=re.search(r'(?ms)^\[auth\.email\]\s*\n(.*?)(?=^\[|\Z)',data)
+          assert section, 'Local Auth email section missing'
+          patched,count=re.subn(r'^enable_confirmations\s*=\s*false\s*$',
+             'enable_confirmations = true',section.group(1),count=1,flags=re.M)
+          assert count==1, 'Fail closed: confirmation requirement must be enabled in local Auth'
+          data=data[:section.start(1)]+patched+data[section.end(1):]
+          assert 'enable_confirmations = true' in patched
+          config.write_text(data)
+          PY
+      - name: Boot local Auth/Postgres/Mailpit (no linked project or hosted credentials)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/pazo-meta-auth-lab"
+          # Keep gotrue, postgres, kong and mailpit; no production DB/Meta.
+          supabase start -x realtime,storage-api,imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+          umask 077
+          supabase status -o json > "$RUNNER_TEMP/pazo-meta-auth-lab/status.json"
+      - name: Launch test-only Deno Edge HTTP function, with local Kong/Auth/RPC
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/pazo-meta-auth-lab"
+          mkdir -p supabase/functions/{pazo-meta-lab,pazo-meta-consent,pazo-meta-receipt,pazo-marketing-attribution,_shared}
+          cp "$GITHUB_WORKSPACE/supabase/tests/marketing/meta-local-edge-entry.ts" supabase/functions/pazo-meta-lab/index.ts
+          cp "$GITHUB_WORKSPACE/supabase/functions/pazo-meta-consent/grantCore.mjs" supabase/functions/pazo-meta-consent/grantCore.mjs
+          cp "$GITHUB_WORKSPACE/supabase/functions/pazo-meta-consent/withdrawCore.mjs" supabase/functions/pazo-meta-consent/withdrawCore.mjs
+          cp "$GITHUB_WORKSPACE/supabase/functions/pazo-meta-receipt/receiptCore.mjs" supabase/functions/pazo-meta-receipt/receiptCore.mjs
+          cp "$GITHUB_WORKSPACE/supabase/functions/pazo-marketing-attribution/requestBody.mjs" supabase/functions/pazo-marketing-attribution/requestBody.mjs
+          cp "$GITHUB_WORKSPACE/supabase/functions/_shared/metaGpcOverride.mjs" supabase/functions/_shared/metaGpcOverride.mjs
+          # The functions are intentionally not present in the deployable repo folder.
+          # Production candidate flags remain OFF; only this temporary test
+          # harness uses enabled handlers with a hardcoded local Kong backend.
+          supabase functions serve pazo-meta-lab --no-verify-jwt > "$RUNNER_TEMP/pazo-meta-edge-start.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/pazo-meta-edge.pid"
+          ready=0
+          for attempt in $(seq 1 45); do
+            body=$(curl --max-time 3 -sS http://127.0.0.1:54321/functions/v1/pazo-meta-lab/status 2>/dev/null || true)
+            if [[ "$body" == *'"status":"not_available"'* ]]; then
+              ready=1
+              break
+            fi
+            if ! kill -0 "$(cat "$RUNNER_TEMP/pazo-meta-edge.pid")" 2>/dev/null; then
+              echo "LOCAL_EDGE_FAILED_TO_START"
+              exit 1
+            fi
+            sleep 2
+          done
+          if [[ "$ready" != "1" ]]; then
+            echo "LOCAL_EDGE_READY_CHECK_FAILED"
+            exit 1
+          fi
+          echo "LOCAL_EDGE_RUNTIME_READY"
+      - name: Ensure local PostgreSQL client is available
+        shell: bash
+        run: command -v psql
+      - name: Verify Chromium and browser module syntax
+        shell: bash
+        run: |
+          node --check scripts/meta-local-browser-playwright.mjs
+          node --check scripts/meta-browser-supabase-client.mjs
+          node --check src/features/marketing/metaConsentController.mjs
+      - name: Verify test-only HTTP suite syntax
+        shell: bash
+        run: node --check scripts/meta-local-edge-http-lab.mjs
+      - name: Verify local GoTrue + handlers + actual Meta SQL outbox/withdrawal
+        shell: bash
+        run: node --check scripts/meta-local-gotrue-sql-lab.mjs
+      - name: Verify real GoTrue signup + Auth-bound candidate Edge consent GPC contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/meta-local-auth-lab.mjs "$RUNNER_TEMP/pazo-meta-auth-lab/status.json"
+      - name: Stop and discard all synthetic local data
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/pazo-meta-auth-lab/supabase/config.toml" ]; then
+            cd "$RUNNER_TEMP/pazo-meta-auth-lab"
+            if [ -f "$RUNNER_TEMP/pazo-meta-edge.pid" ]; then
+              kill "$(cat "$RUNNER_TEMP/pazo-meta-edge.pid")" 2>/dev/null || true
+            fi
+            supabase stop --no-backup || true
+          fi

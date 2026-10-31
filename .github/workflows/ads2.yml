@@ -37,12 +37,14 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - run: node --test scripts/meta-consent-ui-candidate.test.mjs
       - run: npm run test:marketing
       - run: npm run test:governance
       - run: npm run test:intelligence
       - run: npm run test:admin-visual
       - run: npm run build
       - run: node scripts/ads2-pg17.mjs
+      - run: node scripts/meta-outbox-pg17.mjs
       - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
       - run: npx --no-install playwright install --with-deps chromium
       - run: node scripts/ads2-browser.mjs

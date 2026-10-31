@@ -1,0 +1,66 @@
+name: Meta Pixel CAPI fail-closed candidate
+on:
+  pull_request:
+    branches: [main, feat/issue168-ads2-attribution]
+  push:
+    branches: [feat/issue169-meta-pixel-capi-off]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  meta-off:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test scripts/meta-conversion-off.test.mjs scripts/meta-delivery-coordinator.test.mjs scripts/meta-pixel-loader.test.mjs scripts/meta-receipt-off.test.mjs scripts/meta-receipt-adapter-off.test.mjs scripts/meta-outbox-repository-off.test.mjs scripts/meta-match-reader-off.test.mjs scripts/meta-qa-dedup-contract.test.mjs scripts/meta-consent-registration-flow.test.mjs scripts/meta-consent-transport-off.test.mjs scripts/meta-consent-controller-off.test.mjs scripts/meta-disclosure-scope.test.mjs scripts/meta-gpc-server-off.test.mjs scripts/meta-worker-off.test.mjs scripts/meta-server-config-off.test.mjs scripts/meta-server-gateway-off.test.mjs scripts/meta-withdraw-off.test.mjs scripts/meta-withdraw-adapter-off.test.mjs scripts/meta-grant-off.test.mjs scripts/meta-production-boundary.test.mjs scripts/meta-gpc-sync-off.test.mjs
+      - run: node --check supabase/functions/_shared/metaConversion.mjs
+      - run: node --check supabase/functions/_shared/metaCapi.mjs
+      - run: node --check supabase/functions/_shared/metaPurposePolicy.mjs
+      - run: node --check supabase/functions/_shared/metaDeliveryCoordinator.mjs
+      - run: node --check supabase/functions/_shared/metaServerConfig.mjs
+      - run: node --check supabase/functions/_shared/metaServerGateway.mjs
+      - run: node --check supabase/functions/_shared/metaOutboxRepository.mjs
+      - run: node --check supabase/functions/_shared/metaMatchReader.mjs
+      - run: node --check supabase/functions/_shared/metaGpcOverride.mjs
+      - run: node --check scripts/meta-production-boundary.mjs
+      - run: node --check scripts/meta-local-auth-edge-flow.mjs
+      - run: node --check scripts/meta-local-auth-lab.mjs
+      - run: node --check scripts/meta-local-gotrue-sql-lab.mjs
+      - run: node --check scripts/meta-local-edge-http-lab.mjs
+      - run: node scripts/meta-production-boundary.mjs
+      - run: node --check src/features/marketing/metaPixel.mjs
+      - run: node --check src/features/marketing/metaPixelLoader.mjs
+      - run: node --check src/features/marketing/metaConsentRegistrationFlow.mjs
+      - run: node --check src/features/marketing/metaConsentTransport.mjs
+      - run: node --check src/features/marketing/metaGpcSync.mjs
+      - run: node --check src/features/marketing/metaConsentController.mjs
+      - run: node --check supabase/functions/pazo-meta-receipt/receiptCore.mjs
+      - run: node --check supabase/functions/pazo-meta-receipt/receiptAdapter.mjs
+      - run: node --check supabase/functions/pazo-meta-worker/workerCore.mjs
+      - run: node --check supabase/functions/pazo-meta-worker/workerAuth.mjs
+      - run: node --check supabase/functions/pazo-meta-worker/runtime.mjs
+      - run: node --check supabase/functions/pazo-meta-consent/withdrawCore.mjs
+      - run: node --check supabase/functions/pazo-meta-consent/withdrawAdapter.mjs
+      - run: node --check supabase/functions/pazo-meta-consent/grantCore.mjs
+      - run: node --check supabase/functions/pazo-meta-consent/grantAdapter.mjs
+      - run: grep -qx 'const META_WITHDRAW_ENDPOINT_RELEASED=false' supabase/functions/pazo-meta-consent/index.ts
+      - run: grep -qx 'const META_RECEIPT_ENDPOINT_RELEASED=false' supabase/functions/pazo-meta-receipt/index.ts
+      - run: grep -qx 'const META_RECEIPT_PRIVACY_REVIEWED=false' supabase/functions/pazo-meta-receipt/index.ts
+      - run: grep -qx 'const META_WORKER_ENDPOINT_RELEASED=false' supabase/functions/pazo-meta-worker/index.ts
+      - run: grep -qx 'const META_WORKER_PRIVACY_REVIEWED=false' supabase/functions/pazo-meta-worker/index.ts
+      - run: grep -qx 'const META_WORKER_MATCH_FIELDS_APPROVED=false' supabase/functions/pazo-meta-worker/index.ts
+      - run: grep -qx 'const META_WORKER_PROVIDER_APPROVED=false' supabase/functions/pazo-meta-worker/index.ts
+      - run: grep -qx 'const META_WORKER_MATCH_SOURCE_APPROVED=false' supabase/functions/pazo-meta-worker/index.ts
+      - run: grep -qx 'const META_GRANT_ENDPOINT_RELEASED=false' supabase/functions/pazo-meta-grant/index.ts
+      - run: grep -qx 'const META_CONSENT_PRIVACY_REVIEWED=false' supabase/functions/pazo-meta-grant/index.ts
+      - run: grep -qx 'export const META_CHOICES_RELEASED=false' src/features/marketing/MetaConsentChoice.tsx
+      # All provider integrations remain deliberately unreferenced.
+      - run: |
+          if grep -E 'metaCapi|metaPixel' src/App.tsx src/features/marketing/marketingRuntime.ts supabase/functions/pazo-marketing-attribution/index.ts; then
+            echo "Unexpected Meta import into production" >&2
+            exit 1
+          fi

@@ -1,0 +1,40 @@
+name: PAZO Meta QA vendor SDK egress audit (NO event delivery)
+on:
+  # Run once as a visible PR check; never from PAZO production.
+  pull_request:
+    branches: [feat/issue168-ads2-attribution]
+    paths:
+      - '.github/workflows/meta-vendor-egress-audit-off.yml'
+      - 'scripts/meta-vendor-egress-browser.mjs'
+      - 'src/features/marketing/metaPixelLoader.mjs'
+      - 'src/features/marketing/metaPixel.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  vendor-egress-isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install pinned Chromium and app dependencies
+        run: |
+          npm ci
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx --no-install playwright install --with-deps chromium
+      - name: Confirm Meta is OFF in production
+        run: |
+          node --check scripts/meta-vendor-egress-browser.mjs
+          node scripts/meta-production-boundary.mjs
+      - name: Load actual SDK only inside isolated Chromium; BLOCK all event egress
+        run: node scripts/meta-vendor-egress-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meta-qa-vendor-egress-observations
+          path: artifacts/meta-vendor-egress/
+          retention-days: 7
