@@ -1,0 +1,47 @@
+name: PAZO Meta consent candidate visual QA (provider OFF)
+on:
+  push:
+    branches: [feat/issue169-meta-pixel-capi-off]
+    paths:
+      - '.github/workflows/meta-consent-visual-off.yml'
+      - 'scripts/meta-consent-visual-browser.mjs'
+      - 'src/features/marketing/MetaConsentChoice.tsx'
+      - 'src/index.css'
+      - 'package-lock.json'
+      - 'package.json'
+  pull_request:
+    paths:
+      - '.github/workflows/meta-consent-visual-off.yml'
+      - 'scripts/meta-consent-visual-browser.mjs'
+      - 'src/features/marketing/MetaConsentChoice.tsx'
+      - 'src/index.css'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  candidate-visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install pinned app and ephemeral Chromium dependencies
+        run: |
+          npm ci
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx --no-install playwright install --with-deps chromium
+      - name: Syntax and source boundary
+        run: |
+          node --check scripts/meta-consent-visual-browser.mjs
+          node scripts/meta-production-boundary.mjs
+      - name: Render isolated bilingual screen and verify mobile states
+        run: node scripts/meta-consent-visual-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meta-consent-visual-candidate
+          path: artifacts/meta-consent-ui/
+          retention-days: 7
