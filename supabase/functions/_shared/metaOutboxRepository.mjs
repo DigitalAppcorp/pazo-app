@@ -37,6 +37,22 @@ export function createMetaOutboxRepository({
     if(response?.status!==200)throw Error('meta_rpc_unavailable')
     return response.json()
   }
+  const currentClaim=async(eventId,leaseId)=>{
+    if(!UUID4.test(eventId)||!UUID4.test(leaseId))return null
+    let rows
+    try{rows=await rpc('pazo_meta_check_claim_candidate',{
+      p_event:eventId,p_lease:leaseId,
+    })}catch{return null}
+    if(!Array.isArray(rows)||rows.length!==1)return null
+    const p=rows[0],decidedAt=iso(p?.decided_at)
+    if(!UUID.test(p?.owner_id)||p?.eligible!==true
+      ||p?.purpose!=='meta_conversions_v1'
+      ||p?.version!=='pazo-meta-conversions-v1'
+      ||p?.decision!=='granted'||!decidedAt||p?.withdrawn_at!==null
+      ||p?.gpc!==false||p?.sharing_opt_out!==false
+      ||!secs(p?.event_time)||Date.parse(decidedAt)>Date.now())return null
+    return {...p,decidedAt}
+  }
   return Object.freeze({
     leaseOne:async()=>{
       let rows
@@ -46,36 +62,30 @@ export function createMetaOutboxRepository({
       const row=rows[0]
       if(!UUID.test(row?.owner_id)||!UUID4.test(row?.event_id)
          ||!UUID4.test(row?.lease_id)||!secs(row?.event_time))return null
-      let hashedEmail=null
-      try{hashedEmail=await readApprovedMatchField(row.owner_id)}
-      catch{/* omit match field, fail closed; worker returns retryable */}
-      if(typeof hashedEmail!=='string'||!HASH.test(hashedEmail))
-        hashedEmail=null
+      // No matching field is touched during leasing. The coordinator
+      // validates current privacy before requesting approved match data.
       return {kind:'retry',claimWasInserted:true,
         eventId:row.event_id,leaseId:row.lease_id,
-        eventTime:secs(row.event_time),hashedEmail}
+        eventTime:secs(row.event_time)}
     },
     checkPrivacy:async(eventId,leaseId)=>{
-      if(!UUID4.test(eventId)||!UUID4.test(leaseId))return null
-      let rows
-      try{rows=await rpc('pazo_meta_check_claim_candidate',{
-        p_event:eventId,p_lease:leaseId,
-      })}catch{return null}
-      if(!Array.isArray(rows)||rows.length!==1)return null
-      const p=rows[0]
-      const decidedAt=iso(p?.decided_at)
-      const withdrawnAt=p?.withdrawn_at===null?null:iso(p?.withdrawn_at)
-      if(!UUID.test(p?.owner_id)||p?.eligible!==true
-        ||p?.purpose!=='meta_conversions_v1'
-        ||p?.version!=='pazo-meta-conversions-v1'
-        ||p?.decision!=='granted'||!decidedAt||p?.withdrawn_at!==null
-        ||p?.gpc!==false||p?.sharing_opt_out!==false
-        ||!secs(p?.event_time))return null
+      const p=await currentClaim(eventId,leaseId)
+      if(!p)return null
       return {record:{
         purpose:p.purpose,version:p.version,decision:p.decision,
-        decidedAt,withdrawnAt,revokedAt:null,
+        decidedAt:p.decidedAt,withdrawnAt:null,revokedAt:null,
       },trusted:true,gpc:false,sharingOptOut:false,
       accountExcluded:false,qaOrAdmin:false,verifiedRegistration:true}
+    },
+    readApprovedMatchField:async(eventId,leaseId)=>{
+      // Revalidate the same current lease AND consent before accessing any
+      // matching data; a stale lease or opt-out cannot even trigger a read.
+      const p=await currentClaim(eventId,leaseId)
+      if(!p)return null
+      let value=null
+      try{value=await readApprovedMatchField(p.owner_id)}
+      catch{return null}
+      return typeof value==='string'&&HASH.test(value)?value:null
     },
     settle:async(eventId,leaseId,status)=>{
       if(!UUID4.test(eventId)||!UUID4.test(leaseId)
