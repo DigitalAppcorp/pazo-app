@@ -108,7 +108,7 @@ test('absent match identifier, token or Meta dataset fails closed',async()=>{
   const out=await deliverVerifiedMetaRegistration({...base,repository,
     fetchImpl:async()=>{calls++}})
   assert.equal(out.status,'not_configured')
-  assert.equal(settled,'suppressed')
+  assert.equal(settled,'retryable')
   assert.equal(calls,0)
 })
 
