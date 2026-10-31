@@ -7,6 +7,7 @@ const URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const UUID4=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const HASH=/^[0-9a-f]{64}$/
+const USER_AGENT=/^[\x20-\x7E]{20,512}$/
 const STATUSES=new Set(['sent','retryable','suppressed'])
 const iso=value=>{
   if(typeof value!=='string'||!Number.isFinite(Date.parse(value)))return null
@@ -85,7 +86,13 @@ export function createMetaOutboxRepository({
       let value=null
       try{value=await readApprovedMatchField(p.owner_id)}
       catch{return null}
-      return typeof value==='string'&&HASH.test(value)?value:null
+      // The source of both identifiers requires separate review before release.
+      // Never synthesize a UA from this server's own HTTP client.
+      return value && typeof value==='object' && !Array.isArray(value)
+        && typeof value.em==='string' && HASH.test(value.em)
+        && typeof value.clientUserAgent==='string'
+        && USER_AGENT.test(value.clientUserAgent)
+        ?{em:value.em,clientUserAgent:value.clientUserAgent}:null
     },
     settle:async(eventId,leaseId,status)=>{
       if(!UUID4.test(eventId)||!UUID4.test(leaseId)
