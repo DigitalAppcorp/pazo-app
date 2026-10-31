@@ -28,6 +28,7 @@ jobs:
       - run: node --check supabase/functions/pazo-meta-receipt/receiptCore.mjs
       - run: node --check supabase/functions/pazo-meta-consent/withdrawCore.mjs
       - run: node --check supabase/functions/pazo-meta-consent/withdrawAdapter.mjs
+      - run: grep -qx 'const META_WITHDRAW_ENDPOINT_RELEASED=false' supabase/functions/pazo-meta-consent/index.ts
       # All provider integrations remain deliberately unreferenced.
       - run: |
           if grep -E 'metaCapi|metaPixel' src/App.tsx src/features/marketing/marketingRuntime.ts supabase/functions/pazo-marketing-attribution/index.ts; then
