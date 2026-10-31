@@ -3,8 +3,8 @@
 import {createClient} from '@supabase/supabase-js'
 import {createMetaConsentTransport,createMetaWithdrawalTransport}
  from '../src/features/marketing/metaConsentTransport.mjs'
-import {completeExplicitMetaOptIn}
- from '../src/features/marketing/metaConsentRegistrationFlow.mjs'
+import {createMetaConsentController}
+ from '../src/features/marketing/metaConsentController.mjs'
 
 window.__runPazoMetaBrowserLab=async({api,key,email,password}={})=>{
   const base=new URL(api)
@@ -67,49 +67,49 @@ window.__runPazoMetaBrowserLab=async({api,key,email,password}={})=>{
   })
   if(!transport||!withdrawal)throw Error('transport_initialization_failed')
   let callbacks=0,issuedId=null,issuedDataset=null
-  const run=()=>completeExplicitMetaOptIn({
-    releaseEnabled:true,privacyApproved:true,deliberateOptIn:true,
-    ownerId,accessToken:token,getActiveSession:session,
-    stillPermitted:()=>privacyPermitted,browser:window,dom:{},
-    requestGrant:transport.requestGrant,requestReceipt:transport.requestReceipt,
-    requestWithdraw:withdrawal.requestWithdraw,
+  const controller=createMetaConsentController({
+    releaseEnabled:true,privacyApproved:true,withdrawalReleased:true,
+    supabaseClient:client,ownerId,accessToken:token,
+    getSessionSnapshot:session,stillPermitted:()=>privacyPermitted,
+    browser:window,dom:{},
     pixelLoader:async({eventId,datasetId})=>{
       callbacks++;issuedId=eventId;issuedDataset=datasetId
-      return {status:'queued'}
+      return {status:'unavailable'} // Offline Pixel failure must not undo grant.
     },
   })
-  // Browser preflight + functions.invoke MUST complete before this counts.
-  console.log('META_BROWSER_CLIENT_PHASE consent_and_receipt_request')
-  const first=await run()
-  if(first.status!=='queued'||callbacks!==1)
-    throw Error('browser_first_grant_receipt_failed:'+first.status)
-  console.log('META_BROWSER_CLIENT_PHASE first_consent_accepted')
-  const second=await run()
-  if(second.status==='queued'||callbacks!==1)
-    throw Error('browser_repeat_conversion_accepted')
+  if(!controller)throw Error('browser_controller_initialization_failed')
+  // Browser preflight and functions.invoke MUST both succeed.
+  console.log('META_BROWSER_CLIENT_PHASE controller_grant_and_receipt_request')
+  const first=await controller.onGrant()
+  if(first!==true||callbacks!==1)
+    throw Error('browser_controller_first_grant_failed')
+  console.log('META_BROWSER_CLIENT_PHASE controller_first_consent_saved')
+  const second=await controller.onGrant()
+  if(second!==true||callbacks!==1)
+    throw Error('browser_controller_repeat_conversion_dispatched')
+  // GPC after an earlier opt-in vetoes all future Pixel work and initiates
+  // durable withdrawal independently of the Pixel delivery outcome.
   gpc=true
-  const veto=await run()
-  if(veto.status!=='suppressed'||callbacks!==1)
-    throw Error('browser_gpc_veto_failed')
-  console.log('META_BROWSER_CLIENT_PHASE repeated_event_and_gpc_veto')
-  const removed=await withdrawal.requestWithdraw({
-    accessToken:token,body:{action:'withdraw'},
-  })
+  const veto=await controller.onGrant()
+  if(veto!==false||callbacks!==1)
+    throw Error('browser_controller_gpc_veto_failed')
+  console.log('META_BROWSER_CLIENT_PHASE controller_repeat_and_gpc_veto')
+  const removed=await controller.syncGpc()
   if(removed.status!=='withdrawn')
-    throw Error('browser_durable_withdrawal_failed')
+    throw Error('browser_controller_durable_gpc_withdrawal_failed')
   gpc=false
   privacyPermitted=true
-  const afterWithdraw=await run()
-  if(afterWithdraw.status==='queued'||callbacks!==1)
-    throw Error('browser_withdrawn_account_regranted')
-  console.log('META_BROWSER_CLIENT_PHASE withdrawal_persisted')
+  const afterWithdraw=await controller.onGrant()
+  if(afterWithdraw!==false||callbacks!==1)
+    throw Error('browser_controller_withdrawn_account_regranted')
+  console.log('META_BROWSER_CLIENT_PHASE controller_withdrawal_persisted')
   await client.auth.signOut({scope:'local'})
   return {status:'REAL_BROWSER_SUPABASE_JS_META_OFF_PASS',
     ownerId,eventId:issuedId,datasetId:issuedDataset,
     sdkFunctionInvocations:sdkCalls,
-    first:first.status,second:second.status,
-    gpcVeto:veto.status,withdrawal:removed.status,
-    postWithdrawal:afterWithdraw.status,
+    first:first?'saved':'not_saved',second:second?'saved_no_duplicate':'not_saved',
+    gpcVeto:veto?'failed':'suppressed',withdrawal:removed.status,
+    postWithdrawal:afterWithdraw?'failed':'suppressed',
     simulatedPixelCallbacks:callbacks,
   }
 }
