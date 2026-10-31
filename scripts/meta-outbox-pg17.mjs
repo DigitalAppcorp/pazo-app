@@ -1,6 +1,7 @@
 // Runs AFTER ads2-pg17.mjs against its fenced disposable PG17.
 // The SQL is test-only: NEVER a hosted Supabase migration.
 import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
 import {sql,sqlAsync,file} from './marketing-sql-lab.mjs'
 const before=sql('SELECT row_to_json(g) FROM marketing_private.collection_gate g')
 file('supabase/tests/marketing/meta-outbox-candidate.sql')
@@ -76,6 +77,29 @@ assert.match(leaseToken,/^[0-9a-f-]{36}$/)
 assert.equal(sql(`SET ROLE service_role;
  SELECT owner_id::text FROM public.pazo_meta_check_claim_candidate(
   '${leasedEvent}','${leaseToken}')`),owner,'current worker sees only its eligible private policy')
+const syntheticUA='Mozilla/5.0 (PAZO synthetic verified registration browser)'
+const syntheticEmail='pazo-synthetic-verified@example.invalid'
+sql(`UPDATE auth.users SET email='${syntheticEmail}' WHERE id='${owner}'`)
+const expectedHash=createHash('sha256').update(syntheticEmail).digest('hex')
+assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_capture_ua_candidate(
+ '${owner}','Mozilla/5.0 (PAZO synthetic verified registration browser)')`),'t',
+ 'one genuine lab consented event may capture its browser UA')
+assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_capture_ua_candidate(
+ '${owner}','Mozilla/5.0 (different later browser)')`),'f',
+ 'later browser cannot overwrite the original UA')
+assert.equal(sql(`SET ROLE service_role;SELECT * FROM public.pazo_meta_read_match_candidate(
+ '${leasedEvent}','${leaseToken}')`),expectedHash+'|'+syntheticUA,
+ 'hash remains server-side, tied to lease and original browser snapshot')
+assert.equal(sql(`SET ROLE service_role;SELECT * FROM public.pazo_meta_read_match_candidate(
+ '${leasedEvent}','11111111-1111-4111-8111-111111111111')`),'',
+ 'stale lease cannot read personal matching material')
+for(const role of ['anon','authenticated']){
+ assert.throws(()=>sql(`SET ROLE ${role};
+  SELECT * FROM public.pazo_meta_read_match_candidate('${leasedEvent}','${leaseToken}')`))
+ assert.throws(()=>sql(`SET ROLE ${role};
+  SELECT public.pazo_meta_capture_ua_candidate('${owner}','${syntheticUA}')`))
+}
+
 assert.equal(sql(`SET ROLE service_role;
  SELECT owner_id::text FROM public.pazo_meta_check_claim_candidate(
   '${leasedEvent}','11111111-1111-4111-8111-111111111111')`),'',
@@ -300,6 +324,7 @@ assert.equal(sql(`SELECT bool_and(relrowsecurity AND relforcerowsecurity)
 
 sql(`DELETE FROM marketing_private.acquisition WHERE owner_id='${owner}'`)
 assert.equal(count(owner),'0','withdrawing acquisition removes unsent/sent outbox')
+assert.equal(sql(`SELECT count(*) FROM marketing_private.meta_match_candidate WHERE owner_id='${owner}'`),'0','cascading 14-day attribution deletion also purges UA')
 assert.equal(sql(`SELECT count(*) FROM marketing_private.meta_purpose_candidate
  WHERE owner_id='${owner}'`),'1','privacy decision has separate lifecycle')
 assert.equal(sql('SELECT row_to_json(g) FROM marketing_private.collection_gate g'),before)
