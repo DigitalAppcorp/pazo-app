@@ -61,7 +61,8 @@ export async function runMetaLocalEdgeHttpLab({api,key,ownerId,token,dbUrl}={}){
  const before=sql(`SELECT decision||'|'||sharing_opt_out||'|'||gpc_at_last_request
  FROM marketing_private.meta_purpose_candidate WHERE owner_id=${q}`)
  console.log('META_EDGE_HTTP_PHASE preexisting_sql_withdrawal_check')
- assert.equal(before,'withdrawn|t|t')
+ assert.equal(before,'withdrawn|true|true',
+  'Postgres booleans cast to text in concatenation use true/false')
  const gpc=await request('receipt',{body:{},
   extraHeaders:{'sec-gpc':'1'}})
  console.log('META_EDGE_HTTP_DIAG gpc_status='+gpc.status)
