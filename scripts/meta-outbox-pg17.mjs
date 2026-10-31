@@ -181,9 +181,16 @@ create(withdrawn);pref(withdrawn)
 assert.equal(sql(record(withdrawn)),'t')
 assert.equal(count(withdrawn),'1')
 assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_meta_capture_ua_candidate('${withdrawn}',
+ 'Mozilla/5.0 (PAZO synthetic browser about to withdraw)')`),'t')
+assert.equal(sql(`SELECT count(*) FROM marketing_private.meta_match_candidate
+ WHERE owner_id='${withdrawn}'`),'1','consented UA snapshot stored server-only')
+
+assert.equal(sql(`SET ROLE service_role;
  SELECT public.pazo_meta_withdraw_candidate('${withdrawn}')`),'t')
 assert.equal(sql(`SELECT decision FROM marketing_private.meta_purpose_candidate
  WHERE owner_id='${withdrawn}'`),'withdrawn')
+assert.equal(sql(`SELECT count(*) FROM marketing_private.meta_match_candidate WHERE owner_id='${withdrawn}'`),'0','withdrawal atomically purges UA snapshot')
 assert.equal(sql(`SELECT status FROM marketing_private.meta_outbox_candidate
  WHERE owner_id='${withdrawn}'`),'suppressed','pending work is canceled atomically')
 assert.equal(sql('SET ROLE service_role;SELECT * FROM public.pazo_meta_lease_candidate()'),'','withdrawal suppresses pending event')
