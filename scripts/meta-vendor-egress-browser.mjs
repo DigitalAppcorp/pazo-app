@@ -114,8 +114,13 @@ try{
   // all event/beacon/network destinations are intercepted and ABORTED
   // by the Playwright route above, so no provider event is delivered.
   await new Promise(resolve=>setTimeout(resolve,1700))
+  const cookiesBeforeRevoke=document.cookie.split(';').map(x=>x.trim()
+    .split('=')[0]).filter(Boolean).sort()
   const revoke=revokeOwnedMetaPixelConsent({browser:window})
+  const cookiesAfterRevoke=document.cookie.split(';').map(x=>x.trim()
+    .split('=')[0]).filter(Boolean).sort()
   return {status:result.status,revoked:revoke,
+    cookiesBeforeRevoke,cookiesAfterRevoke,
     preloadCommandsCaptured:beforeVendorSdk.length,
     consentInitiallyRevoked:beforeVendorSdk.some(a=>
       a[0]==='consent'&&a[1]==='revoke'),
@@ -135,6 +140,8 @@ try{
   e.eventName==='CompleteRegistration'&&e.eventIdIsSynthetic)
  if(observed.sourceAssetsLoaded===0||result.status!=='queued'){
   observed.status='INCONCLUSIVE_VENDOR_SDK_UNAVAILABLE'
+ }else if(observed.cookiesAfter.some(n=>n==='_fbp'||n==='_fbc')){
+  observed.status='REVIEW_REQUIRED_TRACKING_COOKIE_PERSISTS_AFTER_WITHDRAWAL'
  }else if(unexpected||badAutoEvents.length){
   observed.status='REVIEW_REQUIRED_UNEXPECTED_SDK_EGRESS'
  }else if(!matched){
