@@ -202,7 +202,7 @@ AS $policy$
      AND p.withdrawn_at IS NULL
      AND p.gpc_at_last_request IS FALSE
      AND p.sharing_opt_out IS FALSE
-     AND p.decided_at<=a.signup_verified_at
+     AND p.decided_at<=a.recorded_at+interval '15 minutes'
  )
 $policy$;
 REVOKE ALL ON FUNCTION marketing_private.meta_send_eligible_candidate(uuid)
