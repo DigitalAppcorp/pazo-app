@@ -61,3 +61,18 @@
 **GO de implementación:** continuar solo trabajos de laboratorio que no generen cargos ni impacten producción.
 
 **NO-GO operativo:** no crear todavía Supabase branch/proyecto pago, no aplicar SQL hospedado, no cambiar `supabase/config.toml` global como sustituto de evaluar el Auth alojado, no conectar un Vercel preview al backend vivo para QA, no cargar SDK/CAPI ni usar Meta Events Manager.
+
+## Laboratorio Auth/GoTrue + Mailpit sin entorno alojado
+
+La rama `feat/issue169-meta-pixel-capi-off` incorpora `.github/workflows/meta-auth-local-lab.yml` y `scripts/meta-local-auth-lab.mjs` para ejecutar una prueba de **Auth real** en contenedores temporales del runner GitHub, sin conexión a Supabase alojado. El laboratorio tiene un proyecto Supabase `pazo-meta-auth-lab` creado de cero, activa `[auth.email] enable_confirmations=true` **solo en el fichero efímero**, conserva Auth+PostgreSQL+Mailpit+Kong, excluye servicios que no son necesarios y destruye el volumen sintético al finalizar.
+
+Comprobaciones programadas:
+1. Supabase GoTrue recibe un `signup` con correo sintético `@example.invalid` y **no** devuelve sesión ni `email_confirmed_at`.
+2. `signInWithPassword` contra Auth antes de confirmar debe fallar sin JWT.
+3. Mailpit captura el correo local. El laboratorio sigue **únicamente** un enlace de `/auth/v1/verify` dirigido a loopback, con redirección manual.
+4. Auth devuelve una sesión verificable y `GET /auth/v1/user` contiene confirmación; otra sesión de la misma cuenta no representa un nuevo registro.
+5. El script aborta antes de cualquier solicitud si la URL o el enlace salieran de `127.0.0.1/localhost`; no se escriben email/JWT/contraseñas en logs, no se envían emails reales ni solicitudes a Meta.
+
+**Límites:** no es todavía el E2E completo de PAZO → Meta. Los permisos/meta-outbox en PostgreSQL 17 son comprobados por `meta-outbox-pg17.mjs` aparte; no están conectados al Auth real en este laboratorio. Las Edge Functions de Meta no están desplegadas, Pixel/CAPI siguen OFF y Test Events no se ha probado. El estado de este CI debe citarse por su resultado concreto, sin inferir PASS de un arranque todavía en curso.
+
+**Creación alojada bloqueada:** se intentó `Supabase create_branch` para `pazo-meta169-auth-qa-off` sin token de confirmación y la API exigió explícitamente `get_cost → aceptación del monto → confirm_cost`. **No se creó una rama, ni se generó un cobro de instancia por ese intento.** Antes de obtener una rama alojada corresponde identificar con el propietario la organización de facturación, consultar su cotización específica y aprobar explícitamente el costo y duración. No activar automáticamente recursos facturables.
