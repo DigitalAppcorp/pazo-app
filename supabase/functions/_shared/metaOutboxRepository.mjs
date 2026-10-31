@@ -84,7 +84,9 @@ export function createMetaOutboxRepository({
       const p=await currentClaim(eventId,leaseId)
       if(!p)return null
       let value=null
-      try{value=await readApprovedMatchField(p.owner_id)}
+      try{// The reader independently checks the very same event + lease in SQL.
+      // No owner-only loose lookup can authorize matching data.
+      value=await readApprovedMatchField(p.owner_id,eventId,leaseId)}
       catch{return null}
       // The source of both identifiers requires separate review before release.
       // Never synthesize a UA from this server's own HTTP client.
