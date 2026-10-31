@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import {randomUUID} from 'node:crypto'
+import {runAuthenticatedMetaEdgeLab} from './meta-local-auth-edge-flow.mjs'
 
 function local(url,allowedPaths=[]){
   const parsed=new URL(url)
@@ -141,12 +142,22 @@ export async function runMetaLocalAuthLab({statusFile,apiUrl,mailpitUrl}={}){
   const repeat=await requestAuth(api,key,'token?grant_type=password',{email,password})
   assert.equal(repeat.status,200,'repeat_login_failed')
   assert.equal(repeat.data.user?.id,who.data.id,'repeat_login_changed_owner')
+  // The same live GoTrue session now passes candidate HTTP handlers with
+  // an in-memory outbox. No hosted SQL or Meta provider interaction.
+  console.log('META_AUTH_PHASE candidate_edge_real_jwt')
+  const edge=await runAuthenticatedMetaEdgeLab({
+    api,key,ownerId:who.data.id,token,
+  })
+  assert.equal(edge.status,'LOCAL_AUTH_META_EDGE_CONTRACT_PASS')
   return {result:'LOCAL_GOTRUE_CONFIRMED_SIGNUP_PASS',
     signupRequestedWithoutSession:true,
     unverifiedLoginRejected:true,
     confirmedAuthUser:true,
     repeatLoginSameOwner:true,
-    metaProviderRequests:0}
+    edgeContract:edge.status,
+    browserOwnerSpoofRejected:edge.browserOwnerSpoofRejected,
+    gpcWithdrawPersistedInMemory:edge.gpcWithdrawPersistedInMemory,
+    hostedRequests:0,metaProviderRequests:0}
 }
 const direct=process.argv[1]?.endsWith('/meta-local-auth-lab.mjs')
 if(direct){
