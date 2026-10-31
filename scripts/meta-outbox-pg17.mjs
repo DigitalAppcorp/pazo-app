@@ -213,6 +213,44 @@ assert.equal(lgEvent,lateGrantedEvent)
 assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_settle_candidate(
  '${lgEvent}','${lgLease}','sent')`),'t')
 
+// Simulated authenticated GPC arriving while the CAPI worker holds a lease.
+// The private withdrawal RPC must atomically suppress the lease and the
+// one-time browser proof; a late worker cannot settle the withdrawn event.
+const leasedGpc='16900000-0000-4000-8000-00000000000b'
+create(leasedGpc);pref(leasedGpc)
+assert.equal(sql(record(leasedGpc)),'t')
+const held=sql('SET ROLE service_role;SELECT * FROM public.pazo_meta_lease_candidate()')
+const [gpcOwner,gpcEvent,gpcAt,gpcLease]=held.split('|')
+assert.equal(gpcOwner,leasedGpc)
+assert.equal(sql(`SET ROLE service_role;
+ SELECT owner_id::text FROM public.pazo_meta_check_claim_candidate(
+  '${gpcEvent}','${gpcLease}')`),leasedGpc)
+assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_meta_withdraw_candidate('${leasedGpc}')`),'t',
+ 'authenticated GPC persist uses same service-only opt-out RPC')
+assert.equal(sql(`SELECT status FROM marketing_private.meta_outbox_candidate
+ WHERE owner_id='${leasedGpc}'`),'suppressed',
+ 'withdrawal cancels an already leased provider event')
+assert.equal(sql(`SET ROLE service_role;
+ SELECT * FROM public.pazo_meta_check_claim_candidate(
+  '${gpcEvent}','${gpcLease}')`),'',
+ 'the old worker loses its live privacy proof')
+assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_meta_settle_candidate(
+  '${gpcEvent}','${gpcLease}','sent')`),'f',
+ 'GPC-withdrawn event cannot be marked sent by a stale lease')
+assert.equal(sql(`SET ROLE service_role;
+ SELECT * FROM public.pazo_meta_take_pixel_receipt_candidate(
+  '${leasedGpc}')`),'',
+ 'GPC-withdrawn event cannot issue a Pixel receipt')
+assert.equal(sql(`SELECT decision='withdrawn' AND sharing_opt_out
+ AND gpc_at_last_request FROM marketing_private.meta_purpose_candidate
+ WHERE owner_id='${leasedGpc}'`),'t')
+assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_meta_grant_first_session_candidate(
+  '${leasedGpc}','pazo-meta-conversions-v1',false)`),'f',
+ 'stored withdrawal prevents silent later re-grant')
+
 const deniedGrant='16900000-0000-4000-8000-000000000009'
 create(deniedGrant)
 assert.equal(sql(record(deniedGrant)),'t')
@@ -267,7 +305,7 @@ assert.equal(sql(`SELECT count(*) FROM marketing_private.meta_purpose_candidate
 assert.equal(sql('SELECT row_to_json(g) FROM marketing_private.collection_gate g'),before)
 console.log(JSON.stringify({status:'PASS',environment:'disposable PG17',
  atomicSignupAndEvent:true,concurrentFirstParty:8,concurrentLeases:8,
- oneTimeClaims:1,leaseBoundPrivacy:true,typedSettlement:true,leaseFence:true,stableRetryId:true,revocationStopsPending:true,withdrawalIdempotent:true,serverOnlyWithdrawal:true,
+ oneTimeClaims:1,leaseBoundPrivacy:true,typedSettlement:true,leaseFence:true,stableRetryId:true,revocationStopsPending:true,revocationStopsLeased:true,staleWorkerGpcDenied:true,withdrawalIdempotent:true,serverOnlyWithdrawal:true,
  singleUseBrowserReceipt:true,concurrentBrowserReceiptClaims:8,
  independentGateDefaultsOff:true,gpcExclusion:true,qaExclusion:true,
  noBackfill:true,verifiedSessionGrant:true,explicitNotice:true,grantGpcGate:true,grantNoReversal:true,rlsForced:true,retentionCascade:true,hostedWrites:0}))
