@@ -4,11 +4,12 @@
 
 This branch follows [PR #170](https://github.com/DigitalAppcorp/pazo-app/pull/170) (#168). It adds independently testable Meta Pixel and CAPI event *adapters* only. **Neither is imported or invoked by the production app. No SDK, HTTP request, secret, Meta dataset, ad or budget has been created or activated.** This is not a claim of full integration or an Events Manager PASS.
 
-**Candidate: CODE_PARTIAL (contracts, private purpose policy, lazy SDK and delivery coordinator), PROVIDER_OFF, PRIVACY_BLOCKED, META_DATASET_NOT_VERIFIED.**
+**Candidate: CODE_PARTIAL (contracts, private purpose policy, lazy SDK, credential resolver and delivery coordinator), PROVIDER_OFF, PRIVACY_BLOCKED, META_WEB_DATASET_IDENTIFIED, EVENTS_MANAGER_NOT_TESTED.**
 The user approved implementation and testing, but not the third-party production data release or ad spend.
 
 ## Technical assets
 - `supabase/functions/_shared/metaConversion.mjs`: shared, strictly validated `CompleteRegistration` contract; the same random UUIDv4 event ID is presented as Pixel `eventID` and CAPI `event_id`. Requires independent positive Meta purpose consent, independently *trusted* consent, valid verified account, QA/admin/exclusion/GPC/opt-out negative checks, format-valid ID, server event timestamp and explicit dataset ID + SHA256 match field. Uses a fixed query-free canonical URL. This module **does not issue or persist event IDs**.
+- `supabase/functions/_shared/metaServerConfig.mjs`: OFF-by-default server-only credential resolver for Edge secrets `META_CAPI_ACCESS_TOKEN` and `META_DATASET_ID`. Requires explicit release AND privacy gates, verifies the dataset ID matches PAZO Web `1438916858347709` and a separately approved API version, and never reads secrets while OFF. The synthetic tests exercise unavailability and the safe status-only report; it is not imported by any live Edge Function.
 - `supabase/functions/_shared/metaCapi.mjs`: isolated server-side transport with flags OFF, trusted server-side authorization recheck, a required unique-claim proof, strict canonical payload and version, token only in `Authorization` header, timeout/error handling without logging data. A caller MUST implement durable idempotency, server-only approved match-field processing, and privacy authorization before using it.
 - `src/features/marketing/metaPixel.mjs`: isolated Pixel event dispatcher requiring positive browser privacy and a same-ID server-attested conversion. It intentionally does **not** load a third-party script or initialize a Pixel. A later, reviewed consent-gated loader is still needed.
 - `supabase/functions/_shared/metaPurposePolicy.mjs`: independent, versioned affirmative marketing purpose; opt-out, GPC, QA/admin and withdrawal override any prior grant. A trusted server read is mandatory. It **does not persist consent**.
@@ -21,7 +22,7 @@ The user approved implementation and testing, but not the third-party production
 
 ## Blockers — do not flip flags or wire the adapters until resolved
 
-1. **Meta asset ownership:** #168 read-only audit found no PAZO-specific Pixel/web dataset in the accessible Events Manager. Obtain PAZO-owned dataset ID, approved API version and server-side access token through secure settings, not in GitHub. No borrowing unrelated datasets.
+1. **Meta asset ownership:** The account owner subsequently created or identified **PAZO Web**, numeric dataset ID `1438916858347709`, visible in Events Manager. On 31 Oct 2026 the owner saved `META_CAPI_ACCESS_TOKEN` and `META_DATASET_ID` as Supabase Edge Functions secrets, and their **names** were verified in the live secrets list (not their secret values). This confirms storage, **not** that CAPI is integrated or the token works. Confirm business ownership/permissions, choose an API version supported by Meta and run Test Events only after privacy and runtime gates pass. Do not reuse the unrelated Guastayomi app source.
 2. **Privacy and consent:** first-party PAZO analytics notice does not imply authorization to disclose verified registrations to Meta. Review whether and how California CCPA/CPRA applies, opt-out of sharing, GPC, withdrawal and accurate ES/EN notice. Record an explicit, durable purpose-specific Meta consent/opt-out decision and a corresponding trusted server proof. Any PII/matching data (including hashed email, IP and cookies) needs explicit inventory/review. `hashedEmail` in the pure fixture is an imaginary 64-character hash; no real email is processed.
 3. **Server-generated durable event proof:** existing `pazo_marketing_record_verified_v1` returns only boolean and enforces insertion/deduplication internally. Do not reuse the Auth user ID or invent a client ID. Build a private, persistent one-time conversion claim with unique random UUIDv4 `event_id` and trusted eligibility at the **same atomic boundary** as newly accepted signup. Return only the event ID to the correct authorized browser if consent permits. Server submission and Pixel must use that same ID; no reissue on retries, refresh, account switches, or email reconfirmation. Existing 14-day retention policy and QA exclusions must not be weakened; choose TTL and retry policy consistent with Meta's window and the privacy policy.
 4. **Live runtime integration:** only after 1–3, connect one authenticated server-backed flow to the existing verified signup success; connect a guarded SDK loader in the browser, never automatic PageView/advanced matching. Server-side authorization must be independently verified, not derived from request body boolean. Browser GPC/withdrawal must be checked prior to SDK and prior to event. No unconditional `fbevents.js` in HTML or startup.
@@ -40,7 +41,8 @@ The user approved implementation and testing, but not the third-party production
 | Consent purpose policy | Tested, but no durable trusted storage or UI |
 | Trusted persistent privacy decision | BLOCKED |
 | Atomic one-time event proof | Lab-only, OFF-by-default AFTER INSERT trigger + service-only lease/settle RPCs; no hosted migration, trusted Edge integration or browser event receipt |
-| Meta asset ID/token | NOT VERIFIED |
+| PAZO web dataset ID | Identified: `1438916858347709` (owner screenshot) |
+| Meta CAPI token storage | Names present in hosted Supabase Secrets; actual token value/validity not read or tested |
 | Browser/server dedup in Meta | NOT TESTED |
 | Real Meta conversions | NOT VERIFIED |
 | Production provider transfer | OFF |
@@ -60,4 +62,4 @@ The candidate Meta-specific release gate starts **OFF** and is separate from PAZ
 
 ## 30 Oct — constrained owner handoff
 
-Current Meta Events Manager browser tab can be read but not controlled. It shows only the unrelated app source Guastayomi; not an owned PAZO website Pixel. See [Meta Web dataset setup handoff](META_WEB_DATASET_SETUP_HANDOFF.md) for steps the account owner must take. Never copy an access token into PRs or chat.
+Current browser can view Events Manager but cannot control it. The user subsequently supplied proof of a **PAZO Web** dataset in Events Manager and saved server-side credentials under `META_CAPI_ACCESS_TOKEN` and `META_DATASET_ID` in hosted Supabase, verified by secret names in the UI. This supersedes the earlier absence of PAZO in the unrelated Guastayomi app view. See [Meta Web dataset setup handoff](META_WEB_DATASET_SETUP_HANDOFF.md) for the updated configuration handoff. Never copy an access token into PRs or chat.
