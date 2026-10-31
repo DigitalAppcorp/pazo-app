@@ -69,7 +69,17 @@ export async function sendMetaCapi({
     })
     if (!response?.ok) return {status:'provider_error'}
     const receipt=await response.json()
-    return receipt?.events_received===1
-      ? {status:'accepted'} : {status:'provider_error'}
+    if (receipt?.events_received!==1) return {status:'provider_error'}
+    // Meta can return events_received=1 AND report a rejected/inactive
+    // test_event_code in messages. That is API acceptance, NOT verified
+    // Test Events visibility. Never echo provider messages (which are
+    // untrusted and can include arbitrary strings) or claim clean success.
+    // A received event is terminal: retries could duplicate a conversion.
+    const notices=receipt.messages
+    if (notices!==undefined && notices!==null &&
+        (!Array.isArray(notices) ||
+          notices.some(m=>typeof m!=='string'||m.trim()!=='')))
+      return {status:'accepted_with_warnings'}
+    return {status:'accepted'}
   } catch {return {status:'unavailable'}}
 }
