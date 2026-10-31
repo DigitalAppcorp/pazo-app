@@ -15,6 +15,8 @@ The user approved implementation and testing, but not the third-party production
 - `supabase/functions/_shared/metaDeliveryCoordinator.mjs`: composed CAPI event delivery with a required DB-backed `leaseOne()` + privacy read + idempotent `settle()` interface. Rechecks current permission immediately before network transmission; failures remain retryable using the same event ID. No DB adapter is implemented yet.
 - `src/features/marketing/metaPixelLoader.mjs`: isolated SDK bootstrap that creates no third-party script until release, purpose-specific consent and browser eligibility are all affirmative. Queues a consent revoke before init; does not send PageView; sends the named event only after a post-load consent/GPC check. Does not import into PAZO.
 - `scripts/meta-conversion-off.test.mjs`, `scripts/meta-delivery-coordinator.test.mjs`, `scripts/meta-pixel-loader.test.mjs` and isolated workflow: synthetic-only tests. No real Meta or Supabase requests.
+- `supabase/tests/marketing/meta-outbox-candidate.sql`: laboratory-only private PG17 candidate, **NOT** a migration or deployable release. Candidate outbox is a child of first-party acquisition so 14-day pruning/withdrawal cascades, with one-time event IDs and a separate purpose ledger. RLS forced, no direct public/anon/authenticated table grants; a service-only claim bridge must be bound to trusted Auth by Edge if ever used. The candidate requires a server-persisted prior specific permission; it cannot create new consent by itself.
+- `scripts/meta-outbox-pg17.mjs`: isolated PG17 tests for eight concurrent claims, no grant/GPC/post-verification consent, retroactive QA exclusion, private RLS and 14-day-related cascade. CI has an Ads2 job to run it after the original marketing baseline. Mark PASS only after that job succeeds.
 
 ## Blockers — do not flip flags or wire the adapters until resolved
 
@@ -36,7 +38,7 @@ The user approved implementation and testing, but not the third-party production
 | CAPI API transport | Prepared, provider disconnected |
 | Consent purpose policy | Tested, but no durable trusted storage or UI |
 | Trusted persistent privacy decision | BLOCKED |
-| Atomic one-time event proof | Outbox lease/settle interface prepared; DB transaction NOT IMPLEMENTED |
+| Atomic one-time event proof | Lab-only SQL claim + concurrency test prepared; no hosted migration or operational lease/settle adapter |
 | Meta asset ID/token | NOT VERIFIED |
 | Browser/server dedup in Meta | NOT TESTED |
 | Real Meta conversions | NOT VERIFIED |
@@ -47,6 +49,6 @@ Documentation basis: https://developers.facebook.com/docs/marketing-api/conversi
 
 ## Handoff for subsequent work (do not bypass gates)
 
-The next implementation milestone is a private, transactionally safe one-event claim/outbox at the trusted signup insertion boundary, with a persistent and independently verified purpose preference and withdrawal. Test concurrently on disposable PG17 first; any additional SQL is PREPARED_ONLY with no hosted installation. Only then bind the isolated coordinator to that private adapter and a consented browser-side callback; continue to require an owned PAZO Pixel/dataset and Test Events evidence. In the interim the isolated loader is inert; do not interpret code preparation as Meta registration measurement.
+The next implementation milestone is to mature the laboratory-only one-time claim/outbox into a reviewed Supabase CLI-generated migration and connect it to the trusted verified-signup insertion boundary, with an authenticated, persistent and independently verified purpose preference and withdrawal. Test concurrently on disposable PG17 first; any additional SQL is PREPARED_ONLY with no hosted installation. Only then bind the isolated coordinator to that private adapter and a consented browser-side callback; continue to require an owned PAZO Pixel/dataset and Test Events evidence. In the interim the isolated loader is inert; do not interpret code preparation as Meta registration measurement.
 
 Privacy basis: California's CPPA describes the opt-out right for cross-context behavioral advertising and user-enabled opt-out signals at https://cppa.ca.gov/faq ; a legal review is still required to determine the exact PAZO implementation. The prior PAZO 14-day acquisition record purge and the duration of a purpose-specific preference are separate concerns; do not silently expire a privacy opt-out by applying the analytics TTL.
