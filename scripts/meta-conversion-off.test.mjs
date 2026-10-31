@@ -109,14 +109,14 @@ test('Test Events code requires explicit non-production mode; invalid config nev
     authorized:async()=>true,
   }
   assert.equal(validMetaTestConfiguration(),true)
-  assert.equal(validMetaTestConfiguration({testModeEnabled:true,testEventCode:'TEST3982',nonProduction:true}),true)
+  assert.equal(validMetaTestConfiguration({testModeEnabled:true,testEventCode:'TESTSYNTH01',nonProduction:true}),true)
   let network=0
   for(const patch of [
-    {testModeEnabled:false,testEventCode:'TEST3982',nonProduction:true},
-    {testModeEnabled:true,testEventCode:'TEST3982',nonProduction:false},
+    {testModeEnabled:false,testEventCode:'TESTSYNTH01',nonProduction:true},
+    {testModeEnabled:true,testEventCode:'TESTSYNTH01',nonProduction:false},
     {testModeEnabled:true,testEventCode:null,nonProduction:true},
     {testModeEnabled:true,testEventCode:'bad-code',nonProduction:true},
-    {testModeEnabled:true,testEventCode:'TEST3982?token=bad',nonProduction:true},
+    {testModeEnabled:true,testEventCode:'TESTSYNTH01?token=bad',nonProduction:true},
   ]) {
     assert.equal(validMetaTestConfiguration(patch),false)
     const out=await sendMetaCapi({...options,...patch,
@@ -132,7 +132,7 @@ test('explicit non-production CAPI Test Events request carries code only in payl
     releaseEnabled:true,privacyGateApproved:true,claimWasInserted:true,
     event:p.server,datasetId,apiVersion:'v24.0',
     serverToken:'synthetic_private_token_1234567890',
-    testModeEnabled:true,testEventCode:'TEST3982',nonProduction:true,
+    testModeEnabled:true,testEventCode:'TESTSYNTH01',nonProduction:true,
     authorized:async()=>true,
     fetchImpl:async(uri,req)=>{
       endpoint=uri;headers=req.headers;payload=JSON.parse(req.body)
@@ -140,9 +140,9 @@ test('explicit non-production CAPI Test Events request carries code only in payl
     },
   })
   assert.deepEqual(out,{status:'accepted'})
-  assert.equal(payload.test_event_code,'TEST3982')
+  assert.equal(payload.test_event_code,'TESTSYNTH01')
   assert.deepEqual(payload.data,[p.server])
   assert.equal(endpoint,'https://graph.facebook.com/v24.0/'+datasetId+'/events')
-  assert.equal(endpoint.includes('TEST3982'),false)
+  assert.equal(endpoint.includes('TESTSYNTH01'),false)
   assert.equal(headers.authorization,'Bearer synthetic_private_token_1234567890')
 })
