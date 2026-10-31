@@ -15,6 +15,7 @@ export function createMetaGrantProvider({url,anonKey,serviceKey,
  const withdrawal=createMetaWithdrawalProvider({url,anonKey,serviceKey,fetchImpl})
  return {
   authenticate:source.authenticate,
+    authenticateGpc:withdrawal.authenticate,
     persistGpc:withdrawal.withdraw,
   grant:async(ownerId,notice,gpc)=>{
    if(typeof ownerId!=='string'||!UUID.test(ownerId)
