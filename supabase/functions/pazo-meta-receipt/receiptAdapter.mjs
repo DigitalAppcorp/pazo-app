@@ -5,7 +5,7 @@
 import {createMarketingProvider} from '../pazo-marketing-attribution/intakeAdapter.mjs'
 const URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const PAZO_WEB_DATASET='1438916858347709'
-const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export function createMetaReceiptProvider({
   url,anonKey,serviceKey,datasetId,fetchImpl=fetch,
