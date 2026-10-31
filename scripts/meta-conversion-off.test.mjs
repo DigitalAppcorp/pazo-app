@@ -11,12 +11,13 @@ import {canUseMetaPixel,dispatchMetaPixel} from '../src/features/marketing/metaP
 const eventId='11111111-2222-4333-8444-555555555555'
 const datasetId='123456789012345'
 const hashedEmail='a'.repeat(64) // fixture, not anyone's email
+const clientUserAgent='Mozilla/5.0 (PAZO Synthetic Consent Test)'
 const consent={
   releaseEnabled:true,explicitConsent:true,consentTrusted:true,
   verifiedRegistration:true,excluded:false,globalPrivacyControl:false,
   optedOut:false,qaOrAdmin:false,eventId,
 }
-const proof=()=>buildMetaRegistration({...consent,datasetId,hashedEmail,
+const proof=()=>buildMetaRegistration({...consent,datasetId,hashedEmail,clientUserAgent,
   eventTime:Math.floor(Date.now()/1000)})
 test('third-party sharing is OFF by default, even if Meta ID is configured',()=>{
   assert.equal(eligibleMetaRegistration(),false)
@@ -29,9 +30,9 @@ test('each independent privacy/identity gate suppresses sharing',()=>{
     releaseEnabled:false,explicitConsent:false,consentTrusted:false,
     verifiedRegistration:false,excluded:true,globalPrivacyControl:true,
     optedOut:true,qaOrAdmin:true,eventId:'not-a-uuid',
-  })) assert.equal(buildMetaRegistration({...consent,[key]:bad,datasetId,hashedEmail,eventTime:Math.floor(Date.now()/1000)}),null,key)
-  assert.equal(buildMetaRegistration({...consent,datasetId,hashedEmail:'',eventTime:Math.floor(Date.now()/1000)}),null)
-  assert.equal(buildMetaRegistration({...consent,datasetId,hashedEmail,eventTime:1}),null)
+  })) assert.equal(buildMetaRegistration({...consent,[key]:bad,datasetId,hashedEmail,clientUserAgent,eventTime:Math.floor(Date.now()/1000)}),null,key)
+  assert.equal(buildMetaRegistration({...consent,datasetId,hashedEmail:'',clientUserAgent,eventTime:Math.floor(Date.now()/1000)}),null)
+  assert.equal(buildMetaRegistration({...consent,datasetId,hashedEmail,clientUserAgent,eventTime:1}),null)
 })
 test('shared browser/server event_name and eventID, fixed URL with no query/PII',()=>{
   const event=proof()
@@ -40,7 +41,10 @@ test('shared browser/server event_name and eventID, fixed URL with no query/PII'
   assert.equal(event.browser.eventID,event.server.event_id)
   assert.equal(event.server.event_source_url,META_CANONICAL_URL)
   assert.equal(event.server.action_source,'website')
-  assert.deepEqual(Object.keys(event.server.user_data),['em'])
+  assert.deepEqual(Object.keys(event.server.user_data).sort(),['client_user_agent','em'])
+  assert.equal(event.server.user_data.client_user_agent,clientUserAgent)
+  assert.equal(validMetaServerEvent({...event.server,user_data:{em:[hashedEmail]}},datasetId),false)
+  assert.equal(validMetaServerEvent({...event.server,user_data:{...event.server.user_data,client_user_agent:'bad\\nua'}},datasetId),false)
   assert.equal(JSON.stringify(event.server).includes('utm'),false)
   assert.equal(JSON.stringify(event.server).includes('facebook.com'),false)
   assert.equal(validMetaServerEvent(event.server,datasetId),true)
