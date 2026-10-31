@@ -1,56 +1,102 @@
-import {useState} from 'react'
+import {useEffect,useRef,useState} from 'react'
 import type {ReactNode} from 'react'
 
-// #169 DESIGN CANDIDATE — not imported or rendered anywhere in PAZO.
-// Present only after a fresh server-verified registration, once the
-// authenticated server grant path, notice, revocation and privacy review
-// pass release gates. Never treat this checkbox as trusted storage.
+// #169 DESIGN CANDIDATE — never imported, rendered or served by live PAZO.
+// Requires the separately released first-party withdrawal endpoint. Browser
+// preferences alone do not prove server persistence or release to Meta.
+// Legal/Design OS review and PO approval required before any publication.
 interface Props {
   lang:'es'|'en'
   onGrant:()=>Promise<boolean>
+  onWithdraw:()=>Promise<boolean>
   onContinue:()=>void
   onPrivacy:()=>void
   busy?:boolean
 }
 const COPY={
  es:{
-  title:'Tu privacidad, tu decisión',
-  description:'¿Permites que PAZO comparta con Meta la confirmación de tu registro para medir nuestros anuncios? Meta podría recibir identificadores técnicos y datos de coincidencia autorizados, además de la señal de registro.',
-  toggle:'Sí, permito esta medición con Meta.',
-  link:'Ver cómo se usan mis datos',
+  title:'Tú decides qué compartir',
+  description:'¿Permites que PAZO informe a Meta cuando confirmas tu registro para medir nuestros anuncios? Si lo permites, Meta puede recibir datos técnicos de conexión, como IP y navegador. Un identificador derivado de tu correo solo podrá enviarse si se aprueba específicamente.',
+  toggle:'Sí, permito medir mi registro con Meta.',
+  link:'Cómo se usarían mis datos',
   grant:'Permitir medición',
   continue:'Continuar sin permitirlo',
-  blocked:'Tu navegador solicita no compartir datos para publicidad. Respetaremos esa preferencia.',
-  error:'No se pudo guardar tu elección. Puedes continuar sin permitirlo.',
-  optional:'Es opcional. PAZO funciona de la misma manera si no lo permites.',
+  blocked:'Tu navegador solicita no compartir datos para publicidad. No activaremos esta medición.',
+  syncSaved:'Tu preferencia de no compartir quedó guardada en PAZO.',
+  syncPending:'Guardando tu preferencia en PAZO…',
+  syncError:'No pudimos confirmar tu preferencia en el servidor. No activaremos la medición. Puedes reintentar.',
+  retry:'Reintentar guardar',
+  error:'No se pudo guardar el permiso. Puedes continuar sin permitirlo.',
+  optional:'Es opcional. Todas las herramientas de PAZO funcionan sin esta medición.',
  },
  en:{
-  title:'Your privacy, your choice',
-  description:'Do you allow PAZO to share your confirmed registration with Meta to measure our ads? Meta may receive technical identifiers and approved matching data as well as the registration signal.',
-  toggle:'Yes, I allow this measurement with Meta.',
+  title:'You decide what to share',
+  description:'May PAZO tell Meta when you confirm your registration to measure our ads? If you allow it, Meta may receive technical connection data such as IP address and browser information. An identifier derived from your email would only be sent after separate approval.',
+  toggle:'Yes, I allow Meta to measure my registration.',
   link:'How my data may be used',
   grant:'Allow measurement',
   continue:'Continue without allowing',
-  blocked:'Your browser asks websites not to share data for advertising. We will respect that preference.',
-  error:'We could not save your choice. You can continue without allowing.',
-  optional:'This is optional. PAZO works the same way if you do not allow it.',
+  blocked:'Your browser requests no advertising data sharing. This measurement will not be enabled.',
+  syncSaved:'Your do-not-share preference has been saved in PAZO.',
+  syncPending:'Saving your preference in PAZO…',
+  syncError:'We could not confirm your preference on the server. We will not enable measurement. You can retry.',
+  retry:'Retry saving',
+  error:'We could not save permission. You can continue without allowing.',
+  optional:'Optional. All PAZO tools work without this measurement.',
  },
 } as const
 export const META_CHOICES_RELEASED=false
-export function MetaConsentChoice({lang,onGrant,onContinue,onPrivacy,busy=false}:Props):ReactNode{
+
+export function MetaConsentChoice({
+ lang,onGrant,onWithdraw,onContinue,onPrivacy,busy=false,
+}:Props):ReactNode{
  const [selected,setSelected]=useState(false)
  const [saving,setSaving]=useState(false)
  const [failed,setFailed]=useState(false)
+ const [gpcState,setGpcState]=useState<'idle'|'saving'|'saved'|'error'>('idle')
+ const gpcRequest=useRef<Promise<boolean>|null>(null)
  const gpc=typeof navigator!=='undefined' &&
    (navigator as Navigator&{globalPrivacyControl?:boolean}).globalPrivacyControl===true
  const t=COPY[lang]
  const disabled=busy||saving
+
+ const persistWithdrawal=()=>{
+  try{return Promise.resolve(onWithdraw()).then(value=>value===true).catch(()=>false)}
+  catch{return Promise.resolve(false)}
+ }
+ // Not a Meta event. This is a first-party opt-out-only request, made even
+ // when grant/Pixel/CAPI are OFF. Never claim it succeeded until confirmed.
+ // Promise reuse keeps React Strict Mode effect replay idempotent.
+ useEffect(()=>{
+  if(!gpc)return
+  if(!gpcRequest.current)gpcRequest.current=persistWithdrawal()
+  let active=true
+  setGpcState('saving')
+  void gpcRequest.current.then(saved=>{
+   if(active)setGpcState(saved?'saved':'error')
+  })
+  return ()=>{active=false}
+ },[gpc,onWithdraw])
+
+ const retryWithdrawal=()=>{
+  if(!gpc||gpcState==='saving')return
+  gpcRequest.current=persistWithdrawal()
+  setGpcState('saving')
+  void gpcRequest.current.then(saved=>setGpcState(saved?'saved':'error'))
+ }
+
  const accept=async()=>{
   if(disabled||!selected||gpc)return
   setSaving(true);setFailed(false)
   try{if(await onGrant()===true){onContinue();return}}
-  catch{/* no conversion or grant on failure */}
+  catch{/* Unconfirmed permission cannot authorize any Meta request. */}
   setFailed(true);setSaving(false)
+ }
+ const continueWithoutSharing=()=>{
+  // A deliberate decline persists a withdrawal without needing Meta SDK.
+  // Failure cannot block the core PAZO experience. No grant is attempted.
+  if(!gpc||gpcState==='error')void persistWithdrawal()
+  onContinue()
  }
  return (
   <section aria-labelledby="meta-consent-title"
@@ -62,7 +108,17 @@ export function MetaConsentChoice({lang,onGrant,onContinue,onPrivacy,busy=false}
     className="my-3 min-h-11 text-[15px] font-semibold underline underline-offset-4 focus-visible:bg-[#E1E53F]">
     {t.link}
    </button>
-   {gpc ? <p role="status" className="my-3 text-[15px]">{t.blocked}</p> :
+   {gpc ? <>
+    <p role="status" className="my-3 text-[15px]">{t.blocked}</p>
+    {gpcState!=='idle'&&<p role={gpcState==='error'?'alert':'status'}
+      className="mb-3 text-[15px] leading-relaxed">
+      {gpcState==='saved'?t.syncSaved:gpcState==='error'?t.syncError:t.syncPending}
+    </p>}
+    {gpcState==='error'&&<button type="button" onClick={retryWithdrawal}
+      className="min-h-11 text-[15px] font-semibold underline underline-offset-4">
+      {t.retry}
+    </button>}
+   </> :
     <label className="my-3 flex min-h-12 items-center gap-3 rounded-2xl bg-[#F1F6F2] px-3 py-3 text-[15px] font-semibold">
      <input type="checkbox" checked={selected} disabled={disabled}
       onChange={e=>setSelected(e.currentTarget.checked)}
@@ -75,7 +131,7 @@ export function MetaConsentChoice({lang,onGrant,onContinue,onPrivacy,busy=false}
      className="mt-2 min-h-12 w-full rounded-full bg-[#204E4A] px-5 text-[16px] font-bold text-white disabled:opacity-40">
      {t.grant}
    </button>}
-   <button type="button" onClick={onContinue} disabled={disabled}
+   <button type="button" onClick={continueWithoutSharing} disabled={disabled}
     className="mt-3 min-h-12 w-full rounded-full bg-[#E1E53F] px-5 text-[16px] font-bold text-[#204E4A] disabled:opacity-40">
     {t.continue}
    </button>
