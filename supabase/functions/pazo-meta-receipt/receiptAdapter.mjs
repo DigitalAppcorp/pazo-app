@@ -2,6 +2,7 @@
 // No provider token, pixel initialization, or third-party network here.
 // Service-only RPC atomically consumes at most one receipt for a verified
 // authenticated signup. A lost response may omit Pixel; it cannot re-mint it.
+import {createMetaWithdrawalProvider} from '../pazo-meta-consent/withdrawAdapter.mjs'
 import {createMarketingProvider} from '../pazo-marketing-attribution/intakeAdapter.mjs'
 const URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const PAZO_WEB_DATASET='1438916858347709'
@@ -15,8 +16,10 @@ export function createMetaReceiptProvider({
   // This provider's authenticate calls Supabase Auth /user AND /settings.
   // Auto-confirmation, unknown Auth configuration, and missing keys fail closed.
   const source=createMarketingProvider({url,anonKey,serviceKey,fetchImpl})
-  return {
+  const withdrawal=createMetaWithdrawalProvider({url,anonKey,serviceKey,fetchImpl})
+ return {
     authenticate:source.authenticate,
+    persistGpc:withdrawal.withdraw,
     lookupReceipt:async ownerId=>{
       if(typeof ownerId!=='string'||!UUID.test(ownerId))return null
       let response
