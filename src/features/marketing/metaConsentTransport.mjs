@@ -2,7 +2,7 @@
 // NOT imported by the PAZO runtime or rendered by the signup flow.
 // Deliberate UI opt-in and the independent privacy release must be reviewed.
 // Supabase Auth/Edge remains authoritative; browser checks are vetoes only.
-const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const EVENT=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const DATASET='1438916858347709'
 const NOTICE='pazo-meta-conversions-v1'
