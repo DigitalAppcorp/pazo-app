@@ -4,6 +4,7 @@ on:
     branches: [feat/issue169-meta-pixel-capi-off]
     paths:
       - 'scripts/meta-local-auth-lab.mjs'
+      - 'scripts/meta-local-auth-edge-flow.mjs'
       - '.github/workflows/meta-auth-local-lab.yml'
   workflow_dispatch:
 permissions:
@@ -51,7 +52,7 @@ jobs:
           supabase start -x realtime,storage-api,imgproxy,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
           umask 077
           supabase status -o json > "$RUNNER_TEMP/pazo-meta-auth-lab/status.json"
-      - name: Verify signup requested != confirmed and confirmed GoTrue Auth login
+      - name: Verify real GoTrue signup + Auth-bound candidate Edge consent GPC contract
         shell: bash
         run: |
           set -euo pipefail
