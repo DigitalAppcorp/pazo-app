@@ -11,6 +11,10 @@ export async function loadMetaPixelForVerifiedSignup({
   datasetId=null,eventId=null,stillAllowed=()=>false,
   browser=null,dom=null,
 }={}) {
+  const stillPermitted=()=>{
+    try{return stillAllowed()===true && browser?.navigator?.globalPrivacyControl!==true}
+    catch{return false}
+  }
   if (!canUseMetaPixel({
     releaseEnabled,privacyGateApproved,explicitConsent,
     excluded:accountExcluded,qaOrAdmin,optedOut,
@@ -19,7 +23,7 @@ export async function loadMetaPixelForVerifiedSignup({
   }) || !DATASET.test(String(datasetId)) || !browser?.document
      || dom!==browser.document || typeof dom.createElement!=='function'
      || typeof eventId!=='string' || !UUID4.test(eventId)
-     || typeof stillAllowed!=='function' || stillAllowed()!==true)
+     || typeof stillAllowed!=='function' || !stillPermitted())
     return {status:'suppressed'}
   // A different / pre-existing Pixel bootstrap would make ownership ambiguous.
   if (browser.fbq || browser._fbq) return {status:'existing_pixel'}
@@ -41,7 +45,12 @@ export async function loadMetaPixelForVerifiedSignup({
   return new Promise(resolve=>{
     let settled=false
     const finish=result=>{if(!settled){settled=true;resolve(result)}}
-    const script=dom.createElement('script')
+    let script
+    try {script=dom.createElement('script')}
+    catch {
+      fbq('consent','revoke')
+      return finish({status:'unavailable'})
+    }
     script.async=true
     script.src=PIXEL_URL
     script.onerror=()=>{
@@ -50,18 +59,25 @@ export async function loadMetaPixelForVerifiedSignup({
       finish({status:'unavailable'})
     }
     script.onload=()=>{
-      if (stillAllowed()!==true || browser.navigator?.globalPrivacyControl===true){
+      if (!stillPermitted()){
         fbq('consent','revoke')
         return finish({status:'suppressed'})
       }
-      fbq('consent','grant')
-      const result=dispatchMetaPixel({
-        authorized:true,browserGpc:false,stillConsented:stillAllowed,
-        eventId,datasetId,fbq,
-      })
-      finish(result)
+      try {
+        fbq('consent','grant')
+        const result=dispatchMetaPixel({
+          authorized:true,browserGpc:false,stillConsented:stillPermitted,
+          eventId,datasetId,fbq,
+        })
+        // A preference may change between the pre-load and dispatch checks.
+        if(result.status!=='queued')fbq('consent','revoke')
+        finish(result)
+      } catch {
+        fbq('consent','revoke')
+        finish({status:'unavailable'})
+      }
     }
     try {dom.head.appendChild(script)}
-    catch {finish({status:'unavailable'})}
+    catch {fbq('consent','revoke');finish({status:'unavailable'})}
   })
 }
