@@ -37,6 +37,7 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - run: node --test scripts/meta-consent-ui-candidate.test.mjs
       - run: npm run test:marketing
       - run: npm run test:governance
       - run: npm run test:intelligence
