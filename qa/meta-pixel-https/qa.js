@@ -17,9 +17,14 @@ function render(message){
  fire.disabled=busy || authorized || isGpc() || checkbox.checked!==true;
 }
 function removeMetaCookies(){
+ const host=location.hostname.toLowerCase();
  for(const name of ['_fbp','_fbc']){
-  // Host-only. No other application's cookies are touched.
-  try{document.cookie=name+'=; Path=/; Max-Age=0; SameSite=Lax'}catch{}
+  // Meta may set a host or explicit-domain first-party cookie. Remove
+  // only matching Meta cookies on this isolated QA host.
+  for(const domain of ['',host]){
+   try{document.cookie=name+'=; Path=/; Max-Age=0; SameSite=Lax'
+     +(domain?'; Domain='+domain:'')}catch{}
+  }
  }
 }
 function withdraw(){
@@ -43,8 +48,10 @@ setInterval(()=>{
 function install(){
  return new Promise((resolve,reject)=>{
   if(window.fbq || window._fbq)return reject(new Error('Hay otro Pixel. Cancelado.'));
-  const stub=function(){stub.callMethod?stub.callMethod.apply(stub,arguments):stub.queue.push(Array.from(arguments))};
-  stub.queue=[];stub.loaded=true;stub.version='2.0';
+  // Match the official bootstrap exactly; the vendor SDK may require
+  // the .push alias and native arguments objects to drain queued calls.
+  const stub=function(){stub.callMethod?stub.callMethod.apply(stub,arguments):stub.queue.push(arguments)};
+  stub.queue=[];stub.loaded=true;stub.version='2.0';stub.push=stub;
   stub.disablePushState=true;
   window.fbq=stub;window._fbq=stub;
   sdkOwned=true;
