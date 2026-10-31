@@ -16,8 +16,31 @@ export function revokeOwnedMetaPixelConsent({browser=null}={}) {
   const owned=ownedPixelQueues.get(browser)
   if(typeof owned!=='function'||browser.fbq!==owned||browser._fbq!==owned)
     return false
-  try{owned('consent','revoke');return true}
-  catch{return false}
+  let revoked=false
+  try{owned('consent','revoke');revoked=true}catch{/* fail closed locally */}
+  // The authentic SDK may create _fbp (and, after a click, _fbc) after
+  // consent. SDK revoke alone does NOT erase those first-party cookies.
+  // Remove only Meta measurement cookies, never PAZO Auth or other cookies;
+  // use only this document's host to avoid cross-site mutation.
+  const doc=browser.document
+  if(doc && typeof doc.cookie==='string'){
+    let host=''
+    try{host=String(browser.location?.hostname||'').toLowerCase()}
+    catch{/* host-only clear still possible */}
+    const domains=['']
+    if(host && /^[a-z0-9.-]+$/.test(host)
+       && host.includes('.') && !host.startsWith('.'))
+      domains.push(host)
+    for(const name of ['_fbp','_fbc']){
+      for(const domain of domains){
+        try{
+          doc.cookie=name+'=; Max-Age=0; Path=/; SameSite=Lax'
+            +(domain?'; Domain='+domain:'')
+        }catch{/* cookie blockers cannot reactivate Meta or fail withdrawal */}
+      }
+    }
+  }
+  return revoked
 }
 
 export async function loadMetaPixelForVerifiedSignup({
