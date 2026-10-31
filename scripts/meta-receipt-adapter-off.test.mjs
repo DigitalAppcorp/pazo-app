@@ -91,3 +91,54 @@ test('replay, absent claim and disabled release fail closed',async()=>{
  assert.equal((await disabled(makeReq())).status,503)
  assert.equal(f.calls.length,3,'disabled handler must not call provider')
 })
+
+test('released receipt binds original browser UA through private matching snapshot, not body',async()=>{
+ const ua='Mozilla/5.0 (PAZO synthetic signed-in browser)'
+ const calls=[]
+ const provider=createMetaReceiptProvider({
+  url,anonKey,serviceKey,datasetId,captureOriginalUa:true,
+  fetchImpl:async(path,init)=>{
+   calls.push({path,init})
+   if(path.endsWith('/auth/v1/user'))return new Response(JSON.stringify({
+    id:owner,is_anonymous:false,email_confirmed_at:timestamp}),{status:200})
+   if(path.endsWith('/auth/v1/settings'))
+    return new Response('{"mailer_autoconfirm":false}',{status:200})
+   if(path.endsWith('/rpc/pazo_meta_take_pixel_receipt_candidate'))
+    return new Response(JSON.stringify([{event_id:eventId,event_time:timestamp}]),{status:200})
+   if(path.endsWith('/rpc/pazo_meta_capture_ua_candidate'))
+    return new Response('true',{status:200})
+   throw Error('unexpected')
+  },
+ })
+ const handle=createMetaReceiptHandler({released:true,privacyReviewed:true,...provider})
+ const result=await handle(makeReq({'user-agent':ua}))
+ assert.equal(result.status,200)
+ assert.equal(calls.length,4)
+ assert.deepEqual(JSON.parse(calls[3].init.body),{p_owner:owner,p_agent:ua})
+ assert.equal(calls[3].init.headers.authorization,'Bearer '+serviceKey)
+ assert.equal(JSON.stringify(await result.json()).includes(ua),false)
+})
+test('released receipt cannot take claim without valid original UA or confirmed snapshot',async()=>{
+ let claims=0
+ const make=acceptCapture=>createMetaReceiptProvider({
+  url,anonKey,serviceKey,datasetId,captureOriginalUa:true,
+  fetchImpl:async(path)=>{
+   if(path.endsWith('/auth/v1/user'))return new Response(JSON.stringify({
+    id:owner,is_anonymous:false,email_confirmed_at:timestamp}),{status:200})
+   if(path.endsWith('/auth/v1/settings'))
+    return new Response('{"mailer_autoconfirm":false}',{status:200})
+   if(path.endsWith('/rpc/pazo_meta_take_pixel_receipt_candidate')){
+    claims++;return new Response(JSON.stringify([{event_id:eventId,event_time:timestamp}]),{status:200})
+   }
+   if(path.endsWith('/rpc/pazo_meta_capture_ua_candidate'))
+    return new Response(acceptCapture?'true':'false',{status:200})
+   throw Error('unexpected')
+  },
+ })
+ const missing=createMetaReceiptHandler({released:true,privacyReviewed:true,...make(true)})
+ assert.equal((await missing(makeReq({'user-agent':'tiny'}))).status,404)
+ assert.equal(claims,0,'invalid header must not consume a one-time receipt')
+ const failed=createMetaReceiptHandler({released:true,privacyReviewed:true,...make(false)})
+ assert.equal((await failed(makeReq({'user-agent':'Mozilla/5.0 (PAZO synthetic signed-in browser)'}))).status,404)
+ assert.equal(claims,1,'valid header can consume claim but failed persistence must block Pixel')
+})
