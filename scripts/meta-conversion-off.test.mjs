@@ -4,7 +4,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {buildMetaRegistration,eligibleMetaRegistration,META_EVENT_NAME,META_CANONICAL_URL}
   from '../supabase/functions/_shared/metaConversion.mjs'
-import {sendMetaCapi,validMetaServerEvent}
+import {sendMetaCapi,validMetaServerEvent,validMetaTestConfiguration}
   from '../supabase/functions/_shared/metaCapi.mjs'
 import {canUseMetaPixel,dispatchMetaPixel} from '../src/features/marketing/metaPixel.mjs'
 
@@ -98,4 +98,51 @@ test('malformed CAPI receipt does not claim conversion success',async()=>{
     event:p.server,datasetId,apiVersion:'v24.0',serverToken:'private_synthetic_never_real_012345',
     authorized:async()=>true,fetchImpl:async()=>({ok:true,json:async()=>({events_received:0})})})
   assert.equal(result.status,'provider_error')
+})
+
+test('Test Events code requires explicit non-production mode; invalid config never contacts Meta',async()=>{
+  const p=proof()
+  const options={
+    releaseEnabled:true,privacyGateApproved:true,claimWasInserted:true,
+    event:p.server,datasetId,apiVersion:'v24.0',
+    serverToken:'synthetic_private_token_1234567890',
+    authorized:async()=>true,
+  }
+  assert.equal(validMetaTestConfiguration(),true)
+  assert.equal(validMetaTestConfiguration({testModeEnabled:true,testEventCode:'TEST3982',nonProduction:true}),true)
+  let network=0
+  for(const patch of [
+    {testModeEnabled:false,testEventCode:'TEST3982',nonProduction:true},
+    {testModeEnabled:true,testEventCode:'TEST3982',nonProduction:false},
+    {testModeEnabled:true,testEventCode:null,nonProduction:true},
+    {testModeEnabled:true,testEventCode:'bad-code',nonProduction:true},
+    {testModeEnabled:true,testEventCode:'TEST3982?token=bad',nonProduction:true},
+  ]) {
+    assert.equal(validMetaTestConfiguration(patch),false)
+    const out=await sendMetaCapi({...options,...patch,
+      fetchImpl:async()=>{network++;throw Error('should not send')}})
+    assert.deepEqual(out,{status:'not_configured'})
+  }
+  assert.equal(network,0)
+})
+test('explicit non-production CAPI Test Events request carries code only in payload',async()=>{
+  const p=proof()
+  let payload=null,endpoint=null,headers=null
+  const out=await sendMetaCapi({
+    releaseEnabled:true,privacyGateApproved:true,claimWasInserted:true,
+    event:p.server,datasetId,apiVersion:'v24.0',
+    serverToken:'synthetic_private_token_1234567890',
+    testModeEnabled:true,testEventCode:'TEST3982',nonProduction:true,
+    authorized:async()=>true,
+    fetchImpl:async(uri,req)=>{
+      endpoint=uri;headers=req.headers;payload=JSON.parse(req.body)
+      return {ok:true,json:async()=>({events_received:1})}
+    },
+  })
+  assert.deepEqual(out,{status:'accepted'})
+  assert.equal(payload.test_event_code,'TEST3982')
+  assert.deepEqual(payload.data,[p.server])
+  assert.equal(endpoint,'https://graph.facebook.com/v24.0/'+datasetId+'/events')
+  assert.equal(endpoint.includes('TEST3982'),false)
+  assert.equal(headers.authorization,'Bearer synthetic_private_token_1234567890')
 })
