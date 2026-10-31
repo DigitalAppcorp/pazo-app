@@ -28,3 +28,10 @@
 `RELEASE: NO-GO`
 
 This report does not constitute permission to merge, deploy, change the published privacy policy, send data to Meta, provision paid infrastructure, or spend on ads. Separate legal/data-field review, authenticated isolated hosted/staging flow, Meta Events Manager verification, and explicit launch authorization remain required.
+
+## Extended coverage — 31 Oct 2026 (commit 33e13d7e)
+
+- [Chromium visual run #32](https://github.com/DigitalAppcorp/pazo-app/actions/runs/41184589597) **SUCCESS** with 54 PNG files: 2 languages × 3 widths × 4 scenarios × initial/result = 48, plus 6 explicit GPC persistence-error screenshots captured **before** pressing Retry. Archive artifact ID `13036626001`; SHA `33e13d7ee206e706c93386830f2fe70d65514cf9`.
+- `QA_RESULT.json`: `META_CONSENT_VISUAL_DOM_PASS`, `screenshots:54`, `externalRequests:0`, `findings:[]`. Browser console errors, page runtime exceptions, local 4xx/5xx and failed local requests now fail the test, even if the DOM appears acceptable.
+- Independent visual contact-sheet inspection of all 48 initial/result states plus the 6 saved GPC-error screenshots: ES/EN copy present, retry visible after server failure, non-consent continuation visible, no apparent horizontal clipping at 320/390/430 px. This is qualitative screen review, not a contrast calculation, assistive-technology audit or public-hosted E2E.
+- **Revised isolated visual verdict:** `DESIGN_QA_ISOLATED: PASS`. `DESIGN_QA_FULL: NOT_TESTED` remains because the actual signed-in PAZO route, privacy-link destination, cross-device GPC and production treatment have not been validated. All provider release gates stay OFF.
