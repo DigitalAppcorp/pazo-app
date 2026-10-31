@@ -209,3 +209,16 @@ test('synthetic Edge runtime routes authorized outbox lease through CAPI without
  assert.ok(secretReads.includes('META_WORKER_DISPATCH_SECRET'))
  assert.ok(secretReads.includes('META_CAPI_ACCESS_TOKEN'))
 })
+
+test('worker reports sanitized accepted-with-warnings status, not provider warning details',async()=>{
+ const handler=createMetaWorkerHandler({
+   released:true,privacyReviewed:true,matchFieldsApproved:true,providerApproved:true,
+   authenticate:async()=>true,
+   run:async()=>({status:'accepted_with_warnings',
+     messages:['test_event_code TESTSYNTH01 is not active'],
+     token:SECRET}),
+ })
+ assert.deepEqual(await read(await handler(req())),{
+  http:200,status:'accepted_with_warnings',
+ })
+})
