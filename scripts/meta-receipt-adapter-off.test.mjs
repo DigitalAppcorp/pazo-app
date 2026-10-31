@@ -78,10 +78,9 @@ test('unverified email blocks receipt; GPC persists opt-out instead of claiming 
  const h=createMetaReceiptHandler({released:true,privacyReviewed:true,...normal.provider})
  assert.equal((await h(makeReq({'sec-gpc':'1'}))).status,403)
  assert.deepEqual(normal.calls.map(x=>x.path),[
-   url+'/auth/v1/user',url+'/auth/v1/settings',
-   url+'/rest/v1/rpc/pazo_meta_withdraw_candidate',
- ])
- assert.deepEqual(JSON.parse(normal.calls[2].init.body),{p_owner:owner})
+   url+'/auth/v1/user',url+'/rest/v1/rpc/pazo_meta_withdraw_candidate',
+ ],'durable GPC opt-out must not require email confirmation settings')
+ assert.deepEqual(JSON.parse(normal.calls[1].init.body),{p_owner:owner})
  assert.equal(normal.calls.some(x=>x.path.includes('take_pixel_receipt')),false)
 })
 test('replay, absent claim and disabled release fail closed',async()=>{
