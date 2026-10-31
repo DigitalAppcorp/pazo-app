@@ -28,6 +28,7 @@ jobs:
       - run: node --check scripts/meta-production-boundary.mjs
       - run: node --check scripts/meta-local-auth-edge-flow.mjs
       - run: node --check scripts/meta-local-auth-lab.mjs
+      - run: node --check scripts/meta-local-gotrue-sql-lab.mjs
       - run: node scripts/meta-production-boundary.mjs
       - run: node --check src/features/marketing/metaPixel.mjs
       - run: node --check src/features/marketing/metaPixelLoader.mjs
