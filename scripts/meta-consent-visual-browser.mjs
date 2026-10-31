@@ -12,45 +12,6 @@ const require=createRequire(import.meta.url)
 const {chromium}=require('playwright')
 const PORT=5392,ORIGIN='http://127.0.0.1:'+PORT
 const DIR='artifacts/meta-consent-ui'
-const virtualEntry='virtual:pazo-meta-consent-qa'
-const source=`
-import React,{useState} from 'react'
-import {createRoot} from 'react-dom/client'
-import '/src/index.css'
-import {MetaConsentChoice,META_CHOICES_RELEASED} from '/src/features/marketing/MetaConsentChoice.tsx'
-if(META_CHOICES_RELEASED!==false)throw Error('candidate_unexpectedly_released')
-const p=new URLSearchParams(location.search)
-const lang=p.get('lang')==='en'?'en':'es'
-const scenario=p.get('case')||'default'
-Object.defineProperty(navigator,'globalPrivacyControl',{
- configurable:true,get:()=>scenario==='gpc'||scenario==='gpc-error'
-})
-window.__metaLab={grantCalls:0,withdrawCalls:0,continued:0,privacy:0}
-function Lab(){
- const [state,setState]=useState('ready')
- const withdraw=async()=>{
-   window.__metaLab.withdrawCalls++
-   if(scenario==='gpc-error'&&window.__metaLab.withdrawCalls===1)return false
-   return true
- }
- const grant=async()=>{
-   window.__metaLab.grantCalls++
-   if(scenario==='grant-error')return false
-   return true
- }
- return React.createElement('main',{className:'min-h-screen px-4 py-6',
-   style:{maxWidth:'100%',margin:'0 auto'}},
-   React.createElement(MetaConsentChoice,{
-    lang,onGrant:grant,onWithdraw:withdraw,
-    onContinue:()=>{window.__metaLab.continued++;setState('continued')},
-    onPrivacy:()=>{window.__metaLab.privacy++;setState('privacy')},
-   }),
-   React.createElement('output',{'data-testid':'lab-result',hidden:true},state)
- )
-}
-createRoot(document.getElementById('qa-root')).render(React.createElement(Lab))
-window.__metaLabReady=true
-`
 const plugin={
  name:'pazo-meta-consent-test-only',
  configureServer(server){
@@ -58,11 +19,9 @@ const plugin={
    if(!req.url?.startsWith('/__meta_consent_lab__/'))return next()
    res.setHeader('Content-Type','text/html; charset=utf-8')
    res.setHeader('Cache-Control','no-store')
-   res.end('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PAZO isolated consent QA</title></head><body><div id="qa-root"></div><script type="module" src="/@id/virtual:pazo-meta-consent-qa"></script></body></html>')
+   res.end('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PAZO isolated consent QA</title></head><body><div id="qa-root"></div><script type="module" src="/scripts/meta-consent-lab-entry.tsx"></script></body></html>')
   })
  },
- resolveId(id){if(id===virtualEntry)return String.fromCharCode(0)+virtualEntry},
- load(id){if(id===String.fromCharCode(0)+virtualEntry)return source},
 }
 const server=await createServer({
  configFile:false,logLevel:'error',plugins:[react(),plugin],
@@ -91,7 +50,18 @@ try{
     })
     const url=ORIGIN+'/__meta_consent_lab__/?lang='+lang+'&case='+scenario
     await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000})
-    await page.waitForFunction(()=>window.__metaLabReady===true,{timeout:30000})
+    const pageIssues=[]
+    page.on('pageerror',()=>pageIssues.push('module_runtime_exception'))
+    page.on('response',res=>{
+      const u=new URL(res.url())
+      if(u.origin===ORIGIN&&res.status()>=400)
+        pageIssues.push('local_http_'+res.status()+'_path_'+u.pathname.slice(0,70))
+    })
+    try{
+      await page.waitForFunction(()=>window.__metaLabReady===true,null,{timeout:12000})
+    }catch{
+      throw Error('synthetic_visual_entry_failed:'+pageIssues.join(','))
+    }
     const section=page.locator('section[aria-labelledby="meta-consent-title"]')
     await section.waitFor()
     assert.equal(await section.locator('h2').count(),1)
