@@ -31,11 +31,12 @@ export function createMetaReceiptHandler({
       'access-control-max-age':'300','cache-control':'no-store'}
     })
     if(request.method!=='POST')return reply(DENIED,405,origin)
-    if(!/^application\\/json(?:;\\s*charset=utf-8)?$/i.test(
-      request.headers.get('content-type')||''))return reply(DENIED,415,origin)
+    const type=(request.headers.get('content-type')||'').toLowerCase().trim()
+    if(type!=='application/json'&&type!=='application/json; charset=utf-8')
+      return reply(DENIED,415,origin)
     if(Number(request.headers.get('content-length')||0)>2)return reply(DENIED,413,origin)
     const token=request.headers.get('authorization')||''
-    if(!/^Bearer [A-Za-z0-9._~+/=-]{12,4096}$/.test(token))return reply(DENIED,401,origin)
+    if(!/^Bearer [A-Za-z0-9._~+=-]{12,4096}$/.test(token))return reply(DENIED,401,origin)
     let raw
     try {raw=await request.text()} catch {return reply(DENIED,400,origin)}
     if(raw!=='{}')return reply(DENIED,400,origin)
