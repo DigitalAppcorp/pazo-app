@@ -57,6 +57,12 @@ export async function loadMetaPixelForVerifiedSignup({
   ownedPixelQueues.set(browser,fbq)
   // Queue privacy safeguard before initialization. No automatic PageView.
   fbq('consent','revoke')
+  // Explicitly disable Meta's automatic event / microdata / interaction
+  // instrumentation before init. This is defense in depth; the actual SDK
+  // network behavior still requires an independent QA audit.
+  fbq('set','autoConfig',false,datasetId)
+  // Disable SPA history instrumentation; PAZO only wants one explicit event.
+  fbq.disablePushState=true
   fbq('init',datasetId)
   return new Promise(resolve=>{
     let settled=false
