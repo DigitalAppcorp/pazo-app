@@ -6,6 +6,13 @@ const API_VERSION = /^v(?:[2-9][0-9]|[1-9][0-9]{2,})\.0$/
 const DATASET = /^[1-9][0-9]{5,24}$/
 const HASH = /^[a-f0-9]{64}$/
 const TEST_EVENT_CODE=/^TEST[A-Za-z0-9]{4,32}$/
+export function validMetaTestConfiguration({
+  testModeEnabled=false,testEventCode=null,nonProduction=false,
+}={}) {
+  if(testModeEnabled===false && testEventCode===null)return true
+  return testModeEnabled===true && nonProduction===true
+    && typeof testEventCode==='string' && TEST_EVENT_CODE.test(testEventCode)
+}
 const USER_AGENT = /^[\x20-\x7E]{20,512}$/
 const UUID4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 export function validMetaServerEvent(event,datasetId) {
@@ -43,9 +50,8 @@ export async function sendMetaCapi({
   // Supplying a test code without all independent test controls is a
   // misconfiguration, NOT permission to silently send a live conversion.
   const testRequested=testModeEnabled===true || testEventCode!==null
-  if(testRequested && !(testModeEnabled===true && nonProduction===true
-    && typeof testEventCode==='string'
-    && TEST_EVENT_CODE.test(testEventCode)))return {status:'not_configured'}
+  if(!validMetaTestConfiguration({testModeEnabled,testEventCode,nonProduction}))
+    return {status:'not_configured'}
   let allowed=false
   try {allowed=await authorized()} catch {return {status:'unavailable'}}
   if (allowed!==true) return {status:'suppressed'}
