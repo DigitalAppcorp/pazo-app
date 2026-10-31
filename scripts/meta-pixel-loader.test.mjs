@@ -97,6 +97,42 @@ test('DOM SDK creation or insertion errors resolve without conversion',async()=>
     assert.deepEqual(f.browser.fbq.queue.at(-1),['consent','revoke'])
   }
 })
+test('stalled SDK resolves within the configured timeout and never dispatches late',async()=>{
+  const f=fakeBrowser(false)
+  const pending=loadMetaPixelForVerifiedSignup({
+    ...settings,...f,stillAllowed:()=>true,sdkTimeoutMs:10,
+  })
+  assert.equal(f.appended.length,1)
+  let removals=0
+  f.appended[0].remove=()=>{removals++}
+  assert.deepEqual(await pending,{status:'unavailable'})
+  assert.equal(removals,1,'timed-out SDK element must be detached')
+  assert.deepEqual(f.browser.fbq.queue.at(-1),['consent','revoke'])
+  // Even a late onload callback must not grant consent or enqueue an event.
+  f.appended[0].onload()
+  assert.equal(f.browser.fbq.queue.some(x=>x.includes('trackSingle')),false)
+  assert.equal(f.browser.fbq.queue.some(x=>x.includes('grant')),false)
+})
+test('successful SDK cancels the timeout rather than revoking consent later',async()=>{
+  const f=fakeBrowser(false)
+  const pending=loadMetaPixelForVerifiedSignup({
+    ...settings,...f,stillAllowed:()=>true,sdkTimeoutMs:10,
+  })
+  f.appended[0].onload()
+  assert.deepEqual(await pending,{status:'queued'})
+  await new Promise(resolve=>setTimeout(resolve,25))
+  assert.deepEqual(f.browser.fbq.queue.at(-1),[
+    'trackSingle',datasetId,'CompleteRegistration',{}, {eventID:eventId},
+  ])
+})
+test('invalid custom timeout falls back to safe default without enabling the SDK',async()=>{
+  const f=fakeBrowser(true)
+  const result=await loadMetaPixelForVerifiedSignup({
+    ...settings,...f,stillAllowed:()=>true,sdkTimeoutMs:NaN,
+  })
+  assert.equal(result.status,'suppressed')
+  assert.equal(f.appended.length,0)
+})
 test('preexisting Pixel never silently inherits PAZO conversion events',async()=>{
   const f=fakeBrowser(false)
   f.browser.fbq=()=>{}
