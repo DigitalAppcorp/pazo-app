@@ -61,8 +61,8 @@ const plugin={
    res.end('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PAZO isolated consent QA</title></head><body><div id="qa-root"></div><script type="module" src="/@id/virtual:pazo-meta-consent-qa"></script></body></html>')
   })
  },
- resolveId(id){if(id===virtualEntry)return '\\0'+virtualEntry},
- load(id){if(id==='\\0'+virtualEntry)return source},
+ resolveId(id){if(id===virtualEntry)return String.fromCharCode(0)+virtualEntry},
+ load(id){if(id===String.fromCharCode(0)+virtualEntry)return source},
 }
 const server=await createServer({
  configFile:false,logLevel:'error',plugins:[react(),plugin],
