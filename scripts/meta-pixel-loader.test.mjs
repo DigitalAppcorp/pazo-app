@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {loadMetaPixelForVerifiedSignup}
+import {loadMetaPixelForVerifiedSignup,revokeOwnedMetaPixelConsent}
   from '../src/features/marketing/metaPixelLoader.mjs'
 const eventId='11111111-2222-4333-8444-555555555555',datasetId='123456789012345'
 function fakeBrowser(gpc=false){
@@ -37,12 +37,13 @@ test('SDK is lazy: only with valid consent, queues revoke before init, no auto P
   const script=f.appended[0]
   assert.equal(script.src,'https://connect.facebook.net/en_US/fbevents.js')
   assert.equal(script.async,true)
-  assert.deepEqual(f.browser.fbq.queue,[['consent','revoke'],['init',datasetId]])
+  assert.deepEqual(f.browser.fbq.queue,[['consent','revoke'],['set','autoConfig',false,datasetId],['init',datasetId]])
   script.onload()
   const result=await pending
   assert.equal(result.status,'queued')
   assert.deepEqual(f.browser.fbq.queue,[
-    ['consent','revoke'],['init',datasetId],['consent','grant'],
+    ['consent','revoke'],['set','autoConfig',false,datasetId],
+    ['init',datasetId],['consent','grant'],
     ['trackSingle',datasetId,'CompleteRegistration',{}, {eventID:eventId}],
   ])
   assert.equal(f.browser.fbq.queue.some(x=>x.includes('PageView')),false)
@@ -146,4 +147,41 @@ test('failed SDK network never fires a conversion',async()=>{
   f.appended[0].onerror()
   assert.equal((await pending).status,'unavailable')
   assert.equal(f.browser.fbq.queue.some(x=>x.includes('trackSingle')),false)
+})
+
+test('the SDK is restricted to explicit registration, with autoConfig and SPA hooks OFF',async()=>{
+  const f=fakeBrowser(false)
+  const pending=loadMetaPixelForVerifiedSignup({...settings,...f,stillAllowed:()=>true})
+  assert.deepEqual(f.browser.fbq.queue.slice(0,3),[
+    ['consent','revoke'],['set','autoConfig',false,datasetId],
+    ['init',datasetId],
+  ])
+  assert.equal(f.browser.fbq.disablePushState,true)
+  f.appended[0].onload()
+  assert.equal((await pending).status,'queued')
+  const eventCalls=f.browser.fbq.queue.filter(c=>c[0].startsWith('track'))
+  assert.deepEqual(eventCalls,[
+    ['trackSingle',datasetId,'CompleteRegistration',{}, {eventID:eventId}],
+  ])
+})
+test('withdrawal revokes only the Pixel owned by PAZO, not a third-party Pixel',async()=>{
+  const f=fakeBrowser(false)
+  assert.equal(revokeOwnedMetaPixelConsent({browser:f.browser}),false)
+  const pending=loadMetaPixelForVerifiedSignup({...settings,...f,stillAllowed:()=>true})
+  f.appended[0].onload()
+  assert.equal((await pending).status,'queued')
+  const before=f.browser.fbq.queue.length
+  assert.equal(revokeOwnedMetaPixelConsent({browser:f.browser}),true)
+  assert.deepEqual(f.browser.fbq.queue.at(-1),['consent','revoke'])
+  assert.equal(f.browser.fbq.queue.length,before+1)
+  assert.equal(f.browser.fbq.queue.filter(c=>c[0]==='trackSingle').length,1)
+  // A previously loaded SDK is not retroactively erased or unsent.
+  const external=()=>{}
+  f.browser.fbq=external
+  assert.equal(revokeOwnedMetaPixelConsent({browser:f.browser}),false)
+  assert.equal(f.browser.fbq,external)
+  const other=fakeBrowser(false)
+  other.browser.fbq=()=>{throw Error('foreign SDK should never be modified')}
+  other.browser._fbq=other.browser.fbq
+  assert.equal(revokeOwnedMetaPixelConsent({browser:other.browser}),false)
 })
