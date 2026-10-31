@@ -1,6 +1,7 @@
 // #169: isolated server adapter. NOT deployed or imported in PAZO runtime.
 // Account identity comes only from a fresh Supabase Auth lookup, never
 // from browser user_metadata, a JWT decoded without verification, or a payload.
+import {createMetaWithdrawalProvider} from '../pazo-meta-consent/withdrawAdapter.mjs'
 import {createMarketingProvider}
   from '../pazo-marketing-attribution/intakeAdapter.mjs'
 const URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
@@ -11,8 +12,10 @@ export function createMetaGrantProvider({url,anonKey,serviceKey,
 }={}) {
  const source=createMarketingProvider({url,anonKey,serviceKey,fetchImpl})
  if(url!==URL)throw Error('meta_grant_project_mismatch')
+ const withdrawal=createMetaWithdrawalProvider({url,anonKey,serviceKey,fetchImpl})
  return {
   authenticate:source.authenticate,
+    persistGpc:withdrawal.withdraw,
   grant:async(ownerId,notice,gpc)=>{
    if(typeof ownerId!=='string'||!UUID.test(ownerId)
       ||notice!==NOTICE||gpc!==false)return false
