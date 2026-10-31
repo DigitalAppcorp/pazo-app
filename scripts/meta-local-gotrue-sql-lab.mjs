@@ -22,7 +22,7 @@ function localOnly(url,port){
  if(port)assert.equal(u.port,String(port))
  return u
 }
-function localPsql(dbUrl){
+export function localPsql(dbUrl){
  const u=new URL(dbUrl)
  assert.ok(['postgres:','postgresql:'].includes(u.protocol))
  assert.ok(['localhost','127.0.0.1','[::1]'].includes(u.hostname))
