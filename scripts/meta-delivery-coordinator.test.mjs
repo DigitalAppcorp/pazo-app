@@ -70,6 +70,51 @@ test('one lease + two privacy reads, same event_id, token only in header',async(
   assert.equal(fetches,1)
   assert.equal(checks,2)
 })
+test('uncertain initial DB privacy read retries without PII or provider request',async()=>{
+ for(const source of [async()=>null,async()=>{throw Error('transient DB outage')}]) {
+   let matchingReads=0,sends=0,settled=null
+   const repo={
+     leaseOne:async()=>claim,
+     checkPrivacy:source,
+     readApprovedMatchField:async()=>{matchingReads++;return hashedEmail},
+     settle:async(id,lease,status)=>{
+       assert.equal(id,eventId);assert.equal(lease,leaseId)
+       settled=status;return true
+     },
+   }
+   const result=await deliverVerifiedMetaRegistration({...base,repository:repo,
+     fetchImpl:async()=>{sends++;throw Error('forbidden')}})
+   assert.deepEqual(result,{status:'unavailable'})
+   assert.equal(settled,'retryable')
+   assert.equal(matchingReads,0,'privacy uncertainty must not read matching data')
+   assert.equal(sends,0)
+ }
+})
+test('uncertain final DB privacy recheck retries without provider request',async()=>{
+ for(const failure of ['null','exception']) {
+   let checked=0,reads=0,sends=0,settled=null
+   const repo={
+     leaseOne:async()=>claim,
+     checkPrivacy:async()=>{
+       checked++
+       if(checked===1)return privacy
+       if(failure==='null')return null
+       throw Error('temporary DB failure')
+     },
+     readApprovedMatchField:async()=>{reads++;return hashedEmail},
+     settle:async(_,lease,status)=>{
+       assert.equal(lease,leaseId);settled=status;return true
+     },
+   }
+   const result=await deliverVerifiedMetaRegistration({...base,repository:repo,
+     fetchImpl:async()=>{sends++;throw Error('forbidden')}})
+   assert.equal(result.status,'unavailable')
+   assert.equal(settled,'retryable')
+   assert.equal(checked,2)
+   assert.equal(reads,1)
+   assert.equal(sends,0)
+ }
+})
 test('a late GPC/withdrawal change suppresses the provider call',async()=>{
   let calls=0,checks=0,settled
   const repository={leaseOne:async()=>claim,
