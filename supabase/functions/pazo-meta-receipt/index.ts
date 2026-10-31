@@ -15,6 +15,7 @@ function setup(){
       anonKey:Deno.env.get('SUPABASE_ANON_KEY'),
       serviceKey:Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
       datasetId:Deno.env.get('META_DATASET_ID'),
+      captureOriginalUa:true,
     })
     return createMetaReceiptHandler({
       released:true,privacyReviewed:true,...provider,
