@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: node --test scripts/meta-conversion-off.test.mjs scripts/meta-delivery-coordinator.test.mjs scripts/meta-pixel-loader.test.mjs scripts/meta-receipt-off.test.mjs scripts/meta-receipt-adapter-off.test.mjs scripts/meta-outbox-repository-off.test.mjs scripts/meta-consent-registration-flow.test.mjs scripts/meta-consent-transport-off.test.mjs scripts/meta-consent-controller-off.test.mjs scripts/meta-disclosure-scope.test.mjs scripts/meta-gpc-server-off.test.mjs scripts/meta-worker-off.test.mjs scripts/meta-server-config-off.test.mjs scripts/meta-server-gateway-off.test.mjs scripts/meta-withdraw-off.test.mjs scripts/meta-withdraw-adapter-off.test.mjs scripts/meta-grant-off.test.mjs scripts/meta-production-boundary.test.mjs scripts/meta-gpc-sync-off.test.mjs
+      - run: node --test scripts/meta-conversion-off.test.mjs scripts/meta-delivery-coordinator.test.mjs scripts/meta-pixel-loader.test.mjs scripts/meta-receipt-off.test.mjs scripts/meta-receipt-adapter-off.test.mjs scripts/meta-outbox-repository-off.test.mjs scripts/meta-match-reader-off.test.mjs scripts/meta-consent-registration-flow.test.mjs scripts/meta-consent-transport-off.test.mjs scripts/meta-consent-controller-off.test.mjs scripts/meta-disclosure-scope.test.mjs scripts/meta-gpc-server-off.test.mjs scripts/meta-worker-off.test.mjs scripts/meta-server-config-off.test.mjs scripts/meta-server-gateway-off.test.mjs scripts/meta-withdraw-off.test.mjs scripts/meta-withdraw-adapter-off.test.mjs scripts/meta-grant-off.test.mjs scripts/meta-production-boundary.test.mjs scripts/meta-gpc-sync-off.test.mjs
       - run: node --check supabase/functions/_shared/metaConversion.mjs
       - run: node --check supabase/functions/_shared/metaCapi.mjs
       - run: node --check supabase/functions/_shared/metaPurposePolicy.mjs
@@ -24,6 +24,7 @@ jobs:
       - run: node --check supabase/functions/_shared/metaServerConfig.mjs
       - run: node --check supabase/functions/_shared/metaServerGateway.mjs
       - run: node --check supabase/functions/_shared/metaOutboxRepository.mjs
+      - run: node --check supabase/functions/_shared/metaMatchReader.mjs
       - run: node --check supabase/functions/_shared/metaGpcOverride.mjs
       - run: node --check scripts/meta-production-boundary.mjs
       - run: node --check scripts/meta-local-auth-edge-flow.mjs
