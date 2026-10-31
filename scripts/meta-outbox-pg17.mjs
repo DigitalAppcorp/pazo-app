@@ -122,6 +122,68 @@ assert.throws(()=>sql(`SET ROLE anon;
 assert.throws(()=>sql(`SET ROLE authenticated;
  SELECT public.pazo_meta_withdraw_candidate('${owner}')`))
 
+
+const lateGranted='16900000-0000-4000-8000-000000000008'
+create(lateGranted)
+assert.equal(sql(record(lateGranted)),'t')
+assert.equal(count(lateGranted),'0','first-party consent does not grant Meta')
+assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_meta_grant_first_session_candidate(
+ '${lateGranted}','pazo-meta-conversions-v1',false)`),'t',
+ 'explicit consent after verified email, but within 15m, is supported')
+assert.equal(count(lateGranted),'1','one short-window event, not historical backfill')
+const lateGrantedEvent=sql(`SELECT event_id::text FROM marketing_private.meta_outbox_candidate
+ WHERE owner_id='${lateGranted}'`)
+assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_meta_grant_first_session_candidate(
+ '${lateGranted}','pazo-meta-conversions-v1',false)`),'f',
+ 'an additional grant cannot mint another business event')
+assert.equal(sql(`SELECT event_id::text FROM marketing_private.meta_outbox_candidate
+ WHERE owner_id='${lateGranted}'`),lateGrantedEvent)
+const lateGrantedLease=sql('SET ROLE service_role;SELECT * FROM public.pazo_meta_lease_candidate()')
+const [lgOwner,lgEvent,lgTime,lgLease]=lateGrantedLease.split('|')
+assert.equal(lgOwner,lateGranted)
+assert.equal(lgEvent,lateGrantedEvent)
+assert.equal(sql(`SET ROLE service_role;SELECT public.pazo_meta_settle_candidate(
+ '${lgEvent}','${lgLease}',true)`),'t')
+
+const deniedGrant='16900000-0000-4000-8000-000000000009'
+create(deniedGrant)
+assert.equal(sql(record(deniedGrant)),'t')
+for(const [notice,gpc] of [['bad-version',false],['pazo-meta-conversions-v1',true]]){
+ assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_meta_grant_first_session_candidate(
+ '${deniedGrant}','${notice}',${gpc})`),'f')
+}
+assert.equal(count(deniedGrant),'0','GPC or invalid notice never creates a conversion')
+assert.equal(sql(`SELECT count(*) FROM marketing_private.meta_purpose_candidate
+ WHERE owner_id='${deniedGrant}'`),'0','invalid grant never persists')
+assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_meta_grant_first_session_candidate(
+ '${withdrawn}','pazo-meta-conversions-v1',false)`),'f',
+ 'withdrawal cannot be silently reversed')
+assert.equal(sql(`SELECT status FROM marketing_private.meta_outbox_candidate
+ WHERE owner_id='${withdrawn}'`),'suppressed')
+
+const oldUser='16900000-0000-4000-8000-00000000000a'
+sql(`INSERT INTO auth.users(id,created_at,email_confirmed_at)
+ VALUES('${oldUser}',now()-interval '40 minutes',now()-interval '30 minutes');
+ INSERT INTO public.profiles(id) VALUES('${oldUser}');`)
+assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_marketing_record_verified_v1(
+ '${oldUser}','qr_v2_en',now()-interval '45 minutes')`),'t')
+assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_meta_grant_first_session_candidate(
+ '${oldUser}','pazo-meta-conversions-v1',false)`),'f',
+ 'registration older than 15m is never backfilled')
+assert.equal(count(oldUser),'0')
+assert.throws(()=>sql(`SET ROLE anon;
+ SELECT public.pazo_meta_grant_first_session_candidate(
+ '${owner}','pazo-meta-conversions-v1',false)`))
+assert.throws(()=>sql(`SET ROLE authenticated;
+ SELECT public.pazo_meta_grant_first_session_candidate(
+ '${owner}','pazo-meta-conversions-v1',false)`))
+
 for(const role of ['anon','authenticated','service_role']){
   assert.throws(()=>sql(`SET ROLE ${role};SELECT * FROM marketing_private.meta_outbox_candidate`))
   assert.throws(()=>sql(`SET ROLE ${role};SELECT * FROM marketing_private.meta_purpose_candidate`))
@@ -141,4 +203,4 @@ console.log(JSON.stringify({status:'PASS',environment:'disposable PG17',
  atomicSignupAndEvent:true,concurrentFirstParty:8,concurrentLeases:8,
  oneTimeClaims:1,leaseFence:true,stableRetryId:true,revocationStopsPending:true,withdrawalIdempotent:true,serverOnlyWithdrawal:true,
  independentGateDefaultsOff:true,gpcExclusion:true,qaExclusion:true,
- noBackfill:true,rlsForced:true,retentionCascade:true,hostedWrites:0}))
+ noBackfill:true,verifiedSessionGrant:true,explicitNotice:true,grantGpcGate:true,grantNoReversal:true,rlsForced:true,retentionCascade:true,hostedWrites:0}))
