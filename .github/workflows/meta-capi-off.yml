@@ -41,6 +41,7 @@ jobs:
       - run: node --check supabase/functions/pazo-meta-receipt/receiptAdapter.mjs
       - run: node --check supabase/functions/pazo-meta-worker/workerCore.mjs
       - run: node --check supabase/functions/pazo-meta-worker/workerAuth.mjs
+      - run: node --check supabase/functions/pazo-meta-worker/runtime.mjs
       - run: node --check supabase/functions/pazo-meta-consent/withdrawCore.mjs
       - run: node --check supabase/functions/pazo-meta-consent/withdrawAdapter.mjs
       - run: node --check supabase/functions/pazo-meta-consent/grantCore.mjs
