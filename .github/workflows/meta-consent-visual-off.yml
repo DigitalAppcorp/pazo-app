@@ -5,6 +5,9 @@ on:
     paths:
       - '.github/workflows/meta-consent-visual-off.yml'
       - 'scripts/meta-consent-visual-browser.mjs'
+      - 'scripts/meta-pixel-egress-browser.mjs'
+      - 'src/features/marketing/metaPixelLoader.mjs'
+      - 'src/features/marketing/metaConsentController.mjs'
       - 'scripts/meta-consent-lab-entry.tsx'
       - 'src/features/marketing/MetaConsentChoice.tsx'
       - 'src/index.css'
@@ -14,6 +17,9 @@ on:
     paths:
       - '.github/workflows/meta-consent-visual-off.yml'
       - 'scripts/meta-consent-visual-browser.mjs'
+      - 'scripts/meta-pixel-egress-browser.mjs'
+      - 'src/features/marketing/metaPixelLoader.mjs'
+      - 'src/features/marketing/metaConsentController.mjs'
       - 'scripts/meta-consent-lab-entry.tsx'
       - 'src/features/marketing/MetaConsentChoice.tsx'
       - 'src/index.css'
@@ -38,12 +44,17 @@ jobs:
       - name: Syntax and source boundary
         run: |
           node --check scripts/meta-consent-visual-browser.mjs
+          node --check scripts/meta-pixel-egress-browser.mjs
           node scripts/meta-production-boundary.mjs
       - name: Render isolated bilingual screen and verify mobile states
         run: node scripts/meta-consent-visual-browser.mjs
+      - name: Audit synthetic Pixel SDK egress, GPC and immediate withdrawal in Chromium
+        run: node scripts/meta-pixel-egress-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: meta-consent-visual-candidate
-          path: artifacts/meta-consent-ui/
+          path: |
+            artifacts/meta-consent-ui/
+            artifacts/meta-pixel-egress/
           retention-days: 7
