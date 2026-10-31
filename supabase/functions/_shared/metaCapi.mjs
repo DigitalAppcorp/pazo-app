@@ -5,6 +5,7 @@ import {META_EVENT_NAME,META_CANONICAL_URL} from './metaConversion.mjs'
 const API_VERSION = /^v(?:[2-9][0-9]|[1-9][0-9]{2,})\.0$/
 const DATASET = /^[1-9][0-9]{5,24}$/
 const HASH = /^[a-f0-9]{64}$/
+const TEST_EVENT_CODE=/^TEST[A-Za-z0-9]{4,32}$/
 const USER_AGENT = /^[\x20-\x7E]{20,512}$/
 const UUID4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 export function validMetaServerEvent(event,datasetId) {
@@ -29,6 +30,8 @@ export function validMetaServerEvent(event,datasetId) {
 export async function sendMetaCapi({
   releaseEnabled=false, privacyGateApproved=false, claimWasInserted=false,
   event=null, datasetId=null, apiVersion=null, serverToken=null,
+  // Test Events code is never accepted from a browser and never automatic.
+  testModeEnabled=false,testEventCode=null,nonProduction=false,
   authorized=async()=>false, fetchImpl=fetch,
 }={}) {
   if (releaseEnabled!==true || privacyGateApproved!==true || claimWasInserted!==true)
@@ -37,6 +40,12 @@ export async function sendMetaCapi({
     || typeof apiVersion!=='string' || !API_VERSION.test(apiVersion)
     || typeof serverToken!=='string' || serverToken.length<24
     || typeof authorized!=='function') return {status:'not_configured'}
+  // Supplying a test code without all independent test controls is a
+  // misconfiguration, NOT permission to silently send a live conversion.
+  const testRequested=testModeEnabled===true || testEventCode!==null
+  if(testRequested && !(testModeEnabled===true && nonProduction===true
+    && typeof testEventCode==='string'
+    && TEST_EVENT_CODE.test(testEventCode)))return {status:'not_configured'}
   let allowed=false
   try {allowed=await authorized()} catch {return {status:'unavailable'}}
   if (allowed!==true) return {status:'suppressed'}
@@ -48,7 +57,9 @@ export async function sendMetaCapi({
       signal:AbortSignal.timeout(6000),
       headers:{authorization:'Bearer '+serverToken,'content-type':'application/json',
         accept:'application/json'},
-      body:JSON.stringify({data:[event]}),
+      body:JSON.stringify(testRequested
+        ?{data:[event],test_event_code:testEventCode}
+        :{data:[event]}),
     })
     if (!response?.ok) return {status:'provider_error'}
     const receipt=await response.json()
