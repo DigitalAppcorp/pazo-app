@@ -11,18 +11,19 @@ const RECEIPT='pazo-meta-receipt'
 
 export function createMetaConsentTransport({
   released=false,privacyApproved=false,supabaseClient=null,
-  getSessionSnapshot=()=>null,stillPermitted=()=>false,browser=null,
+  ownerId=null,getSessionSnapshot=()=>null,stillPermitted=()=>false,browser=null,
 }={}) {
   // No Supabase or privacy access until the separate release is approved.
   if(released!==true||privacyApproved!==true
      ||typeof supabaseClient?.functions?.invoke!=='function'
+     ||typeof ownerId!=='string'||!UUID.test(ownerId)
      ||typeof getSessionSnapshot!=='function'
      ||typeof stillPermitted!=='function')return null
   const eligible=accessToken=>{
     try{
       const auth=getSessionSnapshot()
       return typeof accessToken==='string'&&accessToken.length>=12
-        && typeof auth?.id==='string'&&UUID.test(auth.id)
+        && auth?.id===ownerId
         && auth.accessToken===accessToken
         && browser?.navigator?.globalPrivacyControl!==true
         && stillPermitted()===true
