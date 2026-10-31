@@ -7,6 +7,8 @@ on:
       - 'scripts/meta-local-auth-edge-flow.mjs'
       - 'scripts/meta-local-gotrue-sql-lab.mjs'
       - 'scripts/meta-local-edge-http-lab.mjs'
+      - 'scripts/meta-local-browser-playwright.mjs'
+      - 'scripts/meta-browser-supabase-client.mjs'
       - 'supabase/tests/marketing/meta-local-edge-entry.ts'
       - 'supabase/tests/marketing/meta-local-gotrue-prerequisites.sql'
       - 'supabase/tests/marketing/meta-outbox-candidate.sql'
@@ -26,6 +28,13 @@ jobs:
       - uses: supabase/setup-cli@v3
         with:
           version: '2.81.3'
+      - name: Install locked app libraries and pinned Playwright for real browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx --no-install playwright install --with-deps chromium
       - name: Prepare a fresh local-only Supabase stack, confirmed email enabled
         shell: bash
         run: |
@@ -95,6 +104,11 @@ jobs:
       - name: Ensure local PostgreSQL client is available
         shell: bash
         run: command -v psql
+      - name: Verify Chromium and browser module syntax
+        shell: bash
+        run: |
+          node --check scripts/meta-local-browser-playwright.mjs
+          node --check scripts/meta-browser-supabase-client.mjs
       - name: Verify test-only HTTP suite syntax
         shell: bash
         run: node --check scripts/meta-local-edge-http-lab.mjs
