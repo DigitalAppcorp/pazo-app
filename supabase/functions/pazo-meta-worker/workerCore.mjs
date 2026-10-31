@@ -41,6 +41,7 @@ export function createMetaWorkerHandler({
     // Server responses never contain event IDs, token values, PII, or claims.
     switch(result?.status){
       case 'accepted':return reply('accepted',200)
+      case 'accepted_with_warnings':return reply('accepted_with_warnings',200)
       case 'disabled':return reply('disabled',503)
       case 'not_eligible':return reply('not_eligible',200)
       case 'not_configured':return reply('not_configured',503)
