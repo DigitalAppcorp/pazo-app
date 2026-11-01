@@ -2,7 +2,7 @@
 
 **Fecha de decisión:** 1 de noviembre de 2026.  
 **Propietario de la decisión:** Product Owner (PO) de PAZO.  
-**Estado:** DIRECCIÓN EDITORIAL ACEPTADA / SIN NUEVO GUION FINAL APROBADO / SIN VIDEO NUEVO PRODUCIDO / SIN RESULTADOS DE AUDIENCIA DE ESTA LÍNEA.  
+**Estado (actualización del PO 2026-11-01):** DIRECCIÓN EDITORIAL ACEPTADA / CONCEPTO 01 R2 ACEPTADO / R3 GUION INTEGRAL PENDIENTE DE CIERRE / SIN VIDEO PRODUCIDO / SIN RESULTADOS DE AUDIENCIA DE ESTA LÍNEA.  
 **Uso:** punto de entrada para el próximo director creativo, Codex, Claude Code u otro agente. **No es permiso para producir, publicar, pagar ni modificar PAZO.**
 
 ## 0. Leer esto primero al retomar
@@ -61,7 +61,7 @@ La utilidad aspiracional puede interesar a dueños de distintas mascotas, sin su
 
 ## 4. Backlog editorial inicial — ideas, NO guiones ni anuncios
 
-1. **PRIORIDAD 1 / VALOR PRÁCTICO:** ¿Y si mañana alguien más tuviera que cuidar de tu mascota? Valor: qué información básica conviene preparar para un cuidador temporal (rutina, comida, necesidades relevantes y contactos apropiados). Probar la exactitud de cualquier consejo veterinario antes de publicarlo. Puede contarse como historia, sin dramatizar miedo ni convertirlo en anuncio obligatorio.
+1. **PRIORIDAD 1 / VALOR PRÁCTICO — R2 ACEPTADO:** «El manual del sospechoso». Una cuidadora descubre unas instrucciones aparentemente escritas por el perro que exageran su derecho a comer; encuentra el plan real del dueño y enseña cuatro preparativos: comidas, medicamentos si corresponden, rutina y contactos veterinarios/de emergencia. Remate imaginario: «You already ate.» — «Allegedly.» El PO aprobó el **concepto** en conversación el 2026-11-01, no un MP4 ni la publicación. Próximo trabajo: guion completo R3, factibilidad/derechos y QA. La historia es ficción cómica, no testimonio. La función de PAZO en este video es atribución editorial, NO presentación de una función inexistente para cuidadores.
 2. **PRIORIDAD 2 / PREVENCIÓN-IDENTIFICACIÓN:** ¿Podrían identificar a tu mascota si alguien la encontrara hoy? Valor: revisar identificación, datos accesibles y qué hacer para mantenerla actualizada. La ficha pública/QR de PAZO puede aparecer SOLO tras verificar el recorrido real en producción.
 3. **PRIORIDAD 3 / COMEDIA DIFERENTE:** ¿Qué pasaría si tu gato pudiera presentar una queja formal? Valor principal: entretenimiento y observación de la relación con mascotas; sarcasmo y posible giro sin forzar un discurso educativo.
 
@@ -97,14 +97,14 @@ No escribir guiones únicamente para llenar esta lista. **La historia debe ser d
 | --- | --- | --- | --- |
 | R0 Aprendizaje histórico | Auditoría de tanda fallida, corrección de errores, feedback del PO | Dirección + PO | DOCUMENTADO |
 | R1 Estrategia editorial | Valor primero, cinco líneas, prioridades, gustos sin atribuir eficacia | Dirección + PO | APROBADA COMO DIRECCIÓN |
-| R2 Concepto 01 | Una premisa de cuidador temporal, recompensa concreta, datos verificados, veto fuerte, una línea elegida | Dirección | SIGUIENTE |
-| R3 Guion integral | Una versión seleccionada con historia, actuación, voz, planos, ritmo, remate y orden única para Claude | Dirección | PENDIENTE |
+| R2 Concepto 01 | «El manual del sospechoso», valor práctico de información para cuidadores + diálogo cómico | Dirección + PO | CONCEPTO ACEPTADO 2026-11-01 |
+| R3 Guion integral | Una versión seleccionada con historia, actuación, voz, planos, ritmo, remate y orden única para Claude | Dirección | SIGUIENTE |
 | R4 Factibilidad/derechos | Activos/voz/música y licencia, captura real si procede, medios técnicos, riesgo y alternativa | Producción + dirección | PENDIENTE |
 | R5 Producción + QA | Archivo real, actuación/cortes/audio/legibilidad/claims/rights evaluados, límites explícitos | Claude + dirección | NO AUTORIZADA AÚN |
 | R6 Aceptación y publicación | Revisión del PO, decisión separada de publicar; sin gastos inferidos | PO | NO AUTORIZADA |
 | R7 Datos y aprendizaje | Retención, finalizaciones, compartidos/guardados, llegadas reales cuando se puedan atribuir, revisión y actualización de habilidad | Dirección + marketing | SIN DATOS |
 
-**Próximo paso exacto para el agente sucesor:** abrir **R2**. Proponer y autocriticar **una** historia centrada en preparar información para quien cuide temporalmente de una mascota. No reiniciar la lluvia de ideas de QR ni enviar tres hooks a Claude. Definir consejo correcto y recompensa al espectador, elegir una línea principal, decidir si cabe humor y explicar si PAZO debe aparecer o no. Luego **R3**: escribir guion cinematográfico integral antes de ordenar ninguna producción.
+**Próximo paso exacto para el agente sucesor:** **R2 YA APROBADO por el PO**: «El manual del sospechoso»; conservar historia central, cuidadora, perro farsante, cuatro datos útiles y «Allegedly». Retomar en **R3** con guion cinematográfico integral antes de delegar una sola orden de producción a Claude. No reabrir los hooks descartados ni interpretar esta aprobación de concepto como permiso de render, gasto o publicación.
 
 ## 7. Medición y aprendizaje sin inventar conclusiones
 
@@ -124,4 +124,4 @@ No escribir guiones únicamente para llenar esta lista. **La historia debe ser d
 
 ### Resumen de 30 segundos para cualquier agente nuevo
 
-**Dónde estamos:** la tanda anterior falló por falta de variedad/acabado; se refinó el método y el PO aprobó orientar el contenido hacia **valor reconocible para dueños de mascotas**, una sola línea principal por video. Humor absurdo, sarcasmo y giros son opciones, no obligación. La primera idea a desarrollar es la preparación de información para un cuidador temporal. El director entrega **guion completo**, Claude lo produce con QA y sin triples pruebas redundantes del hook. **No hay guion final ni autorización de producción/publicación**; retomar en R2, no empezar desde cero.
+**Dónde estamos:** la tanda anterior falló por falta de variedad/acabado; se refinó el método y el PO aprobó orientar el contenido hacia **valor reconocible para dueños de mascotas**, una sola línea principal por video. Humor absurdo, sarcasmo y giros son opciones, no obligación. La primera idea «El manual del sospechoso» ya tiene **concepto R2 aceptado por el PO**: perro que inventa instrucciones de alimentación, cuidadora que descubre el plan verdadero, cuatro datos útiles y remate «Allegedly». El director debe entregar el **guion completo R3** y Claude podrá producirlo con QA tras autorización correspondiente, sin triples pruebas redundantes del hook. **No hay video producido ni publicación autorizada**; retomar en R3, no empezar desde cero.
