@@ -69,6 +69,9 @@ export const rememberAdultAttestationIntent = (storage: IntentStorage, now: numb
 export const clearAdultAttestationIntent = (storage: IntentStorage): void => {
   try { storage.removeItem(ATTESTATION_INTENT_KEY) } catch { /* storage denied */ }
 }
+export const hasAdultAttestationIntent = (storage: IntentStorage): boolean => {
+  try { return Number(storage.getItem(ATTESTATION_INTENT_KEY)) > 0 } catch { return false }
+}
 export const takeAdultAttestationIntent = (storage: IntentStorage, now: number): boolean => {
   try {
     const stored = Number(storage.getItem(ATTESTATION_INTENT_KEY))

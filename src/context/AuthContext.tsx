@@ -12,6 +12,7 @@ import { classifySignUpResult, type SignUpOutcome } from '../features/auth/signu
 import {
   cleanGoogleReturnUrl,
   clearAdultAttestationIntent,
+  hasAdultAttestationIntent,
   googleRedirectUrl,
   googleReturnFailure,
   isGoogleReturn,
@@ -63,7 +64,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [googleAuthFailure, setGoogleAuthFailure] = useState<GoogleAuthFailure | null>(
     () => googleReturnFailure(window.location.search, window.location.hash)
   )
-  const [savingAttestationFor, setSavingAttestationFor] = useState<string | null>(null)
+  // Avoids flashing the 18+ screen to someone who already confirmed it at signup.
+  const [savingAttestation, setSavingAttestation] = useState(() => {
+    try { return hasAdultAttestationIntent(window.sessionStorage) } catch { return false }
+  })
 
   // Session bootstrap is independent from the splash animation.
   // A hung getSession must not trap the user behind the splash forever.
@@ -175,13 +179,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const pendingAttestationUserId = adultAttestationPending ? user?.id ?? null : null
   useEffect(() => {
     if (!pendingAttestationUserId) return
-    let intent = false
-    try { intent = takeAdultAttestationIntent(window.sessionStorage, Date.now()) } catch { /* the gate asks */ }
-    if (!intent) return
-    setSavingAttestationFor(pendingAttestationUserId)
     // Leaves the Auth callback first; a failure falls back to the visible gate.
     window.setTimeout(() => {
-      void saveAdultAttestation().finally(() => setSavingAttestationFor(null))
+      let intent = false
+      try { intent = takeAdultAttestationIntent(window.sessionStorage, Date.now()) } catch { /* the gate asks */ }
+      if (!intent) { setSavingAttestation(false); return }
+      void saveAdultAttestation().finally(() => setSavingAttestation(false))
     }, 0)
   }, [pendingAttestationUserId])
 
@@ -359,7 +362,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             Reintentar
           </button>
         </div>
-      ) : adultAttestationPending && !savingAttestationFor ? (
+      ) : adultAttestationPending && !savingAttestation ? (
         <GoogleAdultGate onConfirm={saveAdultAttestation} onDecline={signOut}/>
       ) : user && !isPasswordRecovery && (profileStatus?.userId !== user.id || profileStatus.status === 'loading') ? (
         <div role="status" className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex items-center justify-center px-6">

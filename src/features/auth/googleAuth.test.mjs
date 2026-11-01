@@ -4,6 +4,7 @@ import {
   isGoogleAuthEnabled, googleRedirectUrl, isGoogleReturn, googleReturnFailure,
   cleanGoogleReturnUrl, requiresAdultAttestation, isNewGoogleAccount,
   rememberAdultAttestationIntent, takeAdultAttestationIntent, clearAdultAttestationIntent,
+  hasAdultAttestationIntent,
 } from './googleAuth.ts'
 
 const NOW = Date.parse('2026-11-01T12:00:00Z')
@@ -65,7 +66,9 @@ test('only a just-created Google-only account is a new signup', () => {
 test('18+ intent is single use and expires; failures just ask again', () => {
   const storage = memory()
   assert.equal(takeAdultAttestationIntent(storage, NOW), false)
+  assert.equal(hasAdultAttestationIntent(storage), false)
   rememberAdultAttestationIntent(storage, NOW)
+  assert.equal(hasAdultAttestationIntent(storage), true)
   assert.equal(takeAdultAttestationIntent(storage, NOW + 1000), true)
   assert.equal(takeAdultAttestationIntent(storage, NOW + 2000), false)
   rememberAdultAttestationIntent(storage, NOW)
