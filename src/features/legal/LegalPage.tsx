@@ -19,7 +19,7 @@ export function LegalPage({ kind, lang }: Props) {
       <article className="mx-auto w-full max-w-2xl">
         <nav aria-label={lang === 'es' ? 'Navegación legal' : 'Legal navigation'}
           className="flex flex-wrap items-center justify-between gap-3 text-[14px]">
-          <a href="/" className={`text-[22px] font-black tracking-tight ${link} no-underline`}>pazo.</a>
+          <a href="/" className="text-[22px] font-black tracking-tight focus-visible:bg-[#E1E53F]">pazo.</a>
           <span className="flex flex-wrap items-center gap-4">
             <a href={`/${kind === 'privacy' ? 'terms' : 'privacy'}?lang=${lang}`} className={link}>
               {kind === 'privacy'
