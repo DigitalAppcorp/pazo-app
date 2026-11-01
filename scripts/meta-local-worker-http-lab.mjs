@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict'
 import {createHash,randomUUID} from 'node:crypto'
 import {localPsql} from './meta-local-gotrue-sql-lab.mjs'
+import {currentTickBodyArgument} from './meta-worker-dispatch-source.mjs'
 const SECRET='synthetic_local_worker_dispatch_secret_0123456789'
 const UA='Mozilla/5.0 (PAZO Synthetic Worker Lab)'
 function loopback(url){
@@ -51,7 +52,7 @@ export async function runMetaLocalWorkerHttpLab({api,serviceKey,dbUrl}={}){
  await expectDenied({method:'PUT'},405)
  console.log('META_WORKER_HTTP_PHASE handler_denies_browser_and_wrong_secret')
 
- const created=async()=>{
+ const signup=async()=>{
   const email='pazo-worker-'+randomUUID().slice(0,12)+'@example.invalid'
   const res=await fetch(base+'/auth/v1/admin/users',{method:'POST',redirect:'manual',
    signal:AbortSignal.timeout(12000),
@@ -63,6 +64,10 @@ export async function runMetaLocalWorkerHttpLab({api,serviceKey,dbUrl}={}){
   const {id}=await res.json()
   sql(`INSERT INTO marketing_private.acquisition(owner_id,signup_verified_at)
     SELECT id,email_confirmed_at FROM auth.users WHERE id='${id}'`)
+  return {id,email}
+ }
+ const created=async()=>{
+  const {id,email}=await signup()
   assert.equal(service(`SELECT public.pazo_meta_grant_first_session_candidate(
     '${id}','pazo-meta-conversions-v1',false)`),'t')
   assert.equal(service(`SELECT public.pazo_meta_capture_ua_candidate('${id}','${UA}')`),'t')
@@ -106,6 +111,51 @@ export async function runMetaLocalWorkerHttpLab({api,serviceKey,dbUrl}={}){
  assert.deepEqual(again.data,{status:'not_eligible'})
  assert.equal((await provider()).length,1,'a settled event is never resent')
  console.log('META_WORKER_HTTP_PHASE no_duplicate_after_settlement')
+
+ // Rejection and GPC leave nothing to send, whoever holds the dispatch secret.
+ // The screen's decline writes nothing: no grant means no purpose row.
+ const rejected=await signup()
+ assert.equal(sql(`SELECT count(*) FROM marketing_private.meta_purpose_candidate
+   WHERE owner_id='${rejected.id}'`),'0')
+ const gpc=await signup()
+ assert.equal(service(`SELECT public.pazo_meta_grant_first_session_candidate(
+   '${gpc.id}','pazo-meta-conversions-v1',true)`),'f')
+ assert.deepEqual((await call(worker)).data,{status:'not_eligible'})
+ for(const {id} of [rejected,gpc])assert.equal(statusOf(id),'')
+ assert.equal((await provider()).length,1,'rejection and GPC are never delivered')
+ console.log('META_WORKER_HTTP_PHASE rejection_and_gpc_never_delivered')
+
+ // A closed gate holds a queued event back; it stays queued and unsent.
+ const held=await created()
+ sql('UPDATE marketing_private.meta_release_gate_candidate SET enabled=false')
+ await call(worker)
+ assert.equal(statusOf(held.id),'pending')
+ assert.equal((await provider()).length,1,'a closed gate sends nothing')
+ sql('UPDATE marketing_private.meta_release_gate_candidate SET enabled=true')
+ console.log('META_WORKER_HTTP_PHASE closed_gate_never_delivered')
+
+ // The dispatch itself, through real pg_net and Kong. A fetch from this script
+ // cannot show what the database sends, which is how the `{}` bug reached production.
+ const viaPgNet=async body=>{
+  const request=sql(`SELECT net.http_post(
+    url:='http://supabase_kong_pazo-meta-auth-lab:8000/functions/v1/${worker}',
+    headers:=jsonb_build_object('authorization','Bearer ${SECRET}'),
+    body:=${body},timeout_milliseconds:=15000)`)
+  for(let attempt=0;attempt<40;attempt++){
+   const code=sql(`SELECT status_code FROM net._http_response WHERE id=${request}`)
+   if(code)return Number(code)
+   await new Promise(resolve=>setTimeout(resolve,500))
+  }
+  throw Error('pg_net_no_response')
+ }
+ sql('CREATE EXTENSION IF NOT EXISTS pg_net')
+ assert.equal(await viaPgNet("'{}'::jsonb"),400,'control: pg_net default must be refused')
+ assert.equal(statusOf(held.id),'pending','a refused dispatch leaves the event queued')
+ const bodyArgument=currentTickBodyArgument()
+ assert.equal(await viaPgNet(bodyArgument),200,'the current tick must reach the handler')
+ assert.equal(statusOf(held.id),'sent')
+ assert.equal((await provider()).length,2)
+ console.log('META_WORKER_HTTP_PHASE real_pg_net_dispatch_sends_once')
  return {status:'LOCAL_REAL_WORKER_HTTP_PASS',jwtGatewayRejectsDispatchSecret:true,
   handlerReachedWithRepoVerifyJwt:true,realSqlOutbox:true,
   fakeProviderOnly:true,metaNetworkRequests:0,hostedRequests:0}

@@ -40,7 +40,7 @@ export function localPsql(dbUrl){
  }
 }
 function fileSql(path){
- assert.ok(path.startsWith('supabase/tests/marketing/'))
+ assert.ok(path.startsWith('supabase/tests/marketing/')||path.startsWith('supabase/migrations/'))
  return readFileSync(path,'utf8')
 }
 export async function runLocalGoTrueSqlMeta({api,key,ownerId,token,dbUrl}={}){
