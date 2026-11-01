@@ -363,7 +363,7 @@ export const OnboardingView = ({
                 </span>
               </div>
 
-              <label className="flex items-center gap-2 pt-1 text-[#5C7470] cursor-pointer">
+              <label className={`-mx-3 flex min-h-11 items-center gap-2 rounded-2xl px-3 cursor-pointer ${googleNeedsAge ? 'bg-[#E1E53F] font-semibold text-[#204E4A]' : 'text-[#5C7470]'}`}>
                 <input
                   ref={ageCheckbox}
                   type="checkbox"
@@ -380,6 +380,13 @@ export const OnboardingView = ({
                     : 'I confirm that I am 18 or older.'}
                 </span>
               </label>
+              {googleNeedsAge && (
+                <p role="alert" className="text-[14px] font-bold leading-snug text-[#204E4A]">
+                  {lang === 'es'
+                    ? 'Para continuar con Google, marca que tienes 18 años o más.'
+                    : 'To continue with Google, confirm that you are 18 or older.'}
+                </p>
+              )}
               <div className="flex flex-wrap items-center justify-center gap-3 pt-1 text-[14px]">
                 <button type="button" onClick={() => setLegalKind('privacy')}
                   className="font-semibold text-[#204E4A] underline underline-offset-2 focus-visible:bg-[#E1E53F]">
@@ -405,14 +412,12 @@ export const OnboardingView = ({
                 <div className="pt-1 space-y-2">
                   <GoogleSignInButton lang={lang} confirmAdult={() => {
                     setGoogleNeedsAge(!isOver18)
-                    if (!isOver18) ageCheckbox.current?.focus()
+                    if (!isOver18) {
+                      ageCheckbox.current?.focus({ preventScroll: true })
+                      ageCheckbox.current?.scrollIntoView({ block: 'center' })
+                    }
                     return isOver18
                   }}/>
-                  {googleNeedsAge && (
-                    <p role="alert" className="text-center text-[13px] font-semibold text-[#204E4A]">
-                      {lang === 'es' ? 'Confirma arriba que tienes 18 años o más.' : 'Confirm above that you are 18 or older.'}
-                    </p>
-                  )}
                 </div>
               )}
               <div className="flex gap-2 pt-1">

@@ -133,8 +133,20 @@ try{
  {const v=await open(browser,{account:user()})
   await signupScreen(v.page)
   await google(v.page).click()
-  await v.page.getByRole('alert').filter({hasText:'18 años'}).waitFor()
+  const ageAlert=v.page.getByRole('alert').filter({hasText:'18 años'})
+  await ageAlert.waitFor()
   assert.equal(v.s.authorize.length,0,'no redirect before confirming 18+')
+  // A quiet line under the button read as a broken button: the checkbox itself must change.
+  const ageFeedback=await ageAlert.evaluate(alert=>{
+   const label=alert.previousElementSibling,box=alert.getBoundingClientRect()
+   return {adjacent:!!label?.querySelector('input[type=checkbox]'),
+    surface:getComputedStyle(label).backgroundColor,
+    inView:box.top>=0&&box.bottom<=innerHeight}
+  })
+  assert.deepEqual(ageFeedback,{adjacent:true,surface:'rgb(225, 229, 63)',inView:true})
+  await v.page.getByRole('checkbox').check()
+  assert.equal(await ageAlert.count(),0,'the message clears once confirmed')
+  await v.page.getByRole('checkbox').uncheck()
   await v.page.getByText('Apple · próximamente').waitFor()
   await finish(v);pass('signup_requires_18_before_leaving_pazo')}
 
