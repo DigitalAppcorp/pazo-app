@@ -68,7 +68,7 @@ try{
     check(kind+'_login_email_accessible_name',
      await page.getByRole('textbox',{name:/Correo electrónico|Email address/i}).count()===1)
     check(kind+'_login_password_accessible_name',
-     await page.getByLabel(/Contraseña|Password/i).count()===1)
+     await page.getByLabel(/^(Contraseña|Password)$/i).count()===1)
    }
    await page.getByRole('button',{name:/Olvidaste tu contraseña\?|Forgot your password\?/i}).click()
    check(kind+'_password_recovery_discoverable',
