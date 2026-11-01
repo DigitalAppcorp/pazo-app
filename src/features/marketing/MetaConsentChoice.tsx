@@ -1,4 +1,3 @@
-import {isMetaPixelEnabled} from './metaRelease'
 import {useEffect,useRef,useState} from 'react'
 import type {ReactNode} from 'react'
 
@@ -13,6 +12,7 @@ interface Props {
   onContinue:()=>void
   onPrivacy:()=>void
   busy?:boolean
+  pixelEnabled?:boolean
 }
 const COPY={
  es:{
@@ -50,7 +50,7 @@ const COPY={
 } as const
 
 export function MetaConsentChoice({
- lang,onGrant,onWithdraw,onContinue,onPrivacy,busy=false,
+ lang,onGrant,onWithdraw,onContinue,onPrivacy,busy=false,pixelEnabled=false,
 }:Props):ReactNode{
  const [selected,setSelected]=useState(false)
  const [saving,setSaving]=useState(false)
@@ -105,7 +105,7 @@ export function MetaConsentChoice({
  return (
   <section aria-labelledby="meta-consent-title"
    className="pazo-meta-consent mx-auto w-full max-w-md rounded-3xl bg-white p-5 text-[#204E4A]">   <h2 id="meta-consent-title" className="text-xl font-extrabold leading-snug">{t.title}</h2>
-   <p className="mt-3 text-[15px] leading-relaxed">{t.description}{isMetaPixelEnabled(import.meta.env??{})?t.pixelDescription:''}</p>
+   <p className="mt-3 text-[15px] leading-relaxed">{t.description}{pixelEnabled?t.pixelDescription:''}</p>
    <p className="mt-3 text-[15px] font-medium">{t.optional}</p>
    <button type="button" onClick={onPrivacy} disabled={disabled}
     className="my-3 min-h-11 text-[15px] font-semibold underline underline-offset-4 focus-visible:bg-[#E1E53F]">
