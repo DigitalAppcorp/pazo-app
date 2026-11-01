@@ -12,7 +12,7 @@ El primer registro real entró en cola a las 06:24 UTC, pero el worker respondi�
 
 1. **El laboratorio no usaba la llamada real.** `meta-local-worker-http-lab.mjs` llamaba al worker con `fetch` y sin cuerpo, una petición escrita a mano. La llamada que hace la base de datos nunca se ejecutó.
 2. **El laboratorio no corría hacia `main`.** `meta-auth-local-lab.yml` solo se activaba en PR hacia `feat/issue168-ads2-attribution`, así que los 20 controles verdes de `main` no lo incluían.
-3. **Su lista de rutas no incluía la migración del despacho**, `20261101120100`.
+3. **Su lista de rutas no incluía la migración del despacho**, `20261101120100`. Además, el laboratorio estaba roto sin que nadie lo viera: al activarlo hacia `main` falló al cargar la migración, porque su helper solo aceptaba rutas de `supabase/tests/marketing/`.
 4. **El gate estaba apagado durante toda la preparación.** Con el gate apagado, o sin eventos, la función termina antes de llamar al worker. Por eso los 200 de esos minutos eran de otro proceso (`worker_idle`, de PayPal), y el fallo solo podía aparecer con el primer evento real.
 
 ## Por qué se aplicó SQL antes de que terminara el CI
