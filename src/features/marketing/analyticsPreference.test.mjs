@@ -24,7 +24,7 @@ async function environment(work,{values=new Map(),storageDenied=false}={}){
   let source=fs.readFileSync(`src/features/marketing/${file}.ts`,'utf8')
    .replace(/from '\.\/([^']+)'/g,(_all,name)=>`from './${name}.mjs'`)
    .replace(/^import .*supabase.*from '[^']+'/m,'const supabase=globalThis.__analyticsQA.client')
-   .replace(/^import .*requestLandingChallenge.*from '[^']+'/m,'const requestLandingChallenge=()=>globalThis.__analyticsQA.challenge()')
+   .replace(/^import \{campaignExperienceFields\}.*$/m,'const campaignExperienceFields=()=>({})').replace(/^import .*requestLandingChallenge.*from '[^']+'/m,'const requestLandingChallenge=()=>globalThis.__analyticsQA.challenge()')
    .replace('import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY',"'sb_publishable_synthetic'")
   fs.writeFileSync(path.join(cache,file+'.mjs'),ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2023}}).outputText)
  }

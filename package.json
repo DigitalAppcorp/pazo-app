@@ -62,7 +62,10 @@
     "test:admin-visual:hosted": "node scripts/admin-visual-hosted.mjs",
     "test:admin-visual:staging": "node scripts/admin-visual-staging-check.mjs",
     "preview:admin-visual": "node scripts/admin-visual-staging.mjs",
-    "test:ads2:pg17": "node scripts/ads2-pg17.mjs"
+    "test:ads2:pg17": "node scripts/ads2-pg17.mjs",
+    "test:campaign-experience": "node --experimental-strip-types --test src/features/marketing/campaignExperience.test.mjs src/features/marketing/experienceDetails.test.mjs",
+    "test:campaign-experience:pg17": "node scripts/campaign-experience-pg17.mjs",
+    "test:experience-details:browser": "node scripts/experience-details-browser.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

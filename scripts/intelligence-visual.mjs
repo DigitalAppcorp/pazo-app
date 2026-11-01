@@ -31,11 +31,10 @@ try{
   await page.addStyleTag({url:font});await page.evaluate(()=>document.fonts.load('700 16px Quicksand'))
   assert.equal(await page.evaluate(()=>document.fonts.check('700 16px Quicksand')),true)
   if(width<1024)await page.getByRole('combobox',{name:lang==='es'?'Secciones del panel':'Dashboard sections'}).selectOption('behavior');else await page.getByRole('button',{name:lang==='es'?'Comportamiento':'Behavior',exact:true}).click()
-  await page.locator('.pa-details').filter({has:page.locator('summary').filter({hasText:lang==='es'?'Explorar tareas':'Explore tasks'})}).locator('summary').first().click();await page.locator('.intelligence-coverage').waitFor()
+  await page.getByTestId('intelligence-panel').locator('.pa-section-title').first().waitFor()
   const captures=[]
   for(const q of [0,1,2,3,4]){
-   await page.locator('.intelligence-questions button').nth(q).click();await page.locator('.behavior-intro').scrollIntoViewIfNeeded();const name=`${lang}-${width}-q${q}.png`;await page.screenshot({path:out+'/'+name,fullPage:true});captures.push(name)
-   if(q===3){await page.locator('.intelligence-proposals').scrollIntoViewIfNeeded();const name=`${lang}-${width}-proposals.png`;await page.screenshot({path:out+'/'+name,fullPage:true});captures.push(name)}
+   await page.locator('.pa-jump button').nth(q).click();const name=`${lang}-${width}-s${q}.png`;await page.screenshot({path:out+'/'+name,fullPage:true});captures.push(name)
    assert.ok(await page.getByTestId('intelligence-panel').evaluate(e=>e.scrollWidth<=e.clientWidth+1))
   }
   cases.push({lang,width,font:'Quicksand loaded from existing product index.html link',captures,status:'PASS'});await context.close()

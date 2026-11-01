@@ -53,7 +53,7 @@ async function enabledRuntime(){
  let s=fs.readFileSync('src/features/marketing/intelligenceRuntime.ts','utf8').replace('import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY',"'sb_publishable_synthetic'").replace("'./analyticsPreference'","'./analyticsPreference.mjs'")
  s=s.replace(/import \{behaviorRecorder\}[^\n]+/,'const behaviorRecorder=globalThis.__recorder')
   .replace(/import \{INTELLIGENCE_COLLECTION_ENABLED[^\n]+/,`const INTELLIGENCE_COLLECTION_ENABLED=true,anonymousSignals=${JSON.stringify(['welcome','demo_enter','signup_start'])}`)
-  .replace(/import \{requestLandingChallenge\}[^\n]+/,'const requestLandingChallenge=()=>globalThis.__challenge()')
+  .replace(/import \{campaignExperienceFields\}[^\n]+/,'const campaignExperienceFields=()=>({})').replace(/import \{requestLandingChallenge\}[^\n]+/,'const requestLandingChallenge=()=>globalThis.__challenge()')
   .replace(/import \{supabase\}[^\n]+/,'const supabase=globalThis.__telemetryClient')
  const target=path.join(cache,'enabled-'+crypto.randomUUID()+'.mjs');fs.writeFileSync(target,ts.transpileModule(s,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2023}}).outputText);return import(pathToFileURL(target).href)
 }

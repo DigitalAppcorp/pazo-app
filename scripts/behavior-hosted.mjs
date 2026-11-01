@@ -109,31 +109,26 @@ try{
   }
   await page.getByRole('button',{name:lang==='es'?'Centro de control':'Control center',exact:true}).click()
   if(width<1024)await page.getByRole('combobox',{name:lang==='es'?'Secciones del panel':'Dashboard sections'}).selectOption('behavior');else await page.getByRole('button',{name:lang==='es'?'Comportamiento':'Behavior',exact:true}).click()
-  await page.locator('.pa-details').filter({has:page.locator('summary').filter({hasText:lang==='es'?'Explorar tareas':'Explore tasks'})}).locator('summary').first().click()
-  await page.locator('.behavior-coverage').waitFor()
-  assert.equal(await page.locator('.behavior-funnel li').count(),4)
+  await page.locator('.behavior-issues').waitFor()
+  assert.equal(await page.locator('.pa-arrivals-panel').count(),1)
   await page.evaluate(lang=>{const e=document.createElement('div');e.textContent=lang==='es'?'QA · Datos sintéticos · Backend aislado':'QA · Synthetic data · Isolated backend';e.style.cssText='position:fixed;bottom:0;right:0;z-index:10000;background:#f8edc9;color:#204e4a;font:600 11px system-ui;padding:6px 10px;pointer-events:none';document.body.append(e)},lang)
   const name=`${lang}-${width}`
   await page.screenshot({path:out+'/'+name+'-overview.png',fullPage:true})
   if(intelligenceHosted){
-   assert.equal(await page.locator('.intelligence-questions button').count(),5)
+   assert.equal(await page.locator('.pa-jump button').count(),5)
+   await page.getByTestId('intelligence-panel').locator('.pa-section-title').first().waitFor()
    for(let i=0;i<5;i++){
-    await page.locator('.intelligence-questions button').nth(i).click()
-    await page.getByTestId('intelligence-panel').locator('.intelligence-coverage').waitFor()
-    await page.getByTestId('intelligence-panel').scrollIntoViewIfNeeded()
-    await page.screenshot({path:out+'/'+name+'-question-'+i+'.png',fullPage:true})
+    await page.locator('.pa-jump button').nth(i).click()
+    await page.screenshot({path:out+'/'+name+'-section-'+i+'.png',fullPage:true})
    }
-   await page.locator('.intelligence-questions button').first().click()
   }
-  await page.locator('.behavior-funnel').scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'-funnel.png',fullPage:true})
-  await page.getByRole('button',{name:lang==='es'?'¿Qué usan al volver?':'What do people use on return?',exact:true}).click()
-  await page.getByRole('heading',{name:lang==='es'?'Qué usan al regresar':'What people use on return',exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'-return.png',fullPage:true})
-  failReport=true;await page.getByRole('button',{name:lang==='es'?'Actualizar datos':'Refresh data',exact:true}).click();await page.getByTestId('behavior-panel').getByRole('alert').waitFor()
-  failReport=false;await page.getByRole('button',{name:lang==='es'?'Reintentar informe':'Retry report',exact:true}).click();await page.locator('.behavior-coverage').waitFor()
+  await page.locator('.pa-arrivals-panel').scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'-funnel.png',fullPage:true})
+  failReport=true;await page.getByRole('button',{name:lang==='es'?'Actualizar analíticas':'Refresh analytics',exact:true}).click();await page.getByTestId('behavior-panel').getByRole('alert').filter({hasText:lang==='es'?'No pudimos consultar este informe':'This report could not be loaded'}).waitFor()
+  failReport=false;await page.getByRole('button',{name:lang==='es'?'Reintentar informe':'Retry report',exact:true}).click();await page.locator('.behavior-issues').waitFor()
   await context.setOffline(true)
   await page.getByText(lang==='es'?'Sin conexión. Comprueba la red y vuelve a actualizar.':'Offline. Check your connection and refresh again.',{exact:true}).waitFor()
   await context.setOffline(false)
-  await page.getByRole('button',{name:lang==='es'?'Actualizar datos':'Refresh data',exact:true}).click();await page.locator('.behavior-coverage').waitFor()
+  await page.getByRole('button',{name:lang==='es'?'Actualizar analíticas':'Refresh analytics',exact:true}).click();await page.locator('.behavior-issues').waitFor()
   if(localEnabled&&!gpc&&lang==='en'){
    assert.equal(await page.evaluate(async()=>{const module=await import('/src/features/marketing/behaviorRuntime.ts');return module.withdrawBehavior()}),true)
    assert.equal(sql(`SELECT count(*) FROM marketing_private.behavior_sessions WHERE owner_id='${owner}'`),'0','actual browser withdrawal deletes active sessions')

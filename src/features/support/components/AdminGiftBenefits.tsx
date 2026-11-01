@@ -1,4 +1,5 @@
 import {useEffect,useRef,useState} from 'react'
+import {InfoTip} from '../../admin/components/AdminClarity'
 import {supabase} from '../../../services/supabaseClient'
 import {useAccountRequestScope} from '../../auth/useAccountRequestScope'
 type Recipient={owner_id:string;email:string|null;pets:string[];gift_level:number|null;gift_expires_at:string|null;gift_active:boolean}
@@ -82,10 +83,10 @@ export function AdminGiftBenefits({lang,onSelect}:{lang:'es'|'en';onSelect?:(own
  }
  return <section aria-label={l('Beneficios de cortesía','Complimentary benefits')}
   className="space-y-4 rounded-[22px] bg-white p-5 shadow-sm">
-  <h3 className="text-lg font-black">{l('Otorgar beneficios sin cobro','Grant benefits without payment')}</h3>
-  <p className="text-xs leading-relaxed text-[#5C7470]">{l(
+  <div className="flex items-center gap-2"><h3 className="text-[16px] font-bold">{l('Otorgar beneficios sin cobro','Grant benefits without payment')}</h3>
+   <InfoTip label={l('Sobre las cortesías','About complimentary benefits')}>{l(
    'Busca por correo o nombre de mascota. Las cortesías son independientes de PayPal y quedan auditadas.',
-   'Search by email or pet name. Complimentary access is independent of PayPal and is audited.')}</p>
+   'Search by email or pet name. Complimentary access is independent of PayPal and is audited.')}</InfoTip></div>
   <form onSubmit={e=>{e.preventDefault();void search()}} className="flex flex-wrap gap-2">
    <label className="min-w-[200px] flex-1 text-xs font-bold">{l('Cuenta o mascota','Account or pet')}
     <input disabled={busy} value={term} onChange={e=>setTerm(e.target.value)} maxLength={80} minLength={3}

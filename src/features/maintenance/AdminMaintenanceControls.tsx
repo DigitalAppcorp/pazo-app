@@ -1,5 +1,6 @@
 import {useEffect,useState} from 'react'
 import {supabase} from '../../services/supabaseClient'
+import {InfoTip} from '../admin/components/AdminClarity'
 type Status={revision:number;enabled:boolean;message_es:string;message_en:string;updated_at:string}
 export function AdminMaintenanceControls({lang}:{lang:'es'|'en'}){
  const [status,setStatus]=useState<Status|null>(null)
@@ -40,31 +41,32 @@ export function AdminMaintenanceControls({lang}:{lang:'es'|'en'}){
   }finally{setWorking(false)}
  }
  return <section aria-label={l('Mantenimiento de PAZO','PAZO maintenance')} className="space-y-4 rounded-[22px] bg-white p-5 shadow-sm">
-  <h2 className="text-lg font-black">{l('Modo mantenimiento','Maintenance mode')}</h2>
-  <a href="/maintenance-admin.html" className="inline-flex min-h-11 items-center rounded-xl px-3 text-xs font-bold underline focus-visible:bg-[#E1E53F]/40">{l('Acceso administrativo de recuperación','Administrator recovery access')}</a>
-  <p className="text-xs leading-relaxed text-[#5C7470]">{l(
-   'Bloquea la interfaz de usuarios y la API de datos; el administrador conserva acceso. Se deben detener las nuevas compras PayPal antes de activarlo. Las renovaciones y servicios externos se gestionan por separado.',
-   'Blocks the user interface and Data API; admin access remains. Stop new PayPal checkout before enabling. Renewals and external services need separate handling.')}</p>
   {loading?<p role="status">{l('Consultando estado…','Reading status…')}</p>:
-   status?<p role="status" className="rounded-xl bg-[#EFF4E9] p-3 text-xs font-bold">
-    {status.enabled?l('Mantenimiento activo','Maintenance active'):l('Aplicación disponible','Application available')}
-   </p>:<p role="alert" className="text-xs text-[#A04535]">{l('Estado no disponible. No intentes activar a ciegas.','State unavailable. Do not toggle without verified status.')}</p>}
-  <label className="block text-xs font-bold">{l('Mensaje en español','Spanish message')}
-   <textarea rows={2} maxLength={300} value={es} onChange={e=>setEs(e.target.value)}
-    className="mt-2 min-h-20 w-full rounded-xl bg-[#F0F4E9] p-3 text-sm"/>
-  </label>
-  <label className="block text-xs font-bold">{l('Mensaje en inglés','English message')}
-   <textarea rows={2} maxLength={300} value={en} onChange={e=>setEn(e.target.value)}
-    className="mt-2 min-h-20 w-full rounded-xl bg-[#F0F4E9] p-3 text-sm"/>
-  </label>
-  <div className="flex flex-wrap gap-2">
-   <button type="button" onClick={()=>{setLoading(true);void reload()}} disabled={loading||working}
-    className="min-h-11 rounded-xl bg-[#EFF4E9] px-4 text-xs font-bold disabled:opacity-50">{l('Consultar estado','Refresh status')}</button>
+   status?<div className="ac-state" data-active={status.enabled}>
+    <span aria-hidden="true"/>
+    <p role="status">{status.enabled?l('Mantenimiento activo','Maintenance active'):l('Aplicación disponible','Application available')}</p>
+    <InfoTip label={l('Qué hace el mantenimiento','What maintenance does')}>{l(
+     'Bloquea la interfaz de usuarios y la API de datos; el administrador conserva acceso. Se deben detener las nuevas compras PayPal antes de activarlo. Las renovaciones y servicios externos se gestionan por separado.',
+     'Blocks the user interface and Data API; admin access remains. Stop new PayPal checkout before enabling. Renewals and external services need separate handling.')}</InfoTip>
+   </div>:<p role="alert" className="text-xs text-[#A04535]">{l('Estado no disponible. No intentes activar a ciegas.','State unavailable. Do not toggle without verified status.')}</p>}
+  <div className="flex flex-wrap items-center gap-2">
    {status&&<button type="button" onClick={()=>void change(!status.enabled)}
     disabled={working||es.trim().length<12||en.trim().length<12}
     className={'min-h-11 rounded-xl px-4 text-xs font-black disabled:opacity-50 '+(status.enabled?'bg-[#E1E53F]':'bg-[#F8E6DC]')}>
     {status.enabled?l('Restaurar acceso','Restore access'):l('Activar mantenimiento','Enable maintenance')}</button>}
+   <button type="button" onClick={()=>{setLoading(true);void reload()}} disabled={loading||working} aria-label={l('Consultar estado','Refresh status')} className="ac-refresh"><span aria-hidden="true">↻</span></button>
   </div>
   {message&&<p role="status" className="text-xs text-[#5C7470]">{message}</p>}
+  <details className="ac-quiet ac-quiet-inset"><summary>{l('Mensaje que ven los usuarios','Message users see')}<span aria-hidden="true">＋</span></summary><div className="space-y-3">
+   <label className="block text-xs font-bold">{l('Mensaje en español','Spanish message')}
+    <textarea rows={2} maxLength={300} value={es} onChange={e=>setEs(e.target.value)}
+     className="mt-2 min-h-20 w-full rounded-xl bg-[#F0F4E9] p-3 text-sm"/>
+   </label>
+   <label className="block text-xs font-bold">{l('Mensaje en inglés','English message')}
+    <textarea rows={2} maxLength={300} value={en} onChange={e=>setEn(e.target.value)}
+     className="mt-2 min-h-20 w-full rounded-xl bg-[#F0F4E9] p-3 text-sm"/>
+   </label>
+  </div></details>
+  <a href="/maintenance-admin.html" className="inline-flex min-h-11 items-center rounded-xl px-3 text-xs font-bold underline focus-visible:bg-[#E1E53F]/40">{l('Acceso administrativo de recuperación','Administrator recovery access')}</a>
  </section>
 }

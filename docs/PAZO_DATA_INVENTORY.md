@@ -1,5 +1,9 @@
 ## #168 — ensayo2 implementado en rama, sin release
 
+
+> **Detalles anónimos, 1-nov-2026 — preparado, apagado:** contadores diarios con categoría cerrada en `marketing_private.experience_detail_daily`: motivo de fallo de registro, última pantalla de Demo y tipo de origen de una visita sin sesión. El referrer se reduce a categoría en el navegador y se descarta; un marcador de sesión del navegador evita contar dos veces por pestaña. Sin texto, identificador, sesión ni enlace a cuentas; 14 días; GPC y exclusión local respetados; no se envía a Meta. Sin instalar ni recoger.
+
+> **Demo y acceso por anuncio, 1-nov-2026 — preparado, apagado:** los contadores anónimos diarios podrán llevar la creatividad validada (catálogo cerrado) en `marketing_private.experience_campaign_daily`. Sin identificador, sesión ni enlace a cuentas; 14 días; GPC y exclusión local respetados; no se envía a Meta. El navegador usa el estado de atribución existente de 72 h, sin nuevo almacenamiento. Sin instalar ni recoger. Ver [runbook](marketing/CAMPAIGN_EXPERIENCE_RUNBOOK.md).
 Orden PO30-oct: #168 antes #169, implementación/QA/PR sin producción ni publicidad. Contrato histórico preservado; campaña pazo_la_en_202611 con qr_v2_en/cuidados_v2_en/app_v2_en. Única SQL nueva PREPARED_NOT_APPLIED, retención14d/gates/QA preservados. [Auditoría y alcance](marketing/ADS2_PREFLIGHT.md). Events Manager sin Pixel web PAZO observado: META_CONVERSION_NOT_VERIFIED. No nueva categoría de datos, proveedor activo ni activos publicitarios en Git. Próximo gate: revisión del PR/CI; lanzamiento reservado al PO.
 
 ## #150 — navegación y prerregistro preparados, no activos

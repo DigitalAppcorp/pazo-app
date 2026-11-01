@@ -42,33 +42,26 @@ try{
   const page=await context.newPage();page.setDefaultTimeout(15000);page.on('pageerror',e=>errors.push(String(e)))
   await page.goto(`http://127.0.0.1:5360/supabase/tests/marketing/behavior-harness.html?lang=${lang}`)
   if(width<1024)await page.getByRole('combobox',{name:lang==='es'?'Secciones del panel':'Dashboard sections'}).selectOption('behavior');else await page.getByRole('button',{name:lang==='es'?'Comportamiento':'Behavior',exact:true}).click()
-  await page.locator('.pa-details').filter({has:page.locator('summary').filter({hasText:lang==='es'?'Explorar tareas':'Explore tasks'})}).locator('summary').first().click()
   const panel=page.getByTestId('intelligence-panel')
-  await panel.waitFor();const buttons=page.locator('.intelligence-questions button');check(await buttons.count()===5,'five plain-language questions')
-  await buttons.nth(1).click()
+  await panel.waitFor();check(await page.locator('.pa-jump button').count()===5,'five sections to jump to')
   if(state==='loading')await panel.getByRole('status').waitFor()
   else if(state==='error')await panel.getByRole('alert').waitFor()
   else if(state==='access'){await panel.getByRole('alert').waitFor();check(await page.locator('[data-pazo-admin-live-mfa]').count()===0,'admin denial never starts an authenticator challenge')}
-  else await panel.locator('.intelligence-coverage').waitFor()
+  else await panel.locator('.pa-section-title').first().waitFor()
   await page.evaluate(()=>document.fonts.ready)
   check(await panel.evaluate(e=>e.scrollWidth<=e.clientWidth+1),'no panel overflow')
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no document overflow')
   const name=`${lang}-${width}-${state}`;await panel.scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'.png',fullPage:true})
   if(state==='content'){
    check(await panel.innerText().then(t=>t.includes(lang==='es'?'Guardar cuidado':'Save care')),'real task label renders')
-   for(let i=0;i<5;i++){
-    await buttons.nth(i).click();await panel.locator('.intelligence-coverage').waitFor();check(await panel.evaluate(e=>e.scrollWidth<=e.clientWidth+1),'each question responsive')
-    await page.locator('.behavior-intro').scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+`-q${i}-top.png`,fullPage:true})
-    await panel.scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+`-q${i}.png`,fullPage:true})
-    if(i===3){await panel.locator('.intelligence-proposals').scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'-proposals.png',fullPage:true})}
-   }
+   for(let i=0;i<5;i++){await page.locator('.pa-jump button').nth(i).click();check(await panel.evaluate(e=>e.scrollWidth<=e.clientWidth+1),'each section responsive');await page.screenshot({path:out+'/'+name+`-s${i}.png`,fullPage:true})}
    await page.keyboard.press('Tab');check(await page.evaluate(()=>document.activeElement!==document.body),'keyboard navigation works')
    await context.setOffline(true);await page.evaluate(()=>window.dispatchEvent(new Event('offline')));await page.getByText(lang==='es'?'Sin conexión. Comprueba la red y vuelve a actualizar.':'Offline. Check your connection and refresh again.').waitFor();await context.setOffline(false)
   }
   if(state==='error'||state==='loading'){
    mode='content';releases.splice(0).forEach(r=>r())
    if(state==='error')await panel.getByRole('button',{name:lang==='es'?'Reintentar tareas':'Retry tasks'}).click()
-   await panel.locator('.intelligence-coverage').waitFor();check((await panel.locator('.behavior-rows li').count())>0,'report recovers without app restart')
+   await panel.locator('.intelligence-attempts').waitFor();check((await panel.locator('.ac-rank li').count())>0,'report recovers without app restart')
   }
   check(!await panel.innerText().then(t=>/97000000|96000000|SYNTHETIC_OUTAGE/.test(t)),'no IDs or raw service diagnostics')
   cases.push({lang,width,state,status:'PASS',capture:name+'.png'});await context.close()

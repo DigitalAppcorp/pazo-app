@@ -100,6 +100,7 @@ try{
   await page.keyboard.press('Escape')
   check(await page.evaluate(()=>document.body.dataset.closed==='true'),'dialog Escape')
   await page.goto(ORIGIN+'/supabase/tests/f17/browser-harness.html?case=inbox')
+  await page.locator('summary',{hasText:/Responder|Ver respuesta/}).first().click()
   await page.getByRole('textbox',{name:'Nota interna (solo administradores)',exact:true}).fill('NEVER_DISPLAY_PRIVATE_NOTE')
   await page.getByRole('textbox',{name:'Respuesta visible para el usuario',exact:true}).fill('Respuesta actualizada de PAZO')
   await page.getByRole('button',{name:'Guardar nota y respuesta',exact:true}).click()

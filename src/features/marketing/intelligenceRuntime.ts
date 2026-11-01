@@ -1,6 +1,7 @@
 import {browserAnalyticsAllowed,captureAnalyticsRequest} from './analyticsPreference'
 import {behaviorRecorder} from './behaviorRuntime'
 import {INTELLIGENCE_COLLECTION_ENABLED,anonymousSignals,type AnonymousSignal,type IntelligenceTask,type IntelligenceKind} from './intelligenceCatalog'
+import {campaignExperienceFields} from './campaignExperience'
 import {requestLandingChallenge} from './landingChallenge'
 import {supabase} from '../../services/supabaseClient'
 const allowed=()=>browserAnalyticsAllowed()&&INTELLIGENCE_COLLECTION_ENABLED&&typeof window!=='undefined'&&typeof document!=='undefined'&&typeof navigator!=='undefined'&&(navigator as Navigator&{globalPrivacyControl?:boolean}).globalPrivacyControl!==true&&document.visibilityState==='visible'
@@ -22,6 +23,6 @@ export function observeAnonymous(signal:AnonymousSignal){
   const publicKey=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
   if(!token||!current()||!allowed()||typeof publicKey!=='string')return
   // A challenge resolved after signup must never inherit the new account JWT.
-  return supabase.functions.invoke('pazo-marketing-landing',{headers:{Authorization:`Bearer ${publicKey}`,'x-pazo-challenge':token},body:{experience:signal}})
+  return supabase.functions.invoke('pazo-marketing-landing',{headers:{Authorization:`Bearer ${publicKey}`,'x-pazo-challenge':token},body:{experience:signal,...campaignExperienceFields()}})
  }).catch(()=>{/* No UI dependency or diagnostic text. */})
 }
