@@ -2,6 +2,16 @@
 
 Fusionar no despliega (`git.deploymentEnabled=false`) ni cambia producción. Cada paso se verifica antes del siguiente. No usar `supabase db push`.
 
+## Estado de producción (1-nov-2026)
+
+Todo publicado por orden del titular, incluido el Pixel antes de demostrar la deduplicación. Los pasos 1 a 6 ya están hechos: no repetirlos.
+
+- Vercel `dpl_G2gXMR2VtY7JC5GhBYCppm7zRkPf`, con los cuatro interruptores de build activos. Gate Meta en `true`.
+- SQL adicional: fuente `20261101130000` instalada como `20261101062705`. `pg_net` enviaba `{}` y el worker devolvía 400 a cada llamada.
+- Primer registro real: atribución `pazo_la_en_202611`/`app_v2_en`, evento `76c6420a-3a1d-4fad-a7ba-3b0a85378e27`, en `sent`. Meta muestra 1 de navegador y 1 de servidor en PAZO Web.
+- **Deduplicación sin demostrar.** La pestaña de Meta indica que sigue analizando los datos. Antes de leer conversiones, revisar Deduplicación de eventos en Administrador de eventos. Si Meta no deduplica, apagar `VITE_PAZO_META_PIXEL_ENABLED` y desplegar.
+- Sin probar con cuenta real: rechazo de consentimiento, GPC, retirada, cuenta existente y PWA.
+
 ## Interruptores
 
 | Interruptor | Dónde | Inicial | Efecto |
