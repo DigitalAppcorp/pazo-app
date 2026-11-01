@@ -6,10 +6,12 @@ import {createMetaWorkerHandler} from './workerCore.mjs'
 import {createMetaWorkerAuthenticator} from './workerAuth.mjs'
 import {createMetaOutboxRepository} from '../_shared/metaOutboxRepository.mjs'
 import {runMetaCapiWorker} from '../_shared/metaServerGateway.mjs'
+import {resolveMetaBackend} from '../_shared/metaSupabaseOrigin.mjs'
 
 export function createMetaWorkerRuntime({
   released=false,privacyReviewed=false,matchFieldsApproved=false,
-  providerApproved=false,url=null,serviceKey=null,readSecret=()=>undefined,
+  providerApproved=false,url=null,isolatedOrigin=null,serviceKey=null,
+  readSecret=()=>undefined,
   readApprovedMatchField=null,apiVersion=null,
   fetchImpl=fetch,clock=()=>Date.now(),cryptoImpl=crypto,
 }={}) {
@@ -18,9 +20,10 @@ export function createMetaWorkerRuntime({
   if(!gatesOpen) return createMetaWorkerHandler()
   // Without a separately reviewed server-side identity reader, fail closed,
   // even when a caller accidentally flips ALL four release switches.
-  const repository=createMetaOutboxRepository({
+  const backend=resolveMetaBackend({url,isolatedOrigin})
+  const repository=backend&&createMetaOutboxRepository({
     enabled:true,privacyApproved:true,matchFieldsApproved:true,
-    url,serviceKey,readApprovedMatchField,fetchImpl,
+    url,isolatedOrigin,serviceKey,readApprovedMatchField,fetchImpl,
   })
   if(!repository)return createMetaWorkerHandler()
   const authenticate=createMetaWorkerAuthenticator({readSecret,cryptoImpl})
@@ -30,6 +33,8 @@ export function createMetaWorkerRuntime({
     run:()=>runMetaCapiWorker({
       releaseEnabled:true,privacyGateApproved:true,repository,
       apiVersion,readSecret,fetchImpl,clock,
+      // A dataset secret that does not belong to this backend fails closed.
+      expectedDatasetId:backend.datasetId,
       // A live, deployed worker never accepts or generates test event codes.
       testModeEnabled:false,testEventCode:null,nonProduction:false,
     }),

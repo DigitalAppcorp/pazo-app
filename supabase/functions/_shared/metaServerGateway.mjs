@@ -9,7 +9,7 @@ import {validMetaTestConfiguration} from './metaCapi.mjs'
 export async function runMetaCapiWorker({
   releaseEnabled=false,privacyGateApproved=false,
   repository=null,apiVersion=null,readSecret=()=>undefined,
-  fetchImpl=fetch,clock=()=>Date.now(),
+  expectedDatasetId=undefined,fetchImpl=fetch,clock=()=>Date.now(),
   testModeEnabled=false,testEventCode=null,nonProduction=false,
 }={}) {
   if (releaseEnabled!==true || privacyGateApproved!==true)
@@ -20,7 +20,7 @@ export async function runMetaCapiWorker({
   // Missing dataset/secret/version always fails closed BEFORE leasing any
   // verified-registration event, so no work can be lost on misconfiguration.
   const config=resolveMetaServerConfig({
-    releaseEnabled,privacyGateApproved,apiVersion,readSecret,
+    releaseEnabled,privacyGateApproved,apiVersion,readSecret,expectedDatasetId,
   })
   if (!config) return {status:'not_configured'}
   return deliverVerifiedMetaRegistration({

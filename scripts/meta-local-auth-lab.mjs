@@ -8,6 +8,7 @@ import {runAuthenticatedMetaEdgeLab} from './meta-local-auth-edge-flow.mjs'
 import {runLocalGoTrueSqlMeta} from './meta-local-gotrue-sql-lab.mjs'
 import {runMetaLocalEdgeHttpLab} from './meta-local-edge-http-lab.mjs'
 import {runMetaRealBrowser} from './meta-local-browser-playwright.mjs'
+import {runMetaLocalWorkerHttpLab} from './meta-local-worker-http-lab.mjs'
 
 function local(url,allowedPaths=[]){
   const parsed=new URL(url)
@@ -167,6 +168,11 @@ export async function runMetaLocalAuthLab({statusFile,apiUrl,mailpitUrl}={}){
     api,key,serviceKey:vars.SERVICE_ROLE_KEY,dbUrl:vars.DB_URL,
   })
   assert.equal(chromium.status,'REAL_BROWSER_SUPABASE_JS_META_OFF_PASS')
+  console.log('META_AUTH_PHASE real_worker_gateway_and_outbox')
+  const workerHttp=await runMetaLocalWorkerHttpLab({
+    api,serviceKey:vars.SERVICE_ROLE_KEY,dbUrl:vars.DB_URL,
+  })
+  assert.equal(workerHttp.status,'LOCAL_REAL_WORKER_HTTP_PASS')
   return {result:'LOCAL_GOTRUE_CONFIRMED_SIGNUP_PASS',
     signupRequestedWithoutSession:true,
     unverifiedLoginRejected:true,
@@ -179,6 +185,7 @@ export async function runMetaLocalAuthLab({statusFile,apiUrl,mailpitUrl}={}){
     persistentGpcLeaseSuppression:database.gpcRevokedLeasedWork,
     actualEdgeHttp:edgeHttp.status,
     realBrowserSupabaseJs:chromium.status,
+    realWorkerHttp:workerHttp.status,
     hostedRequests:0,metaProviderRequests:0}
 }
 const direct=process.argv[1]?.endsWith('/meta-local-auth-lab.mjs')

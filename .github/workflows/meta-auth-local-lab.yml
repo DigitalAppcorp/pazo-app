@@ -10,7 +10,12 @@ on:
       - 'scripts/meta-local-gotrue-sql-lab.mjs'
       - 'scripts/meta-local-edge-http-lab.mjs'
       - 'scripts/meta-local-browser-playwright.mjs'
+      - 'scripts/meta-local-worker-http-lab.mjs'
       - 'scripts/meta-browser-supabase-client.mjs'
+      - 'supabase/tests/marketing/meta-local-worker-entry.ts'
+      - 'supabase/functions/pazo-meta-worker/**'
+      - 'supabase/functions/_shared/meta*'
+      - 'supabase/config.toml'
       - 'src/features/marketing/metaConsentController.mjs'
       - 'src/features/marketing/metaConsentRegistrationFlow.mjs'
       - 'src/features/marketing/metaConsentTransport.mjs'
@@ -50,6 +55,7 @@ jobs:
           supabase init
           python3 - <<'PY'
           from pathlib import Path
+          import os
           import re
           config=Path('supabase/config.toml')
           data=config.read_text()
@@ -61,6 +67,20 @@ jobs:
           assert count==1, 'Fail closed: confirmation requirement must be enabled in local Auth'
           data=data[:section.start(1)]+patched+data[section.end(1):]
           assert 'enable_confirmations = true' in patched
+          # The worker gets the exact verify_jwt the repository would deploy.
+          source=Path(os.environ['GITHUB_WORKSPACE'],'supabase/config.toml').read_text()
+          worker=re.search(r'(?ms)^\[functions\.pazo-meta-worker\]\s*\n(.*?)(?=^\[|\Z)',source)
+          assert worker, 'Repository worker config missing'
+          verify=re.search(r'^verify_jwt\s*=\s*(true|false)\s*$',worker.group(1),flags=re.M)
+          assert verify, 'Repository worker verify_jwt missing'
+          data+=f'''
+          [functions.pazo-meta-lab]
+          verify_jwt = false
+          [functions.pazo-meta-worker-lab]
+          verify_jwt = {verify.group(1)}
+          [functions.pazo-meta-worker-jwt-control]
+          verify_jwt = true
+          '''.replace('          ','')
           config.write_text(data)
           PY
       - name: Boot local Auth/Postgres/Mailpit (no linked project or hosted credentials)
@@ -84,10 +104,16 @@ jobs:
           cp "$GITHUB_WORKSPACE/supabase/functions/pazo-meta-receipt/receiptCore.mjs" supabase/functions/pazo-meta-receipt/receiptCore.mjs
           cp "$GITHUB_WORKSPACE/supabase/functions/pazo-marketing-attribution/requestBody.mjs" supabase/functions/pazo-marketing-attribution/requestBody.mjs
           cp "$GITHUB_WORKSPACE/supabase/functions/_shared/metaGpcOverride.mjs" supabase/functions/_shared/metaGpcOverride.mjs
+          # Same worker behind the repo's verify_jwt, and behind a JWT control.
+          mkdir -p supabase/functions/{pazo-meta-worker,pazo-meta-worker-lab,pazo-meta-worker-jwt-control}
+          cp "$GITHUB_WORKSPACE"/supabase/functions/pazo-meta-worker/{runtime,workerCore,workerAuth}.mjs supabase/functions/pazo-meta-worker/
+          cp "$GITHUB_WORKSPACE"/supabase/functions/_shared/meta*.mjs supabase/functions/_shared/
+          cp "$GITHUB_WORKSPACE/supabase/tests/marketing/meta-local-worker-entry.ts" supabase/functions/pazo-meta-worker-lab/index.ts
+          cp "$GITHUB_WORKSPACE/supabase/tests/marketing/meta-local-worker-entry.ts" supabase/functions/pazo-meta-worker-jwt-control/index.ts
           # The functions are intentionally not present in the deployable repo folder.
           # Production candidate flags remain OFF; only this temporary test
           # harness uses enabled handlers with a hardcoded local Kong backend.
-          supabase functions serve pazo-meta-lab --no-verify-jwt > "$RUNNER_TEMP/pazo-meta-edge-start.log" 2>&1 &
+          supabase functions serve > "$RUNNER_TEMP/pazo-meta-edge-start.log" 2>&1 &
           echo $! > "$RUNNER_TEMP/pazo-meta-edge.pid"
           ready=0
           for attempt in $(seq 1 45); do

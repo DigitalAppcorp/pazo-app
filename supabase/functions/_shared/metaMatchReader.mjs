@@ -2,7 +2,7 @@
 // The lab-only RPC verifies a current event lease, independently granted
 // purpose, original UA snapshot and fresh Auth email inside PostgreSQL.
 // No raw email is serialized to a worker and no browser may call this RPC.
-const URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
+import {resolveMetaBackend} from './metaSupabaseOrigin.mjs'
 const UUID4=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const HASH=/^[a-f0-9]{64}$/
@@ -10,10 +10,11 @@ const UA=/^[\x20-\x7e]{20,512}$/
 
 export function createMetaMatchReader({
   enabled=false,privacyReviewed=false,sourceApproved=false,
-  url=null,serviceKey=null,fetchImpl=fetch,
+  url=null,isolatedOrigin=null,serviceKey=null,fetchImpl=fetch,
 }={}) {
+  const backend=resolveMetaBackend({url,isolatedOrigin})
   if(enabled!==true||privacyReviewed!==true||sourceApproved!==true
-    ||url!==URL||typeof serviceKey!=='string'||serviceKey.length<24
+    ||!backend||typeof serviceKey!=='string'||serviceKey.length<24
     ||typeof fetchImpl!=='function')return null
   return async function readApprovedMatchField(ownerId,eventId,leaseId){
     if(typeof ownerId!=='string'||!UUID.test(ownerId)
@@ -21,7 +22,7 @@ export function createMetaMatchReader({
        ||typeof leaseId!=='string'||!UUID4.test(leaseId))return null
     let response
     try{
-      response=await fetchImpl(URL+'/rest/v1/rpc/pazo_meta_read_match_candidate',{
+      response=await fetchImpl(backend.origin+'/rest/v1/rpc/pazo_meta_read_match_candidate',{
         method:'POST',redirect:'error',cache:'no-store',
         signal:AbortSignal.timeout(6000),
         headers:{apikey:serviceKey,authorization:'Bearer '+serviceKey,

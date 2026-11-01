@@ -3,7 +3,7 @@
 // No browser input, matching field, secret or user identifier is logged.
 // A matching-field reader is deliberately NOT provided: an approved privacy
 // inventory and separate server-only implementation are mandatory.
-const URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
+import {resolveMetaBackend} from './metaSupabaseOrigin.mjs'
 const UUID4=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const HASH=/^[0-9a-f]{64}$/
@@ -20,15 +20,17 @@ const secs=value=>{
 
 export function createMetaOutboxRepository({
   enabled=false,privacyApproved=false,matchFieldsApproved=false,
-  url=null,serviceKey=null,readApprovedMatchField=null,fetchImpl=fetch,
+  url=null,isolatedOrigin=null,serviceKey=null,readApprovedMatchField=null,
+  fetchImpl=fetch,
 }={}) {
   if(enabled!==true||privacyApproved!==true||matchFieldsApproved!==true)
     return null
-  if(url!==URL||typeof serviceKey!=='string'||serviceKey.length<24
+  const backend=resolveMetaBackend({url,isolatedOrigin})
+  if(!backend||typeof serviceKey!=='string'||serviceKey.length<24
     ||typeof readApprovedMatchField!=='function'||typeof fetchImpl!=='function')
     return null
   const rpc=async(name,body)=>{
-    const response=await fetchImpl(URL+'/rest/v1/rpc/'+name,{
+    const response=await fetchImpl(backend.origin+'/rest/v1/rpc/'+name,{
       method:'POST',redirect:'error',cache:'no-store',
       signal:AbortSignal.timeout(6000),
       headers:{apikey:serviceKey,authorization:'Bearer '+serviceKey,

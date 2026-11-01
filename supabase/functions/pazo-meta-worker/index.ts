@@ -25,6 +25,8 @@ const settings=reviewedRelease?{
   released:true,privacyReviewed:true,matchFieldsApproved:true,
   providerApproved:true,
   url:Deno.env.get('SUPABASE_URL'),
+  // Unset in production. An isolated project declares itself and gets QA only.
+  isolatedOrigin:Deno.env.get('META_ISOLATED_SUPABASE_ORIGIN')??null,
   serviceKey:Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
   readSecret:(name)=>Deno.env.get(name),
   // Even after the other four switches, no matching data is read until this
@@ -34,6 +36,7 @@ const settings=reviewedRelease?{
     privacyReviewed:META_WORKER_PRIVACY_REVIEWED,
     sourceApproved:META_WORKER_MATCH_SOURCE_APPROVED,
     url:Deno.env.get('SUPABASE_URL'),
+    isolatedOrigin:Deno.env.get('META_ISOLATED_SUPABASE_ORIGIN')??null,
     serviceKey:Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
   }),
   apiVersion:'v26.0',
