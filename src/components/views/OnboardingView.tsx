@@ -7,6 +7,8 @@ import { createPetProfile } from '../../services/petService'
 import { stageMarketingFirstPetCreated } from '../../features/marketing/marketingRuntime'
 import {observePrereg} from '../../features/marketing/preregRuntime'
 import { isValidPazoPassword } from '../../features/auth/recoveryFlow'
+import { isGoogleAuthEnabled } from '../../features/auth/googleAuth'
+import { GoogleSignInButton } from '../../features/auth/GoogleSignInButton'
 import { pazoBuildVersion } from '../../features/release/buildVersion'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { GratitudeWallPreview } from '../../features/supporter/components/GratitudeWallPreview'
@@ -51,6 +53,8 @@ export const OnboardingView = ({
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isOver18, setIsOver18] = useState(false)
+  const [googleNeedsAge, setGoogleNeedsAge] = useState(false)
+  const ageCheckbox = useRef<HTMLInputElement>(null)
 
   const { signUp, user } = useAuth()
   const [isSigningUp, setIsSigningUp] = useState(false)
@@ -361,9 +365,13 @@ export const OnboardingView = ({
 
               <label className="flex items-center gap-2 pt-1 text-[#5C7470] cursor-pointer">
                 <input
+                  ref={ageCheckbox}
                   type="checkbox"
                   checked={isOver18}
-                  onChange={(e) => setIsOver18(e.target.checked)}
+                  onChange={(e) => {
+                    setIsOver18(e.target.checked)
+                    setGoogleNeedsAge(false)
+                  }}
                   className="rounded text-[#204E4A]"
                 />
                 <span className="text-[14px]">
@@ -393,7 +401,22 @@ export const OnboardingView = ({
                   : (lang === 'es' ? 'Crear cuenta' : 'Create account')}
               </button>
 
+              {isGoogleAuthEnabled(import.meta.env) && (
+                <div className="pt-1 space-y-2">
+                  <GoogleSignInButton lang={lang} confirmAdult={() => {
+                    setGoogleNeedsAge(!isOver18)
+                    if (!isOver18) ageCheckbox.current?.focus()
+                    return isOver18
+                  }}/>
+                  {googleNeedsAge && (
+                    <p role="alert" className="text-center text-[13px] font-semibold text-[#204E4A]">
+                      {lang === 'es' ? 'Confirma arriba que tienes 18 años o más.' : 'Confirm above that you are 18 or older.'}
+                    </p>
+                  )}
+                </div>
+              )}
               <div className="flex gap-2 pt-1">
+                {!isGoogleAuthEnabled(import.meta.env) && (
                 <button
                   type="button"
                   disabled
@@ -401,6 +424,7 @@ export const OnboardingView = ({
                 >
                   Google · {lang === 'es' ? 'próximamente' : 'coming soon'}
                 </button>
+                )}
                 <button
                   type="button"
                   disabled
