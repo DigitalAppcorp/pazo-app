@@ -172,7 +172,7 @@ try{
   failReport=true;await page.getByRole('button',{name:lang==='es'?'Actualizar métricas':'Refresh metrics'}).click();await page.getByRole('alert').waitFor()
   check(await (width<1024?page.locator('#pazo-admin-section'):page.getByRole('button',{name:lang==='es'?'Campañas':'Campaigns',exact:true})).isEnabled(),'Campaign error isolated from navigation')
   failReport=false;delayReport=true;await page.getByRole('button',{name:lang==='es'?'Actualizar métricas':'Refresh metrics'}).click()
-  await page.waitForFunction(()=>[...document.querySelectorAll('button')].some(b=>/Actualizar métricas|Refresh metrics/.test(b.textContent)&&b.disabled))
+  await page.waitForFunction(()=>[...document.querySelectorAll('button')].some(b=>/Actualizar métricas|Refresh metrics/.test(b.getAttribute('aria-label')||'')&&b.disabled))
   check(await page.getByRole('button',{name:lang==='es'?'Actualizar métricas':'Refresh metrics'}).isDisabled(),'Loading has disabled refresh')
   await page.getByRole('table').waitFor();await page.getByRole('button',{name:lang==='es'?'Actualizar métricas':'Refresh metrics'}).focus()
   check(await page.evaluate(()=>document.activeElement?.tagName)==='BUTTON','Keyboard focus supported')
