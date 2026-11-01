@@ -1,4 +1,5 @@
 import {observeTask,beginTask,observeAnonymous} from './features/marketing/intelligenceRuntime'
+import {finishDemoTracking,observeArrivalSource,observeSignupFailure,trackDemoScreen} from './features/marketing/experienceDetails'
 import {isSupporterNotification} from './features/notifications/supporterNotification'
 import { canUseAccountFeatures } from './features/auth/accountAccess'
 import { recordAdminActivity } from './features/admin/adminDashboardService'
@@ -237,6 +238,7 @@ function PazoMain() {
   // A failed or cancelled Google return shows its message and retry here.
   useEffect(() => {
     if (!googleAuthFailure) return
+    observeSignupFailure(googleAuthFailure==='cancelled'?'google_cancelled':'google_failed')
     setAuthMode('login')
     setIsOnboardingActive(false)
   }, [googleAuthFailure])
@@ -403,6 +405,7 @@ function PazoMain() {
 
   const leaveDemo = (destination: 'welcome' | 'signup' = 'welcome') => {
     observeAnonymous(destination==='signup'?'demo_signup':'demo_exit')
+    finishDemoTracking()
     setIsDemoUser(false)
     setIsSearchOpen(false)
     setSelectedPublicProfileId(null)
@@ -1961,7 +1964,12 @@ function PazoMain() {
       const signal=activeTab==='inicio'?'demo_home':activeTab==='mascota'?'demo_pet':activeTab==='comunidades'?'demo_communities':activeTab==='mapa'?'demo_places':null
       if(signal)observeAnonymous(signal)
       if(isSearchOpen)observeAnonymous('demo_explore')
-    }else if(!user)observeAnonymous(authMode==='login'?'login_open':'welcome')
+      const screen=isSearchOpen?'explore':activeTab==='inicio'?'home':activeTab==='mascota'?'pet':activeTab==='comunidades'?'communities':activeTab==='mapa'?'places':null
+      if(screen)trackDemoScreen(screen)
+    }else if(!user){
+      observeAnonymous(authMode==='login'?'login_open':'welcome')
+      observeArrivalSource()
+    }
   },[isDemoUser,activeTab,isSearchOpen,user,authMode])
 
   useEffect(()=>{if(selectedPublicProfileId)observeTask('profile_open','exposure')},[selectedPublicProfileId])

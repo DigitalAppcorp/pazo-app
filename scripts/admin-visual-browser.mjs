@@ -68,6 +68,15 @@ try{
   await page.locator('.pa-kpi>strong').first().filter({hasText:'120'}).waitFor()
   assert.deepEqual(await page.locator('.pa-funnel-labels strong').allTextContents(),['80','60','40','20'])
   checks++
+  // Overview stays compact: no segments or exclusion until Comportamiento, which keeps every prior assertion below.
+  assert.equal(await page.locator('.pa-segments').count(),0);assert.equal(await page.locator('.pa-privacy').count(),0);assert.equal(await page.locator('.pa-journeys-panel').count(),0);checks++
+  await page.screenshot({path:`${out}/${lang}-${width}-overview.png`,fullPage:true})
+  await page.locator('.pa-kpi .ac-info>button').first().click();await page.locator('.ac-info [role=note]').waitFor()
+  assert.ok(await page.locator('.ac-info [role=note]').evaluate(e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth}));await page.keyboard.press('Escape')
+  assert.equal(await page.locator('.ac-info [role=note]').count(),0);assert.equal(await page.evaluate(()=>document.body.dataset.closed),undefined);checks++
+  if(width>=1024)await page.locator('.ac-nav-item',{hasText:lang==='es'?'Comportamiento':'Behavior'}).click();else await page.locator('#pazo-admin-section').selectOption('behavior')
+  await page.locator('.pa-segments').waitFor();await page.locator('.pa-kpi>strong').first().filter({hasText:'120'}).waitFor();checks++
+  assert.deepEqual(await page.locator('.pa-funnel-labels strong').allTextContents(),['80','60','40','20']);checks++
   const panel=page.locator('[data-pazo-executive-analytics]')
   assert.ok(await panel.evaluate(e=>e.scrollWidth<=e.clientWidth+1));checks++
   assert.equal(await page.locator('[data-pazo-admin-live-mfa]').count(),0);checks++

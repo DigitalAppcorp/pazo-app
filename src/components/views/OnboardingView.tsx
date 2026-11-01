@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext'
 import { createPetProfile } from '../../services/petService'
 import { stageMarketingFirstPetCreated } from '../../features/marketing/marketingRuntime'
 import {observePrereg} from '../../features/marketing/preregRuntime'
+import {observeSignupFailure} from '../../features/marketing/experienceDetails'
 import { isValidPazoPassword } from '../../features/auth/recoveryFlow'
 import { isGoogleAuthEnabled } from '../../features/auth/googleAuth'
 import { GoogleSignInButton } from '../../features/auth/GoogleSignInButton'
@@ -106,20 +107,24 @@ export const OnboardingView = ({
   const handleSignUp = async () => {
     if (isSigningUp || awaitingEmailConfirmation) return
     if (!email || !password) {
+      observeSignupFailure('missing_fields')
       alert(lang === 'es' ? 'Por favor ingresa un correo y contraseña.' : 'Please enter an email and password.')
       return
     }
     if (!isOver18) {
+      observeSignupFailure('age_required')
       alert(lang === 'es' ? 'Debes confirmar que eres mayor de edad.' : 'You must confirm that you are 18 or older.')
       return
     }
 
     if (password !== passwordConfirm) {
+      observeSignupFailure('password_mismatch')
       alert(lang === 'es' ? 'Las contraseñas no coinciden.' : 'Passwords do not match.')
       return
     }
 
     if (!isValidPazoPassword(password)) {
+      observeSignupFailure('weak_password')
       alert(
         lang === 'es'
           ? 'Usa al menos 8 caracteres, una mayúscula, una minúscula y un número.'
@@ -143,6 +148,7 @@ export const OnboardingView = ({
       }
     } catch {
       observePrereg('signup_error')
+      observeSignupFailure('network')
       alert(lang === 'es'
         ? 'No hay conexión. Inténtalo nuevamente.'
         : 'Connection error. Please try again.')
@@ -445,6 +451,7 @@ export const OnboardingView = ({
                   <GoogleSignInButton lang={lang} confirmAdult={() => {
                     setGoogleNeedsAge(!isOver18)
                     if (!isOver18) {
+                      observeSignupFailure('google_age')
                       ageCheckbox.current?.focus({ preventScroll: true })
                       ageCheckbox.current?.scrollIntoView({ block: 'center' })
                     }

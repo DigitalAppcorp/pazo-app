@@ -271,8 +271,8 @@ export function AdminPayPalSettings({lang}:Props){
    <>
     {error&&<p role="alert" className="rounded-[16px] bg-[#FAEDE7] px-4 py-3 text-[13px] font-semibold text-[#8B4737]">{error}</p>}
     {notice&&<p role="status" className="rounded-[16px] bg-[#EAF4E4] px-4 py-3 text-[13px] font-semibold text-[#296F50]">{notice}</p>}
-    <section className={cardClass} aria-label={t('Etapas del lanzamiento de PayPal','PayPal launch stages')}>
-      <h4 className="text-[17px] font-black">{t('Desarrollo local y lanzamiento','Local development and launch')}</h4>
+    <details className={cardClass} aria-label={t('Etapas del lanzamiento de PayPal','PayPal launch stages')}>
+      <summary className="min-h-11 cursor-pointer rounded-[14px] py-2 text-[14px] font-black outline-none focus-visible:bg-[#EFF5DC]">{t('Desarrollo local y lanzamiento','Local development and launch')}</summary>
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
         <div className="rounded-[15px] bg-[#EFF5E5] px-4 py-3">
           <p className="text-[13px] font-extrabold">{t('1. Desarrollo', '1. Development')}</p>
@@ -293,7 +293,7 @@ export function AdminPayPalSettings({lang}:Props){
        {t('No necesitas un dominio propio ahora. Localhost es solo la interfaz de desarrollo, no un endpoint público de webhooks. La URL HTTPS del retorno de las pruebas sigue administrada por el checkout Sandbox existente hasta su migración segura.',
           'No custom domain is needed now. Localhost is only the development interface, not a public webhook endpoint. The existing Sandbox checkout continues to manage the HTTPS return URL until a safe migration.')}
       </p>
-    </section>
+    </details>
     {env==='live'&&
      <AdminPaypalMfaStepUp lang={lang} onVerified={()=>{setRecentAdminMfa(true);setNotice(t(
        'Código MFA comprobado. El servidor validará nuevamente la sesión para autorizar credenciales.',

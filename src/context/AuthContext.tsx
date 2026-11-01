@@ -9,6 +9,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../services/supabaseClient'
 import { ensureOwnAccountProfile } from '../features/auth/ensureOwnAccountProfile'
 import { classifySignUpResult, type SignUpOutcome } from '../features/auth/signupFlow'
+import { observeSignupFailureCode } from '../features/marketing/experienceDetails'
 import {
   cleanGoogleReturnUrl,
   clearAdultAttestationIntent,
@@ -226,6 +227,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const outcome = classifySignUpResult(error, data?.session)
 
     if (error) {
+      observeSignupFailureCode(error.code)
       captureEvent('auth_signup_failed', {
         error_code: error.code || null,
       })

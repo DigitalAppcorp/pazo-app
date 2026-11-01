@@ -49,42 +49,33 @@ try{
   const page=await context.newPage();page.setDefaultTimeout(15000);page.on('pageerror',e=>{errors.push(String(e));console.error(String(e))})
   await page.goto(`http://127.0.0.1:5358/supabase/tests/marketing/behavior-harness.html?lang=${lang}`)
   if(width<1024)await page.getByRole('combobox',{name:lang==='es'?'Secciones del panel':'Dashboard sections'}).selectOption('behavior');else await page.getByRole('button',{name:lang==='es'?'Comportamiento':'Behavior',exact:true}).click()
-  await page.locator('.pa-details').filter({has:page.locator('summary').filter({hasText:lang==='es'?'Explorar tareas':'Explore tasks'})}).locator('summary').first().click()
   await page.getByTestId('behavior-panel').waitFor()
   if(state==='loading')await page.getByRole('status').filter({hasText:lang==='es'?'Consultando recorridos':'Loading aggregate'}).waitFor()
   else if(state==='error')await page.getByRole('alert').filter({hasText:lang==='es'?'No pudimos consultar este informe':'This report could not be loaded'}).waitFor()
   else if(state==='access'){await page.getByRole('alert').filter({hasText:lang==='es'?'No pudimos consultar este informe':'This report could not be loaded'}).waitFor();check(await page.locator('[data-pazo-admin-live-mfa]').count()===0,'admin denial never starts an authenticator challenge')}
-  else await page.locator('.behavior-coverage').waitFor()
+  else await page.locator('.behavior-issues').waitFor()
   await page.evaluate(()=>document.fonts.ready)
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no document overflow')
   check(await page.locator('.behavior-panel').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'no panel overflow')
   if(state==='content'){
-   check(await page.locator('.behavior-funnel li').count()===4,'four coherent funnel stages')
+   check(await page.getByTestId('ad-arrivals').locator('li').count()===4,'four stages before signup')
    check(await page.locator('.behavior-panel').innerText().then(t=>!t.includes('96000000')),'no identities rendered')
   }
   const name=`${lang}-${width}-${state}`;await page.screenshot({path:out+'/'+name+'.png',fullPage:true})
   if(state==='content'){
-   await page.locator('.behavior-funnel').scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'-funnel.png',fullPage:true})
-   await page.locator('.behavior-rows').first().scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'-paths.png',fullPage:true})
-   await page.getByRole('button',{name:lang==='es'?'¿Qué usan al volver?':'What do people use on return?',exact:true}).click()
-   check(await page.locator('.behavior-funnel').count()===0,'plain-language views separate acquisition and return')
-   await page.getByRole('heading',{name:lang==='es'?'Qué usan al regresar':'What people use on return',exact:true}).scrollIntoViewIfNeeded()
+   await page.getByTestId('ad-arrivals').scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'-funnel.png',fullPage:true})
+   await page.getByRole('heading',{name:lang==='es'?'Qué usan al volver':'What they use on return',exact:true}).scrollIntoViewIfNeeded()
    await page.screenshot({path:out+'/'+name+'-return.png',fullPage:true})
-   await page.getByRole('button',{name:lang==='es'?'¿Hasta dónde llegan los anuncios?':'How far do ad arrivals get?',exact:true}).click()
   }
   // Scrollable native admin main is captured separately for complete lower sections.
-  const scroll=page.locator('[role="dialog"]').first()
-  const target=await page.locator('.behavior-footnote').count()
-  if(target){await page.locator('.behavior-footnote').scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'-lower.png',fullPage:true})}
   if(state==='error'||state==='loading'){
    mode='content';releases.splice(0).forEach(r=>r())
    if(state==='error')await page.getByRole('button',{name:lang==='es'?'Reintentar informe':'Retry report'}).click()
-   await page.locator('.behavior-coverage').waitFor();check(await page.locator('.behavior-funnel li').count()===4,'local recovery without restarting Administration')
+   await page.locator('.behavior-issues').waitFor();check(await page.getByTestId('ad-arrivals').locator('li').count()===4,'local recovery without restarting Administration')
   }
   if(width===390&&state==='content'){
-   await page.locator('.behavior-filter-disclosure summary').click()
-   const source=page.getByLabel(lang==='es'?'Origen de cuenta':'Account source');await source.selectOption('unknown');await page.locator('.behavior-coverage').waitFor();check(await page.locator('.behavior-funnel li').count()===0,'unknown source never paid funnel')
-   await source.selectOption('paid_attributed');await page.locator('.behavior-coverage').waitFor();check(await page.locator('.behavior-funnel li').count()===4,'source filter refresh')
+   await page.getByRole('button',{name:lang==='es'?/^No atribuido/:/^Unattributed/}).click();await page.locator('.behavior-issues').waitFor();check(await page.locator('.pa-ads-row').count()===0,'unknown source never paid funnel')
+   await page.getByRole('button',{name:/^Ads/}).click();await page.getByTestId('ad-arrivals').waitFor();check(await page.getByTestId('ad-arrivals').locator('li').count()===4,'source filter refresh')
    await page.keyboard.press('Tab');check(await page.evaluate(()=>document.activeElement?.tagName==='SELECT'||document.activeElement?.tagName==='BUTTON'||document.activeElement?.tagName==='A'),'keyboard focus remains actionable')
   }
   cases.push({lang,width,state,calls,status:'PASS',data:'synthetic isolated PG17, Auth double',capture:name+'.png'})

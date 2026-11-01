@@ -10,6 +10,28 @@ export function createExperienceSubmit({url,serviceKey,fetchImpl=fetch}={}){
   return response.status===200&&(await response.json())===true
  }
 }
+export function createExperienceCampaignSubmit({url,serviceKey,fetchImpl=fetch}={}){
+ const expected='https://mrybvqdebbgcayuvgkkr.supabase.co'
+ if(url!==expected||typeof serviceKey!=='string'||serviceKey.length<15)throw Error('experience_config_unavailable')
+ return async(creative,signal)=>{
+  const response=await fetchImpl(expected+'/rest/v1/rpc/pazo_intelligence_experience_campaign_v1',{
+   method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(5000),
+   headers:{apikey:serviceKey,authorization:'Bearer '+serviceKey,'content-type':'application/json'},body:JSON.stringify({p_creative:creative,p_signal:signal}),
+  })
+  return response.status===200&&(await response.json())===true
+ }
+}
+export function createExperienceDetailSubmit({url,serviceKey,fetchImpl=fetch}={}){
+ const expected='https://mrybvqdebbgcayuvgkkr.supabase.co'
+ if(url!==expected||typeof serviceKey!=='string'||serviceKey.length<15)throw Error('experience_config_unavailable')
+ return async(kind,value,creative)=>{
+  const response=await fetchImpl(expected+'/rest/v1/rpc/pazo_experience_detail_v1',{
+   method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(5000),
+   headers:{apikey:serviceKey,authorization:'Bearer '+serviceKey,'content-type':'application/json'},body:JSON.stringify({p_kind:kind,p_value:value,p_creative:creative}),
+  })
+  return response.status===200&&(await response.json())===true
+ }
+}
 // Source contains NO credentials. Never instantiate while release gate OFF.
 export function createMarketingLandingSubmit({url,serviceKey,fetchImpl=fetch}={}){
   const expected='https://mrybvqdebbgcayuvgkkr.supabase.co'

@@ -1,6 +1,7 @@
 import {useCallback,useEffect,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 import {useAccountRequestScope} from '../../auth/useAccountRequestScope'
+import '../../admin/components/AdminClarity.css'
 
 type Ticket={id:string;owner_id:string;category:'problem'|'question'|'feature'|'other';message:string;status:'open'|'reviewing'|'resolved';admin_note:string|null;admin_reply:string|null;created_at:string}
 const names={problem:['Problema','Problem'],question:['Consulta','Question'],feature:['Nueva función','Feature idea'],other:['Otro','Other']} as const
@@ -45,18 +46,12 @@ export function AdminSupportInbox({lang}:{lang:'es'|'en'}){
  }
  const shown=items.filter(t=>filter==='all'||filter===t.status)
  return <section aria-label={l('Bandeja de soporte','Support inbox')} className="space-y-4">
-  <div className="flex flex-wrap items-center justify-between gap-3">
-   <div><h2 className="text-lg font-black">{l('Soporte de usuarios','User support')}</h2>
-    <p className="text-xs text-[#5C7470]">{l('Mensajes privados, consultas y nuevas ideas. Últimos 100 casos.',
-     'Private messages, questions and feature ideas. Latest 100 tickets.')}</p></div>
-   <button onClick={()=>{setState('loading');void refresh()}} disabled={state==='loading'} className="min-h-11 rounded-2xl bg-[#E1E53F] px-4 py-2 text-xs font-black disabled:opacity-50">{l('Actualizar','Refresh')}</button>
+  <div className="ac-filter-row">
+   <div className="ac-filter-tiles" role="group" aria-label={l('Estado','Status')}>
+    {([['all',l('Todos','All'),items.length],...Object.entries(states).map(([key,n])=>[key,n[lang==='es'?0:1],items.filter(t=>t.status===key).length])] as [string,string,number][]).map(([key,name,count])=><button key={key} type="button" aria-pressed={filter===key} onClick={()=>setFilter(key)} className="ac-filter-tile"><small>{name}</small><strong>{count}</strong></button>)}
+   </div>
+   <button onClick={()=>{setState('loading');void refresh()}} disabled={state==='loading'} aria-label={l('Actualizar','Refresh')} className="ac-refresh"><span aria-hidden="true">↻</span></button>
   </div>
-  <label className="block max-w-xs text-xs font-bold">{l('Estado','Status')}
-   <select value={filter} onChange={e=>setFilter(e.target.value)} className="mt-2 min-h-11 w-full rounded-xl bg-white px-3 py-2 text-xs">
-    <option value="all">{l('Todos','All')}</option>
-    {Object.entries(states).map(([key,n])=><option key={key} value={key}>{n[lang==='es'?0:1]}</option>)}
-   </select>
-  </label>
   {state==='loading'&&<p role="status">{l('Consultando soporte…','Loading support…')}</p>}
   {state==='error'&&<p role="alert">{l('No se pudo leer la bandeja.','Could not load the inbox.')}</p>}
   {error&&<p role="alert" className="text-xs text-[#A04535]">{error}</p>}
@@ -64,33 +59,34 @@ export function AdminSupportInbox({lang}:{lang:'es'|'en'}){
   <div className="grid gap-3 lg:grid-cols-2">
    {shown.map(t=><article key={t.id} className="min-w-0 space-y-3 rounded-[22px] bg-white p-5 shadow-sm">
     <div className="flex flex-wrap items-center justify-between gap-2">
-     <strong className="text-xs text-[#204E4A]">{names[t.category][lang==='es'?0:1]}</strong>
-     <span className="rounded-full bg-[#EFF4E9] px-3 py-1 text-xs">{states[t.status][lang==='es'?0:1]}</span>
+     <span className="ac-chip">{names[t.category][lang==='es'?0:1]}</span>
+     <small className="text-[11px] text-[#5C7470]">{new Date(t.created_at).toLocaleDateString(lang)}</small>
     </div>
     <p className="break-words whitespace-pre-wrap text-sm leading-relaxed text-[#204E4A]">{t.message}</p>
-    <p className="break-all text-[11px] text-[#5C7470]">{l('Cuenta','Account')}: {t.owner_id} · {new Date(t.created_at).toLocaleDateString(lang)}</p>
-    <label className="block text-xs font-bold">{l('Nota interna (solo administradores)','Private admin note')}
-     <textarea rows={2} maxLength={1000} value={notes[t.id]??t.admin_note??''}
-      onChange={e=>setNotes(prev=>({...prev,[t.id]:e.target.value}))}
-      className="mt-2 w-full rounded-xl bg-[#F5F8F1] px-3 py-2 text-xs" />
-    </label>
-    <label className="block text-xs font-bold">{l('Respuesta visible para el usuario','Reply visible to the user')}
-     <textarea rows={3} maxLength={2000} value={replies[t.id]??t.admin_reply??''}
-      onChange={e=>setReplies(prev=>({...prev,[t.id]:e.target.value}))}
-      placeholder={l('El usuario podrá leer esta respuesta en Ayuda y soporte.',
-       'The user can read this reply in Help and Support.')}
-      className="mt-2 w-full rounded-xl bg-[#EFF4E9] px-3 py-2 text-xs" />
-    </label>
-    <button type="button" onClick={()=>void setTicket(t,t.status)} disabled={busyId!==null}
-     className="min-h-11 w-full rounded-xl bg-[#204E4A] px-3 py-2 text-xs font-black text-white disabled:opacity-50">
-     {l('Guardar nota y respuesta','Save note and reply')}
-    </button>
-    <div className="flex flex-wrap gap-2">
-     {(['open','reviewing','resolved'] as const).map(status=><button key={status} type="button"
-      onClick={()=>void setTicket(t,status)} disabled={busyId!==null}
-      className={'min-h-11 rounded-xl px-3 py-2 text-xs font-bold disabled:opacity-50 '+(status===t.status?'bg-[#E1E53F]':'bg-[#EFF4E9]')}>
+    <div className="ac-segments" role="group" aria-label={l('Estado','Status')}>
+     {(['open','reviewing','resolved'] as const).map(status=><button key={status} type="button" aria-pressed={status===t.status}
+      onClick={()=>void setTicket(t,status)} disabled={busyId!==null}>
       {states[status][lang==='es'?0:1]}</button>)}
     </div>
+    <details className="ac-quiet ac-quiet-inset"><summary>{t.admin_reply?l('Ver respuesta','See reply'):l('Responder','Reply')}<span aria-hidden="true">＋</span></summary><div className="space-y-3">
+     <p className="break-all text-[11px] text-[#5C7470]">{l('Cuenta','Account')}: {t.owner_id}</p>
+     <label className="block text-xs font-bold">{l('Respuesta visible para el usuario','Reply visible to the user')}
+      <textarea rows={3} maxLength={2000} value={replies[t.id]??t.admin_reply??''}
+       onChange={e=>setReplies(prev=>({...prev,[t.id]:e.target.value}))}
+       placeholder={l('El usuario podrá leer esta respuesta en Ayuda y soporte.',
+        'The user can read this reply in Help and Support.')}
+       className="mt-2 w-full rounded-xl bg-[#EFF4E9] px-3 py-2 text-xs" />
+     </label>
+     <label className="block text-xs font-bold">{l('Nota interna (solo administradores)','Private admin note')}
+      <textarea rows={2} maxLength={1000} value={notes[t.id]??t.admin_note??''}
+       onChange={e=>setNotes(prev=>({...prev,[t.id]:e.target.value}))}
+       className="mt-2 w-full rounded-xl bg-[#F5F8F1] px-3 py-2 text-xs" />
+     </label>
+     <button type="button" onClick={()=>void setTicket(t,t.status)} disabled={busyId!==null}
+      className="min-h-11 w-full rounded-xl bg-[#204E4A] px-3 py-2 text-xs font-black text-white disabled:opacity-50">
+      {l('Guardar nota y respuesta','Save note and reply')}
+     </button>
+    </div></details>
    </article>)}
   </div>
  </section>

@@ -12,7 +12,8 @@ let response,reads=[],root
 const metrics=['verified_registrations','first_pet_accounts','matured_first_pet_accounts','first_utility_accounts','qr_visible_accounts','qr_download_initiated_accounts','qr_share_confirmed_accounts','care_created_accounts','d7_matured_accounts','d7_return_accounts']
 globalThis.__UTILITY_PANEL__={utilityMetrics:metrics,firstUtilitySummary:days=>{reads.push(days);return response(days)}}
 const cache=fs.mkdtempSync(path.resolve('node_modules/.cache/utility-panel-')),f=path.join(cache,'panel.mjs')
-let source=fs.readFileSync('src/features/marketing/FirstUtilityPanel.tsx','utf8').replace(/import \{[^}]+\} from '.\/firstUtility'/,'const {firstUtilitySummary,utilityMetrics}=globalThis.__UTILITY_PANEL__')
+globalThis.__UTILITY_CLARITY__={InfoTip:({children})=>React.createElement('span',null,children),RankBars:({rows})=>React.createElement('ol',null,rows.map(r=>React.createElement('li',{key:r.key},r.label+': '+r.display)))}
+let source=fs.readFileSync('src/features/marketing/FirstUtilityPanel.tsx','utf8').replace("import {InfoTip,RankBars} from '../admin/components/AdminClarity'",'const {InfoTip,RankBars}=globalThis.__UTILITY_CLARITY__').replace(/import \{[^}]+\} from '.\/firstUtility'/,'const {firstUtilitySummary,utilityMetrics}=globalThis.__UTILITY_PANEL__')
 fs.writeFileSync(f,ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2023,jsx:ts.JsxEmit.ReactJSX}}).outputText)
 const {FirstUtilityPanel}=await import(pathToFileURL(f).href)
 const flush=async fn=>act(async()=>{await fn?.();for(let i=0;i<4;i++)await Promise.resolve()})

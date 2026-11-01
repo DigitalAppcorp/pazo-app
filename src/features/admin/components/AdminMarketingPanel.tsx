@@ -1,6 +1,6 @@
 import { useCallback,useEffect,useState } from 'react'
 import { adminMarketingSummary,type AdminMarketingSummary } from '../adminDashboardService'
-import { AdminGlyph } from './AdminVisuals'
+import { InfoTip,RankBars } from './AdminClarity'
 import { FirstUtilityPanel } from '../../marketing/FirstUtilityPanel'
 
 /** Read/collection are independently gated. No RPC call until the privacy,
@@ -20,13 +20,12 @@ const campaigns:Record<string,{es:string;en:string}>={
  comunidad_en:{es:'Comunidades · inglés',en:'Communities · English'},
 }
 
-function SummaryStat({label,value,note}:{
- label:string;value:number|string;note?:string
+function SummaryStat({label,value,info}:{
+ label:string;value:number|string;info?:string
 }){
- return <div className="min-w-0 rounded-[21px] bg-white p-4 shadow-[0_7px_25px_rgba(32,78,74,0.055)]">
-  <p className="text-[12px] font-semibold text-[#597269]">{label}</p>
-  <p className="mt-2 text-[25px] font-black text-[#183F34]">{value}</p>
-  {note&&<p className="mt-1 text-[11px] leading-relaxed text-[#71857F]">{note}</p>}
+ return <div className="min-w-0 rounded-[18px] bg-white p-4 shadow-[0_7px_25px_rgba(32,78,74,0.055)]">
+  <div className="flex items-start justify-between gap-2"><p className="text-[12px] font-semibold text-[#597269]">{label}</p>{info&&<InfoTip label={label}>{info}</InfoTip>}</div>
+  <p className="mt-2 text-[25px] font-bold text-[#183F34]">{value}</p>
  </div>
 }
 
@@ -56,19 +55,6 @@ export function AdminMarketingPanel({lang,period}:{lang:'es'|'en';period:7|30|90
  },[period,requestKey,lang])
 
  return <section aria-busy={loading} aria-label={l('Medición publicitaria','Campaign measurement')} className="min-w-0 space-y-4">
-  <div className="rounded-[21px] bg-[#E8F2E6] px-5 py-4">
-   <div className="flex items-start gap-3">
-    <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#166D54]"><AdminGlyph name="chart" size={21}/></span>
-    <div className="min-w-0 flex-1">
-     <h3 className="text-[17px] font-black text-[#204E4A]">{l('Campañas de PAZO','PAZO campaigns')}</h3>
-     <p className="mt-1 text-[12px] leading-relaxed text-[#597269]">{l(
-      'Atribución interna por anuncio. No se envían conversiones individuales a Meta.',
-      'Internal per-ad attribution. No individual conversions are sent to Meta.'
-     )}</p>
-    </div>
-   </div>
-  </div>
-
   {!PAZO_MARKETING_ADMIN_REPORT_ENABLED&&<div role="status" className="rounded-[21px] bg-white p-5 shadow-sm">
    <p className="text-[15px] font-black text-[#204E4A]">{l('En preparación · no hay recopilación activa','In preparation · collection is inactive')}</p>
    <p className="mt-2 text-[13px] leading-relaxed text-[#647C75]">{l(
@@ -79,38 +65,41 @@ export function AdminMarketingPanel({lang,period}:{lang:'es'|'en';period:7|30|90
 
   {PAZO_MARKETING_ADMIN_REPORT_ENABLED&&<>
    <div className="flex flex-wrap items-center justify-between gap-2">
-    <span className="text-[12px] font-bold text-[#5B736C]">{l('Período: últimos','Period: last')} {period} {l('días','days')}</span>
-    <button type="button" onClick={reload} disabled={loading}
-     className="min-h-11 rounded-full bg-white px-4 text-[12px] font-bold text-[#204E4A] shadow-sm hover:bg-[#E1E53F] disabled:opacity-50">
-     {l('Actualizar métricas','Refresh metrics')}
-    </button>
-   </div>
-   {loading&&<p role="status" className="rounded-[19px] bg-white p-4 text-[13px]">{l('Consultando métricas autorizadas…','Loading authorized metrics…')}</p>}
-   {error&&<p role="alert" className="rounded-[19px] bg-[#F9E7DE] p-4 text-[13px] text-[#823E2D]">{error}</p>}
-   {data&&<div className="space-y-4">
-    <p role="status" className="text-[12px] font-semibold text-[#647C75]">
+    {data?<p role="status" className="flex items-center gap-2 text-[12px] font-bold text-[#47651F]">
+     <span aria-hidden="true" className={'h-2.5 w-2.5 rounded-full '+(data.status==='collecting'?'bg-[#26B957]':'bg-[#C9A23E]')}/>
      {data.status==='not_configured'
       ?l('Sin configurar: recopilación desactivada','Not configured: collection disabled')
       :data.status==='paused'
        ?l('Recopilación pausada','Collection paused')
        :l('Recopilación activa','Collection active')}
-     {' · '}{l('Actualizado','Updated')} {new Date(data.as_of).toLocaleString(lang==='es'?'es-US':'en-US')}
-     {' · '}{l('Días calendario de Los Ángeles','Los Angeles calendar days')}
-    </p>
+     <InfoTip label={l('Sobre estos datos','About this data')}>{l(
+      'Conteos internos orientativos por anuncio, en días calendario de Los Ángeles. No son resultados oficiales de Meta, gasto publicitario, retorno financiero ni visitantes únicos. Se excluyen cuentas QA del embudo de registro.',
+      'Directional internal per-ad counts, in Los Angeles calendar days. Not official Meta results, advertising spend, financial returns or unique visitors. QA accounts are excluded from signup cohorts.'
+     )}</InfoTip>
+    </p>:<span/>}
+    <button type="button" onClick={reload} disabled={loading} aria-label={l('Actualizar métricas','Refresh metrics')} className="ac-refresh"><span aria-hidden="true">↻</span></button>
+   </div>
+   {loading&&<p role="status" className="rounded-[19px] bg-white p-4 text-[13px]">{l('Consultando métricas…','Loading metrics…')}</p>}
+   {error&&<p role="alert" className="rounded-[19px] bg-[#F9E7DE] p-4 text-[13px] text-[#823E2D]">{error}</p>}
+   {data&&<div className="space-y-4">
     <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
      <SummaryStat label={l('Señales de llegada','Landing signals')} value={format(data.totals.landing_signals)}
-      note={l('No son visitantes únicos','Not unique visitors')}/>
+      info={l('No son visitantes únicos','Not unique visitors')}/>
      <SummaryStat label={l('Registros confirmados','Verified signups')} value={format(data.totals.verified_signups)}/>
      <SummaryStat label={l('Primera mascota en 7 días','First pet within 7 days')} value={format(data.totals.first_pet_within_7d)}/>
      <SummaryStat label={l('Actividad observada D7','Observed D7 activity')} value={format(data.totals.d7_screen_activity_proxy)}
-      note={l('Proxy de navegación, no retención real','Navigation proxy, not true retention')}/>
+      info={l('Proxy de navegación, no retención real','Navigation proxy, not true retention')}/>
     </div>
-    <div className="min-w-0 rounded-[21px] bg-white p-4 shadow-[0_7px_25px_rgba(32,78,74,0.055)] sm:p-5">
-     <h3 className="text-[16px] font-black text-[#204E4A]">{l('Resultados por anuncio y día','Results by ad and day')}</h3>
-     <p className="mt-1 text-[12px] text-[#6F837A]">{l(
-      'Las llegadas y las altas pueden suceder en fechas distintas. No se calcula una tasa de conversión a partir de señales aproximadas.',
-      'Landing signals and signups may occur on different dates. No conversion rate is calculated from approximate signals.'
-     )}</p>
+    {data.daily.length>0&&<div className="min-w-0 rounded-[18px] bg-white p-5 shadow-[0_7px_25px_rgba(32,78,74,0.055)]">
+     <h3 className="text-[16px] font-bold text-[#204E4A]">{l('Registros por anuncio','Signups by ad')}</h3>
+     <div className="mt-4"><RankBars rows={Object.entries(data.daily.reduce<Record<string,number>>((all,entry)=>({...all,[entry.creative]:(all[entry.creative]??0)+entry.verified_signups}),{})).sort((a,b)=>b[1]-a[1]).map(([creative,value])=>({key:creative,label:campaigns[creative]?.[lang]??creative,value,display:format(value)}))}/></div>
+    </div>}
+    <div className="min-w-0 rounded-[18px] bg-white p-5 shadow-[0_7px_25px_rgba(32,78,74,0.055)]">
+     <div className="flex items-center gap-2"><h3 className="text-[16px] font-bold text-[#204E4A]">{l('Por anuncio y día','By ad and day')}</h3>
+      <InfoTip label={l('Cómo leer esta tabla','How to read this table')}>{l(
+       'Las llegadas y las altas pueden suceder en fechas distintas. No se calcula una tasa de conversión a partir de señales aproximadas.',
+       'Landing signals and signups may occur on different dates. No conversion rate is calculated from approximate signals.'
+      )}</InfoTip></div>
      {data.daily.length===0?<p className="mt-4 text-[13px] text-[#647C75]">{l('Sin mediciones en este período.','No measurements in this period.')}</p>:
       <div className="mt-4 w-full overflow-x-auto">
        <table className="w-full min-w-[560px] text-left text-[12px]">
@@ -132,10 +121,6 @@ export function AdminMarketingPanel({lang,period}:{lang:'es'|'en';period:7|30|90
       </div>}
     </div>
    </div>}
-   <p className="text-[12px] leading-relaxed text-[#6B8078]">{l(
-    'Conteos internos orientativos. No son resultados oficiales de Meta, gasto publicitario, retorno financiero ni visitantes únicos. Se excluyen cuentas QA del embudo de registro.',
-    'Directional internal counts only. Not official Meta results, advertising spend, financial returns or unique visitors. QA accounts are excluded from signup cohorts.'
-   )}</p>
   </>}
   {PAZO_MARKETING_ADMIN_REPORT_ENABLED&&<FirstUtilityPanel lang={lang} period={period}/>}
  </section>
