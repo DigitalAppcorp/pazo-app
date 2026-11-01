@@ -65,6 +65,7 @@ async function open(browser,{locale='es-ES',viewport={width:390,height:780},acco
     expires_at:Math.floor(Date.now()/1000)+3600,user:s.account})
   }
   if(url.pathname==='/rest/v1/rpc/pazo_ensure_my_profile'){s.profile++;return json(null)}
+  if(url.pathname==='/rest/v1/rpc/pazo_meta_consent_available')return json(s.metaAvailable??true)
   if(url.pathname==='/functions/v1/pazo-marketing-attribution'){s.attribution++;return json({status:'accepted'},202)}
   if(url.pathname==='/functions/v1/pazo-meta-grant'){s.grants=(s.grants||0)+1;return json({status:'granted'})}
   if(url.pathname==='/functions/v1/pazo-meta-receipt'){s.receipts=(s.receipts||0)+1;return json({status:'ready',eventId:'11111111-2222-4333-8444-555555555555',datasetId:'1438916858347709',eventTime:Math.floor(Date.now()/1000)})}
@@ -263,6 +264,13 @@ try{
   await dialog.waitFor({state:'detached'})
   assert.ok(!v.s.remote.some(h=>/facebook/.test(h)),'Pixel off: no browser traffic to Meta')
   await finish(v)}
+ // Meta suspended: the same new ad signup is never offered an acceptance.
+ {const v=await open(browser,{account:user(),start:'/'+CAMPAIGN})
+  v.s.metaAvailable=false
+  await signupScreen(v.page);await v.page.getByRole('checkbox').check();await google(v.page).click()
+  await until(()=>v.s.attribution===1,'attribution still accepted');await v.page.waitForTimeout(800)
+  assert.equal(await v.page.getByText('Tú decides').count(),0,'suspended Meta asks nothing')
+  assert.equal(v.s.grants||0,0);await finish(v)}
  for(const [name,account,start] of [['organic',user(),'/'],['existing',user({created:OLD,attested:true}),'/'+CAMPAIGN]]){
   const v=await open(browser,{account,start})
   await loginScreen(v.page);await google(v.page).click()
