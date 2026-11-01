@@ -1,3 +1,7 @@
+## #168 — ensayo2 implementado en rama, sin release
+
+Orden PO30-oct: #168 antes #169, implementación/QA/PR sin producción ni publicidad. Contrato histórico preservado; campaña pazo_la_en_202611 con qr_v2_en/cuidados_v2_en/app_v2_en. Única SQL nueva PREPARED_NOT_APPLIED, retención14d/gates/QA preservados. [Auditoría y alcance](marketing/ADS2_PREFLIGHT.md). Events Manager sin Pixel web PAZO observado: META_CONVERSION_NOT_VERIFIED. No nueva categoría de datos, proveedor activo ni activos publicitarios en Git. Próximo gate: revisión del PR/CI; lanzamiento reservado al PO.
+
 ## ESTADO ACTUAL — #153 inteligencia global publicada y activa (28-oct-2026 Los Ángeles)
 
 El PO aprobó el diseño y dio GO final. El [informe de postflight](product-intelligence/PRODUCTION_RELEASE_20261028.md) documenta PR #155/#156/#157 integrados, CI final 7/7, producción `dpl_6XNVw4afbDtim71jUPHjp76xDfiM` READY y nueva recopilación activa desde `2026-10-29T01:09:01.761072Z`. Supabase: única migración fuente `20261029010000` → alojada `20261029005231`; Edge landing v8, privacidad ES/EN activa, retención14d y #150 preservados. **No reinstalar ni ejecutar de nuevo fase 7.** El primer Cron periódico posterior al nuevo SQL y una señal real humana no se habían observado al momento del informe. Las secciones inferiores con «OFF», «sin GO», «candidato #150/#153» son snapshots antiguos.

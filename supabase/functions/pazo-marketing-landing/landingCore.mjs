@@ -2,8 +2,7 @@
 // CODE ONLY / RELEASE OFF. No cookies, persistent client identifiers,
 // personal fields or logging. Client origin is NOT an authentication proof.
 import {readMarketingBody} from '../pazo-marketing-attribution/requestBody.mjs'
-const CAMPAIGN='pazo_beta_local_202610'
-const CREATIVES=new Set(['perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en'])
+import {validCampaignPair} from '../_shared/marketingCampaign.mjs'
 const OFF={status:'collection_disabled'}
 const FAIL={status:'not_accepted'}
 const keys=new Set(['utm_source','utm_medium','utm_campaign','utm_content'])
@@ -47,7 +46,7 @@ export function createMarketingLandingHandler({
       ||Object.keys(data).length!==keys.size+(data.step===undefined?0:1)
       ||Object.keys(data).some(k=>!keys.has(k)&&k!=='step')
       ||data.utm_source!=='meta'||data.utm_medium!=='paid_social'
-      ||data.utm_campaign!==CAMPAIGN||!CREATIVES.has(data.utm_content))
+      ||!validCampaignPair(data.utm_campaign,data.utm_content))
       return json(FAIL,400,cors)
     if(data.step!==undefined&&(!preregReleased||typeof submitPrereg!=='function'))return json(OFF,503,cors)
     if(data.step!==undefined&&!['signup_cta','signup_start','signup_requested','signup_error'].includes(data.step))return json(FAIL,400,cors)

@@ -12,7 +12,7 @@ const number=(v:number|null|undefined,lang:Lang)=>v==null?'—':v.toLocaleString
 const percent=(n:number,d:number,lang:Lang)=>d?new Intl.NumberFormat(lang==='es'?'es-GT':'en-US',{style:'percent',maximumFractionDigits:1}).format(n/d):'—'
 const dayLabel=(day:string,lang:Lang)=>new Date(day+'T12:00:00Z').toLocaleDateString(lang==='es'?'es-GT':'en-US',{day:'numeric',month:'short',timeZone:'UTC'})
 const laDay=(instant:string)=>{const parts=new Intl.DateTimeFormat('en',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(instant));return ['year','month','day'].map(k=>parts.find(p=>p.type===k)?.value).join('-')}
-const creativeLabel=(key:string,lang:Lang)=>key==='all'?(lang==='es'?'Todas las creatividades':'All creatives'):(key.startsWith('perfil')?(lang==='es'?'Perfil':'Profile'):key.startsWith('qr')?'QR':lang==='es'?'Comunidad':'Community')+' · '+key.slice(-2).toUpperCase()
+const creativeLabel=(key:string,lang:Lang)=>key==='all'?(lang==='es'?'Todas las creatividades':'All creatives'):(key.includes('_v2_')?(key==='cuidados_v2_en'?(lang==='es'?'Cuidados · v2':'Care · v2'):key==='app_v2_en'?'PAZO · v2':'QR · v2'):key.startsWith('perfil')?(lang==='es'?'Perfil':'Profile'):key.startsWith('qr')?'QR':lang==='es'?'Comunidad':'Community')+' · '+key.slice(-2).toUpperCase()
 
 function Panel({title,eyebrow,note,children,className=''}:{title:string;eyebrow:string;note?:string;children:ReactNode;className?:string}){
  const id=useId()

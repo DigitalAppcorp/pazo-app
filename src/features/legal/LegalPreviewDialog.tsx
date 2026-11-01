@@ -1,14 +1,16 @@
-import { useEffect, useRef } from 'react'
+import { lazy, Suspense, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { resolveLegalCopy, PAZO_MARKETING_PRIVACY_EFFECTIVE_DATE, type LegalKind, type LegalLanguage } from './legalCopy'
+import { resolveLegalCopy, pazoPrivacyEffectiveDate, type LegalKind, type LegalLanguage } from './legalCopy'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from './supportContact'
 import {BehaviorPrivacyControl} from '../marketing/BehaviorPrivacyControl'
+import { isMetaEnabled } from '../marketing/metaRelease'
+const MetaPrivacyControl=lazy(()=>import('../marketing/MetaConsentGate').then(m=>({default:m.MetaPrivacyControl})))
 
 interface Props { kind: LegalKind; lang: LegalLanguage; onClose: () => void }
 
 export function LegalPreviewDialog({ kind, lang, onClose }: Props) {
   const closeButton = useRef<HTMLButtonElement>(null)
-  const copy = resolveLegalCopy(kind, lang, kind === 'privacy' ? PAZO_MARKETING_PRIVACY_EFFECTIVE_DATE : undefined)
+  const copy = resolveLegalCopy(kind, lang, kind === 'privacy' ? pazoPrivacyEffectiveDate() : undefined)
   useEffect(() => {
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
     closeButton.current?.focus()
@@ -61,6 +63,7 @@ export function LegalPreviewDialog({ kind, lang, onClose }: Props) {
           </p>
         </div>
         {kind==='privacy'&&<BehaviorPrivacyControl lang={lang}/>}
+        {kind==='privacy'&&isMetaEnabled(import.meta.env)&&<Suspense fallback={null}><MetaPrivacyControl lang={lang}/></Suspense>}
         <button type="button" onClick={onClose}
           className="mt-6 w-full rounded-full bg-[#204E4A] py-3 text-xs font-extrabold text-white focus-visible:bg-[#356D67]">
           {lang === 'es' ? 'Entendido' : 'Got it'}

@@ -1,0 +1,21 @@
+{
+  "status": "PREPARED_NOT_RELEASED",
+  "campaign": "pazo_la_en_202611",
+  "ads": [
+    {
+      "format": "image",
+      "tracking_label": "QR · English · v2",
+      "url": "https://pazo-app.vercel.app/?utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_la_en_202611&utm_content=qr_v2_en"
+    },
+    {
+      "format": "image",
+      "tracking_label": "Care · English · v2",
+      "url": "https://pazo-app.vercel.app/?utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_la_en_202611&utm_content=cuidados_v2_en"
+    },
+    {
+      "format": "image",
+      "tracking_label": "PAZO · English · v2",
+      "url": "https://pazo-app.vercel.app/?utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_la_en_202611&utm_content=app_v2_en"
+    }
+  ]
+}

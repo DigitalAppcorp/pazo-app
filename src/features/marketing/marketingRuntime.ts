@@ -88,6 +88,14 @@ export function takeVerifiedFirstUseIntent(ownerId:string):'qr'|'neutral' {
   verifiedFirstUseIntent=null
   return receipt?.ownerId===ownerId&&receipt.expiresAt>=Date.now()?receipt.intent:'neutral'
 }
+// In memory on purpose: offered once, in the session of the accepted signup.
+let metaConsentEligibleOwner:string|null=null
+const metaConsentListeners=new Set<()=>void>()
+export const isMetaConsentEligible=(ownerId?:string)=>Boolean(ownerId)&&metaConsentEligibleOwner===ownerId
+export const subscribeMetaConsentEligibility=(listener:()=>void)=>{
+  metaConsentListeners.add(listener)
+  return ()=>{metaConsentListeners.delete(listener)}
+}
 export async function submitAutomaticMarketingAttribution(ownerId?: string, accessToken?: string): Promise<void> {
   const generation=attributionGeneration,current=captureAnalyticsRequest()
   if(!current())return
@@ -110,6 +118,8 @@ export async function submitAutomaticMarketingAttribution(ownerId?: string, acce
       && JSON.stringify(prepareAutomaticCampaignIntake(instance.read()))===JSON.stringify(payload)) {
       verifiedFirstUseIntent={ownerId,intent:payload.utm_content.startsWith('qr_')?'qr':'neutral',
         expiresAt:Date.parse(payload.first_touch_at)+MARKETING_ATTRIBUTION_TTL_MS}
+      metaConsentEligibleOwner=ownerId
+      for(const listener of metaConsentListeners)listener()
       instance.clear()
     }
   } catch {

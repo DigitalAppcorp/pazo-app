@@ -7,13 +7,27 @@ import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { initializeObservability } from './services/observability.ts'
 import { registerPazoPwa } from './features/pwa/registerPwa.ts'
 import { applyDocumentLanguage, getInitialLanguage } from './features/i18n/languagePreference.ts'
+import { legalPageKind, legalPageLanguage } from './features/legal/legalPageRoute.ts'
 // Capture the native install event before the authenticated application mounts.
 import './features/pwa/installPromptBridge.ts'
 
 const initialLanguage = getInitialLanguage()
 applyDocumentLanguage(initialLanguage)
 const root = createRoot(document.getElementById('root')!)
-if (!getPublicSupabaseConfig(import.meta.env)) {
+const legalKind = legalPageKind(window.location.pathname)
+if (legalKind) {
+  // Public legal text: no Auth, database client, analytics or service worker.
+  const lang = legalPageLanguage(window.location.search, initialLanguage)
+  applyDocumentLanguage(lang)
+  void import('./features/legal/LegalPage.tsx').then(({LegalPage}) => {
+    root.render(<StrictMode><ErrorBoundary><LegalPage kind={legalKind} lang={lang} /></ErrorBoundary></StrictMode>)
+  }).catch(() => {
+    root.render(<main role="alert" className="p-6 text-[#204E4A] bg-[#FAF8F5] min-h-screen">
+      <p>{lang === 'en' ? 'This page could not load. Reload or contact support.' : 'Esta página no pudo cargar. Recarga o contacta con soporte.'}</p>
+      <a href={PAZO_PRIVACY_SUPPORT_MAILTO}>{PAZO_PRIVACY_SUPPORT_EMAIL}</a>
+    </main>)
+  })
+} else if (!getPublicSupabaseConfig(import.meta.env)) {
   const english = initialLanguage === 'en'
   root.render(<main role="alert" className="p-6 text-[#204E4A] bg-[#FAF8F5] min-h-screen">
     <h1>{english ? 'PAZO is unavailable' : 'PAZO no está disponible'}</h1>

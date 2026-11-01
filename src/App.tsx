@@ -5,7 +5,7 @@ import { recordAdminActivity } from './features/admin/adminDashboardService'
 import {useBehaviorObservation} from './features/marketing/useBehaviorObservation'
 import { getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
 import { createRequestScope } from './lib/requestScope'
-import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { lazy, Suspense, useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { stageMarketingLanding, takeVerifiedFirstUseIntent } from './features/marketing/marketingRuntime'
@@ -71,6 +71,9 @@ import { PetView } from './components/views/PetView'
 import { SupporterAccountManagement } from './features/supporter/components/SupporterAccountManagement'
 import { isSupporterAccountHash, leaveSupporterAccountRoute, normalizeSupporterPaypalCallback } from './features/supporter/supporterAccountRoute.mjs'
 import { OnboardingView } from './components/views/OnboardingView'
+import { isMetaEnabled } from './features/marketing/metaRelease'
+import { isGoogleAuthEnabled } from './features/auth/googleAuth'
+import { GoogleSignInButton } from './features/auth/GoogleSignInButton'
 import { DemoBanner, DemoCommunities, DemoExplore } from './features/demo/DemoGuestViews'
 import { createDemoPets, createDemoPosts, toggleDemoLike, toggleDemoSave, appendDemoComment } from './features/demo/demoExperience'
 import { PazoInstallControl } from './features/pwa/components/PazoInstallControl'
@@ -88,6 +91,7 @@ import { MessagesModal } from './components/modals/MessagesModal'
 import { NotificationsModal } from './components/modals/NotificationsModal'
 import {SupporterInvitationCoordinator} from './features/supporter/public/SupporterInvitationCoordinator'
 import { SightingDetailModal } from './components/modals/SightingDetailModal'
+const MetaConsentGate=lazy(()=>import('./features/marketing/MetaConsentGate'))
 
 const getPublicRescueRoute = () => {
   const match = window.location.hash.match(
@@ -180,7 +184,7 @@ const EMPTY_FEED_PAGINATION: FeedPaginationState = {
 
 function PazoMain() {
   const {
-    user, loading, signIn, isPasswordRecovery, recoverySessionVerified,
+    user, loading, signIn, googleAuthFailure, isPasswordRecovery, recoverySessionVerified,
     requestPasswordReset, changePassword, finishPasswordRecovery,
   } = useAuth()
   const [lang, setLang] = useState<PazoLanguage>(getInitialLanguage)
@@ -229,6 +233,12 @@ function PazoMain() {
 
   const [isDemoUser, setIsDemoUser] = useState(false)
   const [authMode, setAuthMode] = useState<'onboarding' | 'login'>('onboarding')
+  // A failed or cancelled Google return shows its message and retry here.
+  useEffect(() => {
+    if (!googleAuthFailure) return
+    setAuthMode('login')
+    setIsOnboardingActive(false)
+  }, [googleAuthFailure])
   const [isOnboardingActive, setIsOnboardingActive] = useState(true)
   const [initialOnboardingStep, setInitialOnboardingStep] = useState<'A01' | 'A02' | 'A03' | 'A04'>('A01')
 
@@ -2105,6 +2115,10 @@ function PazoMain() {
           />
         ))}
 
+        {isMetaEnabled(import.meta.env) && user && (
+          <Suspense fallback={null}><MetaConsentGate lang={lang}/></Suspense>
+        )}
+
         {!isAuthenticated ? (
           authMode === 'onboarding' ? (
             <OnboardingView
@@ -2264,6 +2278,10 @@ function PazoMain() {
                     {lang === 'es' ? '¿Olvidaste tu contraseña?' : 'Forgot your password?'}
                   </button>
                 </form>
+                )}
+
+                {!forgotPasswordMode && isGoogleAuthEnabled(import.meta.env) && (
+                  <GoogleSignInButton lang={lang}/>
                 )}
 
                 {!forgotPasswordMode && loginMessage && (

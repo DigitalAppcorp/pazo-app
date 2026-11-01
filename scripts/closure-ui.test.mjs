@@ -60,6 +60,7 @@ const compileDirectory = directory => {
     code=ts.transpileModule(code,{compilerOptions:{target:ts.ScriptTarget.ES2023,module:ts.ModuleKind.ESNext,jsx:ts.JsxEmit.ReactJSX}}).outputText
     code=code.replace(/import\s+['"][^'"]+\.css['"];?/g,'')
     code=code.replace(/(from\s+|import\s*)(['"])(\.[^'"]+)\2/g,(_all,prefix,quote,specifier)=>{
+      if(specifier.endsWith('/_shared/marketingCampaign.mjs')) return prefix+quote+pathToFileURL(path.resolve(path.dirname(source),specifier)).href+quote
       const js=specifier.replace(/\.tsx?$/,'.js')
       return prefix+quote+(/\.(?:js|mjs)$/.test(js)?js:js+'.js')+quote
     }).replaceAll('import.meta.env',JSON.stringify(syntheticEnv)).replaceAll('__PAZO_BUILD_VERSION__',JSON.stringify('0.0.0'))

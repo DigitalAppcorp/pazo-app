@@ -31,6 +31,7 @@ const child=name=>props=>React.createElement('pazo-'+name,props)
 const base={
  createRequestScope,selectFeedPage,advanceFeedCursors,shouldOfferFirstUse,isCurrentFirstUse,
  takeVerifiedFirstUseIntent:()=> 'neutral',
+ isMetaEnabled:()=>false,isGoogleAuthEnabled:()=>false,
  useAuth:()=>auth,AuthProvider:({children})=>children,
  canUseAccountFeatures:(id,demo)=>Boolean(id)&&!demo,
  getInitialLanguage:()=> 'es', applyDocumentLanguage(){},rememberLanguage(){},

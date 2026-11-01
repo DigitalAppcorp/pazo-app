@@ -1,4 +1,5 @@
 // Pre-publication validation only. No network, browser storage or collection.
+import {LEGACY_CAMPAIGN,ADS2_CAMPAIGN} from '../supabase/functions/_shared/marketingCampaign.mjs'
 import {readFileSync} from 'node:fs'
 import {resolve} from 'node:path'
 import {fileURLToPath} from 'node:url'
@@ -10,7 +11,7 @@ export function validateMarketingUrl(value){
  const required=['utm_source','utm_medium','utm_campaign','utm_content']
  if(required.some(key=>url.searchParams.getAll(key).length!==1))return {valid:false,code:'missing_or_duplicate_utm'}
  if([...url.searchParams.keys()].some(key=>!required.includes(key)))return {valid:false,code:'unapproved_query_parameter'}
- if(url.searchParams.get('utm_campaign')!==PAZO_CAMPAIGN)return {valid:false,code:'unsupported_campaign'}
+ if(![LEGACY_CAMPAIGN,ADS2_CAMPAIGN].includes(url.searchParams.get('utm_campaign')))return {valid:false,code:'unsupported_campaign'}
  const attribution=parsePazoCampaign(url.search,Date.now())
  return attribution?{valid:true,code:'accepted',creative:attribution.creative}:{valid:false,code:'unsupported_source_medium_or_creative'}
 }
