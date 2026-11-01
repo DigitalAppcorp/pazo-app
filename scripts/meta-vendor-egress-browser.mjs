@@ -40,9 +40,15 @@ const observed={status:'INCONCLUSIVE',qaDataset:DATASET,
  ]}
 try{
  await app.listen()
- browser=await chromium.launch({headless:true,args:['--no-sandbox']})
+ // The SDK drops events from HeadlessChrome/webdriver sessions, which would make
+ // this audit observe nothing. Every event below is still aborted, never delivered.
+ browser=await chromium.launch({headless:true,args:['--no-sandbox',
+  '--disable-blink-features=AutomationControlled']})
  ctx=await browser.newContext({serviceWorkers:'block',viewport:{
-  width:390,height:780},ignoreHTTPSErrors:false})
+  width:390,height:780},ignoreHTTPSErrors:false,
+  userAgent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36'})
+ await ctx.addInitScript(()=>Object.defineProperty(navigator,'webdriver',
+  {configurable:true,get:()=>undefined}))
  const page=await ctx.newPage()
  page.on('pageerror',err=>{
   // Do not record arbitrary vendor error text or URLs/tokens.

@@ -33,6 +33,11 @@ const bootstraps={
   ['set','autoConfig',false,DATASET],['init',DATASET]],disablePushState:true,
   after:[['consent','grant'],
    ['trackSingle',DATASET,'CompleteRegistration',{},{eventID:EVENT}]]},
+ // Candidate order on a URL holding synthetic campaign and token parameters.
+ candidate_sensitive_url:{query:'?utm_source=synthetic&access_token=synthetic',
+  commands:[['consent','revoke'],['set','autoConfig',false,DATASET],['init',DATASET]],
+  disablePushState:true,after:[['consent','grant'],
+   ['trackSingle',DATASET,'CompleteRegistration',{},{eventID:EVENT}]]},
  // Candidate order, but allow the dataset config to arrive before the event.
  candidate_delayed_event:{commands:[['consent','revoke'],
   ['set','autoConfig',false,DATASET],['init',DATASET]],disablePushState:true,
@@ -101,16 +106,22 @@ try{
      }catch{return route.abort('blockedbyclient')}
     }
     const entry={host:url.hostname,path:url.pathname.slice(0,80),type:req.resourceType(),
-     method:req.method(),queryKeys:[...url.searchParams.keys()].sort().slice(0,40)}
+     method:req.method(),queryKeys:[...new Set([...url.searchParams.keys()]
+      .map(key=>key.replace(/\[\d+\]$/,'[]')))].sort().slice(0,60)}
     if(url.hostname.endsWith('facebook.com')&&url.pathname.startsWith('/tr')){
      entry.ev=(url.searchParams.get('ev')||'').slice(0,40)
+     // Synthetic page only: shows what a real URL would expose to Meta.
+     entry.documentLocation=(url.searchParams.get('dl')||'').slice(0,160)
+     entry.referrerSent=url.searchParams.get('rl')||''
+     entry.fbpSent=url.searchParams.has('fbp')
+     entry.userDataKeys=[...url.searchParams.keys()].filter(key=>/^ud\[/.test(key))
      entry.datasetMatches=url.searchParams.get('id')===DATASET
      entry.eidMatches=url.searchParams.get('eid')===EVENT
      variant.eventAttempts.push(entry)
     }else variant.otherAttempts.push(entry)
     return route.abort('blockedbyclient')
    })
-   await tab.goto(SITE+'/',{waitUntil:'domcontentloaded',timeout:30000})
+   await tab.goto(SITE+'/'+(spec.query||''),{waitUntil:'domcontentloaded',timeout:30000})
    await tab.waitForTimeout(WAIT_MS)
    variant.state=await tab.evaluate(()=>({
     done:window.__done===true,failed:window.__failed===true,
