@@ -9,9 +9,9 @@ const tag={utm_source:'meta',utm_medium:'paid_social',utm_campaign:'pazo_la_en_2
 const request=(body,extra={})=>new Request('https://isolated.invalid',{method:'POST',headers:{origin:'https://pazo-app.vercel.app','content-type':'application/json','x-pazo-challenge':'single-use',...extra},body:JSON.stringify(body)})
 const handler=(over={})=>{const calls=[];return {calls,h:createMarketingLandingHandler({released:true,submit:async()=>true,verifyChallenge:async()=>true,experienceDetailsReleased:true,submitExperienceDetail:async(...a)=>{calls.push(a);return true},...over})}}
 
-test('every release switch ships OFF',()=>{
- assert.match(fs.readFileSync('supabase/functions/pazo-marketing-landing/index.ts','utf8'),/INTELLIGENCE_EXPERIENCE_DETAILS_RELEASED=false/)
- assert.match(fs.readFileSync('src/features/legal/legalCopy.ts','utf8'),/EXPERIENCE_DETAILS_NOTICE_RELEASED=false/)
+test('notice and Edge are released; build flag and SQL gate stay independent',()=>{
+ assert.match(fs.readFileSync('supabase/functions/pazo-marketing-landing/index.ts','utf8'),/INTELLIGENCE_EXPERIENCE_DETAILS_RELEASED=true/)
+ assert.match(fs.readFileSync('src/features/legal/legalCopy.ts','utf8'),/EXPERIENCE_DETAILS_NOTICE_RELEASED=true/)
  assert.match(fs.readFileSync('src/features/marketing/experienceDetails.ts','utf8'),/VITE_PAZO_EXPERIENCE_DETAILS_ENABLED==='true'/)
  assert.match(fs.readFileSync('supabase/migrations/20261102130000_pazo_experience_details.sql','utf8'),/experience_details_enabled boolean NOT NULL DEFAULT false/)
 })

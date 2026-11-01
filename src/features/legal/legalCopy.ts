@@ -1,7 +1,7 @@
 /** #153 prepared notice; release requires the final PO GO. */
 export const INTELLIGENCE_NOTICE_RELEASED=true
-export const CAMPAIGN_EXPERIENCE_NOTICE_RELEASED=false
-export const EXPERIENCE_DETAILS_NOTICE_RELEASED=false
+export const CAMPAIGN_EXPERIENCE_NOTICE_RELEASED=true
+export const EXPERIENCE_DETAILS_NOTICE_RELEASED=true
 export type LegalKind = 'privacy' | 'terms'
 export type LegalLanguage = 'es' | 'en'
 // Candidate publication date: verify actual release date before deploying issue130.

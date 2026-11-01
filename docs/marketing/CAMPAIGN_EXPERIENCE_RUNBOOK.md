@@ -1,6 +1,6 @@
-# Demo y acceso por anuncio — runbook (preparado, apagado)
+# Demo y acceso por anuncio — runbook
 
-**Autorización:** el PO pidió el 1-nov-2026 preparar esta medición. Activarla necesita un GO aparte. Nada de esto está instalado ni publicado.
+**Autorización:** el PO dio el GO para encender esta medición y la de abajo el 1-nov-2026 en el chat («Sí, enciéndelas»), informado de que el aviso no tuvo revisión jurídica. Es decisión del titular, no aprobación legal. El estado real se registra en `continuidad/ESTADO.md`.
 
 ## Qué cambia
 
@@ -32,7 +32,7 @@ Poner `campaign_experience_enabled=false` detiene la recogida al instante; los c
 
 # Motivos de fallo, última pantalla de Demo y origen — preparado, apagado
 
-**Autorización:** el PO eligió estas tres mejoras el 1-nov-2026 para implementarlas apagadas. Activarlas necesita un GO aparte.
+**Autorización:** el PO eligió estas tres mejoras y dio el GO de activación el 1-nov-2026.
 
 - **Por qué falla el registro:** categoría cerrada del motivo. Nunca el correo, la contraseña ni el texto del error. Supabase puede ocultar un correo ya registrado por seguridad, así que ese motivo puede quedar por debajo de la realidad.
 - **Última pantalla en Demo:** al salir o al pasar la pestaña a segundo plano. Cambiar de app momentáneamente también cuenta, y puede faltar si el navegador cierra antes de enviarlo. Mantener un token listo requiere ejecutar Turnstile al entrar en Demo y cada 4 minutos de uso.
