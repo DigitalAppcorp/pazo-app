@@ -60,7 +60,7 @@ export default function MetaConsentGate({ lang }: { lang: 'es' | 'en' }) {
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="meta-consent-title"
       className="fixed inset-0 z-[9998] flex items-center justify-center overflow-y-auto bg-black/40 p-4">
-      <MetaConsentChoice lang={lang} onGrant={controller.onGrant} onWithdraw={controller.onWithdraw}
+      <MetaConsentChoice lang={lang} pixelEnabled={isMetaPixelEnabled(import.meta.env)} onGrant={controller.onGrant} onWithdraw={controller.onWithdraw}
         onContinue={() => setClosed(true)} onPrivacy={() => setShowPrivacy(true)}/>
       {showPrivacy && <LegalPreviewDialog kind="privacy" lang={lang} onClose={() => setShowPrivacy(false)}/>}
     </div>
