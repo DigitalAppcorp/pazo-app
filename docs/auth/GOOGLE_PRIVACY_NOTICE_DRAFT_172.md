@@ -60,6 +60,6 @@ Requiere una fecha efectiva real al publicar, y `PAZO_MARKETING_PRIVACY_EFFECTIV
 2. **Contraseña en cuentas de Google.** «¿Olvidaste tu contraseña?» podría crearle una a una cuenta solo de Google. Si se confirma, añadirlo al aviso o bloquearlo.
 3. **Meta #171.** Este aviso no cubre compartir datos con Meta, que sigue con su propio borrador y aprobación. «No los usa para analítica» se refiere a los datos de Google; si #171 envía el hash del correo de una cuenta Google, los textos deben reconciliarse antes.
 
-## Requisito de Google que hoy no se cumple
+## Enlaces públicos para Google
 
-La pantalla de consentimiento de Google pide enlaces públicos a la política de privacidad y a los términos para salir del modo de prueba. **PAZO no tiene esas URL**: los textos solo se abren en un diálogo dentro de la app, y no hay ruta ni página pública. Hay que crear esas páginas antes de la verificación. Revisar también en Google Cloud los requisitos de dominio para `pazo-app.vercel.app`, y que la pantalla de Google mostrará el dominio de Supabase salvo que se configure uno propio, lo que puede tener costo.
+PR #173 añade `/privacy` y `/terms`, con el mismo texto vigente del diálogo de la app y sin este borrador. Tras desplegar serán `https://pazo-app.vercel.app/privacy` y `https://pazo-app.vercel.app/terms`, con `?lang=es` o `?lang=en`. **Aún no existen en producción.** Revisar también en Google Cloud los requisitos de dominio para `pazo-app.vercel.app`, y que la pantalla de Google mostrará el dominio de Supabase salvo que se configure uno propio, lo que puede tener costo.

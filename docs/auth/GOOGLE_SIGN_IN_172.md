@@ -40,7 +40,7 @@ Google pidió `email profile`, y `openid` no apareció en la URL de autorizació
 
 Requieren GO del PO y no se ejecutaron.
 
-1. **Aviso legal ES/EN:** aprobar y aplicar el [borrador](GOOGLE_PRIVACY_NOTICE_DRAFT_172.md), con su fecha de publicación, y crear las páginas públicas de privacidad y términos que exige Google.
+1. **Aviso legal ES/EN:** aprobar y aplicar el [borrador](GOOGLE_PRIVACY_NOTICE_DRAFT_172.md), con su fecha de publicación. Las páginas públicas `/privacy` y `/terms` llegan con este PR y deben estar desplegadas antes de configurar los enlaces en Google.
 2. **Google Cloud:** en el proyecto `pazo-513404`, cliente OAuth web de producción, enlaces legales en la marca, alcances `email profile`, y URI de redirección `https://mrybvqdebbgcayuvgkkr.supabase.co/auth/v1/callback`. No reutilizar el cliente `PAZO local QA`. Conservar el secreto solo en Google y Supabase, nunca en chat o GitHub. Si la pantalla sigue en modo de prueba, solo entran usuarios de prueba.
 3. **Supabase Auth:** activar Google con esas credenciales y añadir `https://pazo-app.vercel.app/?auth=google` a las URL permitidas. Mantener la confirmación de correo activa: la atribución la exige. **Sin este paso, encender el botón lleva a una respuesta de error de Supabase**, por eso va antes que la variable.
 4. **Prueba real:** cuenta nueva, cuenta existente con el mismo correo, cancelación y retorno en PWA instalada, con cuentas autorizadas.

@@ -223,6 +223,30 @@ try{
   assert.equal(await gateHeading(v.page).count(),0)
   await finish(v);pass('email_password_login_unchanged')}
 
+ // Public legal pages: same text as the app, and nothing else loads.
+ for(const [kind,lang,heading] of [['privacy','es','Privacidad en PAZO'],['privacy','en','Privacy at PAZO'],['terms','es','Reglas de uso de PAZO'],['terms','en','PAZO Community Rules']]){
+  const v=await open(browser,{account:user(),start:'/'+kind+'?lang='+lang,viewport:{width:320,height:640},locale:lang==='es'?'en-US':'es-ES'})
+  await v.page.getByRole('heading',{name:heading,level:1}).waitFor()
+  assert.equal(await v.page.evaluate(()=>document.documentElement.lang),lang)
+  assert.equal(await v.page.evaluate(()=>localStorage.getItem('pazo_language_preference_v1')),null,'a link never changes the preference')
+  assert.deepEqual([v.s.profile,v.s.attribution,v.s.authorize.length],[0,0,0])
+  await noOverflow(v.page,kind+lang)
+  assert.equal(await v.page.title(),heading+' · PAZO')
+  await v.page.screenshot({animations:'disabled',path:path.join(out,`legal-${kind}-${lang}-320.png`)})
+  await finish(v)
+ }
+ {const supabase=[]
+  const ctx=await browser.newContext({serviceWorkers:'block'});const page=await ctx.newPage()
+  page.on('request',r=>{if(new URL(r.url()).origin!==ORIGIN)supabase.push(new URL(r.url()).hostname)})
+  await page.goto(ORIGIN+'/privacy?lang=en');await page.getByRole('heading',{level:1}).waitFor();await page.waitForTimeout(800)
+  assert.equal(supabase.includes(new URL(SUPABASE).hostname),false,'no database or Auth traffic')
+  await page.getByRole('link',{name:'Español'}).click()
+  await page.getByRole('heading',{name:'Privacidad en PAZO',level:1}).waitFor()
+  await page.getByRole('link',{name:'Términos de uso'}).click()
+  await page.getByRole('heading',{name:'Reglas de uso de PAZO',level:1}).waitFor()
+  await ctx.close()}
+ pass('public_legal_pages_es_en_without_auth_or_database')
+
  // Runtime screenshots and layout at the widths the issue requires.
  for(const [locale,lang] of [['es-ES','es'],['en-US','en']])for(const width of [320,390,430]){
   const viewport={width,height:width===320?640:780}
