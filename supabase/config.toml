@@ -495,3 +495,11 @@ verify_jwt = false
 # Auth remains verified both at the gateway and independently inside intake.
 [functions.pazo-marketing-attribution]
 verify_jwt = true
+
+# #169 prepared only; deployment requires a separate PO gate, so enabled=false.
+# The dispatch secret is not a JWT, so the gateway would reject it before the
+# handler. workerCore rejects browsers and verifies the secret; never a user JWT.
+[functions.pazo-meta-worker]
+enabled = false
+verify_jwt = false
+entrypoint = "./functions/pazo-meta-worker/index.ts"
