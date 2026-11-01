@@ -1,3 +1,13 @@
+## Producción vigente — panel reorganizado y mediciones por anuncio (1-nov-2026)
+
+GO del PO en chat: «de una vez publícalo» y «Sí, enciéndelas». PR 184 y 186. Vercel `dpl_H4yVqnMX7pFCRfqEuLR3s76PYENF`, main `cb003eff`. Rollback de app: `dpl_Fdf2aXMUU1HyPsEVrX8C3dCPFEqa` tiene el panel anterior; `dpl_HDHCEW5Pwb9LHcvUYXxVPNHnSF4z`, el panel nuevo sin mediciones.
+
+SQL instalado: fuente `20261102120000` → hospedada `20261101142329`; fuente `20261102130000` → hospedada `20261101142430`. **No reinstalar ni ejecutar `db push` global.** Edge `pazo-marketing-landing` v11. Gates `campaign_experience_enabled` y `experience_details_enabled` abiertos el 2026-11-01 14:32:08 UTC; flags `VITE_PAZO_CAMPAIGN_EXPERIENCE_ENABLED` y `VITE_PAZO_EXPERIENCE_DETAILS_ENABLED` en true. Aviso con vigencia 2026-11-01, **sin revisión jurídica por decisión del titular**.
+
+Son contadores diarios con categorías cerradas: sin identificador, sesión ni vínculo con cuentas, y 14 días de retención. No inventar personas, abandonos ni orgánico de cuentas a partir de ellos. Apagar: poner en false ambos gates. [Runbook](docs/marketing/CAMPAIGN_EXPERIENCE_RUNBOOK.md) y [registro de diseño](docs/admin-visual/CLARITY_REVIEW_20261101.md). Sin sesión humana de administrador ni señal real observada al cierre.
+
+---
+
 ## Producción vigente — Administración visual y confiabilidad #161 (29-oct-2026)
 
 GO explícito del PO: «sube todo a produccion». PR162 **merged**; runtime de producción `16b705d65e8de54afa2c1600a24e2bb23802b99a`, Vercel `dpl_BJ3xLUNFJf6HQJiQ5XydywM9pcHj` READY/production, alias `pazo-app.vercel.app`. [Acta de lanzamiento](docs/admin-visual/PRODUCTION_RELEASE_20261029.md) y [registro instalado](docs/admin-visual/PRODUCTION_RELEASE.json) son la referencia actual.
