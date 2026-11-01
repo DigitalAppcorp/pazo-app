@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/meta-vendor-egress-audit-off.yml'
       - 'scripts/meta-vendor-egress-browser.mjs'
+      - 'scripts/meta-vendor-diagnostic-browser.mjs'
       - 'src/features/marketing/metaPixelLoader.mjs'
       - 'src/features/marketing/metaPixel.mjs'
   workflow_dispatch:
@@ -32,9 +33,13 @@ jobs:
           node scripts/meta-production-boundary.mjs
       - name: Load actual SDK only inside isolated Chromium; BLOCK all event egress
         run: node scripts/meta-vendor-egress-browser.mjs
+      - name: Compare bootstrap and browser variants; ABORT every event request
+        run: node scripts/meta-vendor-diagnostic-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: meta-qa-vendor-egress-observations
-          path: artifacts/meta-vendor-egress/
+          path: |
+            artifacts/meta-vendor-egress/
+            artifacts/meta-vendor-diagnostic/
           retention-days: 7
