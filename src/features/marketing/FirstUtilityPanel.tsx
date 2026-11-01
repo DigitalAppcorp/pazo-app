@@ -18,7 +18,7 @@ export function FirstUtilityPanel({lang,period}:{lang:'es'|'en';period:7|30|90})
   const totals=Object.fromEntries(utilityMetrics.map(metric=>[metric,data?.groups.reduce((n,row)=>n+row[metric],0)??0]))
   const insufficient=(totals.first_pet_accounts??0)<10 || totals.matured_first_pet_accounts===0
   const labels:Record<string,string>={organic:l('Sin campaña atribuida','No attributed campaign'),
-    qr_es:'QR · ES',qr_en:'QR · EN',perfil_es:l('Perfil · ES','Profile · ES'),perfil_en:l('Perfil · EN','Profile · EN'),
+    qr_v2_en:'QR · EN · v2',cuidados_v2_en:l('Cuidados · EN · v2','Care · EN · v2'),app_v2_en:'PAZO · EN · v2',qr_es:'QR · ES',qr_en:'QR · EN',perfil_es:l('Perfil · ES','Profile · ES'),perfil_en:l('Perfil · EN','Profile · EN'),
     comunidad_es:l('Comunidades · ES','Communities · ES'),comunidad_en:l('Comunidades · EN','Communities · EN')}
   return <section aria-label={l('Primera utilidad','First useful action')} className="space-y-3 rounded-[21px] bg-[#E8F2E6] p-4 text-[#204E4A]">
     <div className="flex flex-wrap items-center justify-between gap-3">
