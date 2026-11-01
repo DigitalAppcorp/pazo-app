@@ -148,6 +148,19 @@ try{
   await v.page.getByRole('checkbox').check()
   assert.equal(await ageAlert.count(),0,'the message clears once confirmed')
   await v.page.getByRole('checkbox').uncheck()
+  // No sample dots that read as an already typed password; visible on request; must match.
+  const signupPassword=v.page.locator('#pazo-signup-password')
+  assert.equal(await signupPassword.getAttribute('placeholder'),null)
+  await signupPassword.fill('Synthetic1234')
+  await v.page.locator('#pazo-signup-password-confirm').fill('Synthetic12345')
+  await v.page.getByRole('alert').filter({hasText:'no coinciden'}).waitFor()
+  await v.page.getByRole('button',{name:'Ver contraseña'}).click()
+  assert.equal(await signupPassword.getAttribute('type'),'text')
+  assert.equal(await v.page.locator('#pazo-signup-password-confirm').getAttribute('type'),'text')
+  await v.page.getByRole('button',{name:'Ocultar contraseña'}).click()
+  assert.equal(await signupPassword.getAttribute('type'),'password')
+  await v.page.locator('#pazo-signup-password-confirm').fill('Synthetic1234')
+  assert.equal(await v.page.getByRole('alert').filter({hasText:'no coinciden'}).count(),0)
   await v.page.getByText('Apple · próximamente').waitFor()
   await finish(v);pass('signup_requires_18_before_leaving_pazo')}
 

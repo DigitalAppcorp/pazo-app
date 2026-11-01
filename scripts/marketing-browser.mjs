@@ -144,7 +144,7 @@ try{
    await context.close();continue
   }
   await page.getByPlaceholder(lang==='es'?'tu@correo.com':'you@example.com').fill('fixture@synthetic.invalid')
-  await page.getByPlaceholder('••••••••••••').fill('SyntheticOnly123!');await page.getByRole('checkbox').check()
+  await page.locator('#pazo-signup-password').fill('SyntheticOnly123!');await page.locator('#pazo-signup-password-confirm').fill('SyntheticOnly123!');await page.getByRole('checkbox').check()
   await page.getByRole('button',{name:lang==='es'?'Crear cuenta':'Create account',exact:true}).click()
   await page.getByText(lang==='es'?'Revisa tu correo':'Check your email',{exact:false}).waitFor()
   check(intakes===beforeIntakes,'Signup requested never counts as verified')
