@@ -4,15 +4,15 @@ Fusionar no despliega (`git.deploymentEnabled=false`) ni cambia producción. Cad
 
 ## Estado de producción (1-nov-2026)
 
-**Meta suspendido por orden del titular: la campaña sigue en NO-GO.** Los pasos 1 a 5 ya están hechos: no repetirlos.
+**Meta activo con CAPI como único canal; sin anuncios creados.** Los pasos 1 a 5 ya están hechos: no repetirlos. El paso 6 (Pixel) no se ejecuta.
 
-- Vercel `dpl_4fwHFdxYnrmAruEpbZ5vm15bQLpC`: Google y Meta activos en build; **Pixel apagado**, CAPI como canal único previsto.
-- Gate Meta en `false`: sin consentimiento aceptado, cola ni envío. Google, atribución interna y páginas legales siguen activos.
-- SQL adicional: fuente `20261101130000`, alojada `20261101062705`. Ver [incidente](META_WORKER_INCIDENT_20261101.md).
-- Evento real `76c6420a-3a1d-4fad-a7ba-3b0a85378e27`: Pixel y CAPI llegaron con el mismo `event_id`, pero Meta no ha confirmado la deduplicación.
-- Probado en producción con cuentas reales: retirada, rechazo, GPC en Brave (según el titular, ver [auditoría](META_PRIVACY_AUDIT_20261101.md)), cuenta Google existente, primera mascota, Administración y MFA.
-- La pantalla de consentimiento consulta `pazo_meta_consent_available` y no se ofrece con el gate cerrado (fuente `20261101140000`).
-- **Antes de gastar en anuncios:** el titular decide los puntos jurídicos de la auditoría. Con Pixel apagado no hay riesgo de doble conteo.
+- Vercel `dpl_Fdf2aXMUU1HyPsEVrX8C3dCPFEqa` (`f2325be9`): Google y Meta activos en build; sin `VITE_PAZO_META_PIXEL_ENABLED`.
+- Gate Meta en `true`. La pantalla de consentimiento consulta `pazo_meta_consent_available` y no se ofrece con el gate cerrado.
+- SQL adicional: `20261101130000` alojada como `20261101062705`; `20261101140000` alojada como `20261101083852`. Ver [incidente](META_WORKER_INCIDENT_20261101.md).
+- Conversión real CAPI: registro por correo del titular a las 08:49 UTC con `pazo_la_en_202611`/`app_v2_en`, aceptada a las 08:54 UTC. PAZO Web pasó a 2 de servidor y siguió en 1 de navegador, sin cambio de Pixel.
+- Rechazo, GPC, retirada, cuenta Google existente, primera mascota, Administración y MFA probados con cuentas reales. Ver [auditoría](META_PRIVACY_AUDIT_20261101.md).
+- **Sin probar:** clic desde un anuncio real, navegador interno de Instagram o Facebook, PWA instalada en un dispositivo y pago PayPal real.
+- **Decisión del titular antes de gastar:** los puntos jurídicos de la auditoría.
 
 ## Interruptores
 
