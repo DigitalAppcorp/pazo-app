@@ -59,12 +59,28 @@ Producción declarada como aislada, URLs arbitrarias, rutas o credenciales: work
 | Un evento durable, sin reenvío, retirado suprimido, mismo `event_id` que SQL | PASS | Proveedor falso |
 | Causa de 0 `/tr` en CI | DEMOSTRADA | SDK real, eventos abortados |
 | Orden del candidato genera el intento correcto | PASS | Intento en navegador, no recepción |
-| Entrega Pixel a Meta en navegador humano | NOT_TESTED | Requiere al titular |
-| Fila CAPI en Probar eventos | PENDING | Solo hay aceptación API reportada por el titular |
-| Deduplicación Pixel + CAPI en Meta | NOT_TESTED | Requiere al titular |
+| Entrega Pixel en el Chrome del titular | PASS | Solo evento sintético en dataset QA, sitio QA; ver ensayo abajo |
+| Fila CAPI en Probar eventos | PASS | Evento manual del script QA, no del worker |
+| Mismo nombre, ID y dataset en ambos orígenes | PASS | Observado en Probar eventos |
+| Deduplicación Pixel + CAPI confirmada por Meta | NOT_PROVEN | Ambas filas siguen en «Procesado», sin indicación de deduplicación |
 | Worker detrás del gateway alojado | NOT_TESTED | Sin despliegue ni staging aislado |
 | Aviso legal, campos de matching, retención | BLOCKED | Decisión y revisión del titular |
 | Conversiones reales | NOT_TESTED | Meta OFF |
+
+## Ensayo real en dataset QA (1-nov-2026)
+
+Autorizado por el titular. Una ejecución, ID `1b3874a4-14f8-49a4-8248-2691bcbecc31`, código de sesión vigente, sin usuarios reales.
+
+| Origen | Evidencia | Datos que Meta indica |
+| --- | --- | --- |
+| Navegador, Chrome del titular, 9:09:25 pm | `/tr` HTTP 200, dataset y `eid` correctos; fila «Procesado» | IP y agente de usuario |
+| Servidor, script manual, 9:09:40 pm | `events_received=1`, `messages` vacío, `fbtrace_id=AA0XgqbcBRczXx8le4PFN56`; fila «Procesado» | Correo sintético con hash y agente de usuario |
+
+**Interpretación:** la conexión funciona en un navegador humano y los dos orígenes usan la clave que [Meta](https://developers.facebook.com/docs/marketing-api/conversions-api/deduplicate-pixel-and-server-events/) documenta: `event_name` + `event_id`, con ventana de 48 horas. **No se observó ninguna indicación de Meta de que uno se descartara**, y la documentación consultada no aclara si Probar eventos la muestra. Por eso `META_PROVIDER_DEDUP=NOT_PROVEN`.
+
+Tampoco se probó el código de PAZO en la app, el worker con Meta real, el cargador candidato en este sitio (la página QA usa su propio bootstrap) ni conversiones reales. La retirada del sitio mostró su mensaje, pero las cookies no se inspeccionaron en este ensayo. El token QA quedó solo en el aviso oculto de la terminal.
+
+**Siguiente verificación, sin nuevos envíos:** en Resumen o Diagnóstico del dataset QA, revisar más adelante si los datos agregados de `CompleteRegistration` reflejan deduplicación. Ese tráfico lleva `test_event_code` y puede no aparecer allí; su ausencia tampoco la refuta. Una confirmación más fuerte exigiría un evento sin código de prueba, que requiere una decisión aparte.
 
 ## Protocolo de deduplicación, solo dataset QA
 
