@@ -21,6 +21,8 @@ Se ejecutaron **dos intentos aislados** desde GitHub-hosted Chromium, con interc
 - El workflow de envío one-shot se **retiró** de `.github/workflows/meta-vendor-egress-audit-off.yml` tras los intentos; no habrá más ensayos de Pixel automático por commits posteriores.
 - Resultado `GitHub Actions SUCCESS` significa que la auditoría y sus invariantes ejecutaron sin errores. El estado de negocio `PIXEL_EVENT_DELIVERY` permanece **INCONCLUSIVE**, no un PASS de plataforma.
 
+**Actualización 1-nov-2026:** la causa de 0 `/tr` en CI está demostrada: Meta filtra navegadores automatizados. Ver [diagnóstico y protocolo vigente](META_PIXEL_DIAGNOSIS_20261101.md); prevalece sobre la sección siguiente.
+
 ## Bloqueo actual y protocolo manual más seguro
 
 Necesitamos distinguir si el Pixel oficial no emite por configuración del dataset/dominio/navegador CI o por la secuencia propia de inicialización.
