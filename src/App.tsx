@@ -5,7 +5,7 @@ import { recordAdminActivity } from './features/admin/adminDashboardService'
 import {useBehaviorObservation} from './features/marketing/useBehaviorObservation'
 import { getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
 import { createRequestScope } from './lib/requestScope'
-import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { lazy, Suspense, useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { stageMarketingLanding, takeVerifiedFirstUseIntent } from './features/marketing/marketingRuntime'
@@ -71,6 +71,7 @@ import { PetView } from './components/views/PetView'
 import { SupporterAccountManagement } from './features/supporter/components/SupporterAccountManagement'
 import { isSupporterAccountHash, leaveSupporterAccountRoute, normalizeSupporterPaypalCallback } from './features/supporter/supporterAccountRoute.mjs'
 import { OnboardingView } from './components/views/OnboardingView'
+import { isMetaEnabled } from './features/marketing/metaRelease'
 import { isGoogleAuthEnabled } from './features/auth/googleAuth'
 import { GoogleSignInButton } from './features/auth/GoogleSignInButton'
 import { DemoBanner, DemoCommunities, DemoExplore } from './features/demo/DemoGuestViews'
@@ -90,6 +91,7 @@ import { MessagesModal } from './components/modals/MessagesModal'
 import { NotificationsModal } from './components/modals/NotificationsModal'
 import {SupporterInvitationCoordinator} from './features/supporter/public/SupporterInvitationCoordinator'
 import { SightingDetailModal } from './components/modals/SightingDetailModal'
+const MetaConsentGate=lazy(()=>import('./features/marketing/MetaConsentGate'))
 
 const getPublicRescueRoute = () => {
   const match = window.location.hash.match(
@@ -2112,6 +2114,10 @@ function PazoMain() {
             lang={lang}
           />
         ))}
+
+        {isMetaEnabled(import.meta.env) && user && (
+          <Suspense fallback={null}><MetaConsentGate lang={lang}/></Suspense>
+        )}
 
         {!isAuthenticated ? (
           authMode === 'onboarding' ? (

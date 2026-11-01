@@ -5,8 +5,9 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import {createMetaGrantHandler} from '../pazo-meta-consent/grantCore.mjs'
 import {createMetaGrantProvider} from '../pazo-meta-consent/grantAdapter.mjs'
-const META_GRANT_ENDPOINT_RELEASED=false
-const META_CONSENT_PRIVACY_REVIEWED=false
+// The SQL grant refuses everything while the database release gate is off.
+const META_GRANT_ENDPOINT_RELEASED=true
+const META_CONSENT_PRIVACY_REVIEWED=true
 function setup(){
  if(!META_GRANT_ENDPOINT_RELEASED||!META_CONSENT_PRIVACY_REVIEWED)
   return createMetaGrantHandler()

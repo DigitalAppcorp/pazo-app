@@ -13,22 +13,11 @@ export const ENTRYPOINTS=Object.freeze([
  'supabase/functions/pazo-marketing-attribution/index.ts',
 ])
 export const OFF_FLAGS=Object.freeze({
- 'supabase/functions/pazo-meta-consent/index.ts':
-  ['const META_WITHDRAW_ENDPOINT_RELEASED=false'],
- 'supabase/functions/pazo-meta-grant/index.ts':
-  ['const META_GRANT_ENDPOINT_RELEASED=false',
-   'const META_CONSENT_PRIVACY_REVIEWED=false'],
- 'supabase/functions/pazo-meta-receipt/index.ts':
-  ['const META_RECEIPT_ENDPOINT_RELEASED=false',
-   'const META_RECEIPT_PRIVACY_REVIEWED=false'],
- 'supabase/functions/pazo-meta-worker/index.ts':
-  ['const META_WORKER_ENDPOINT_RELEASED=false',
-   'const META_WORKER_PRIVACY_REVIEWED=false',
-   'const META_WORKER_MATCH_FIELDS_APPROVED=false',
-   'const META_WORKER_PROVIDER_APPROVED=false',
-   'const META_WORKER_MATCH_SOURCE_APPROVED=false'],
- 'src/features/marketing/MetaConsentChoice.tsx':
-  ['export const META_CHOICES_RELEASED=false'],
+ 'supabase/migrations/20261101120000_pazo_meta_conversions.sql':
+  [' enabled boolean NOT NULL DEFAULT false'],
+ 'src/features/marketing/metaRelease.ts':
+  ["  env.VITE_PAZO_META_ENABLED === 'true'",
+   "  isMetaEnabled(env) && env.VITE_PAZO_META_PIXEL_ENABLED === 'true'"],
 })
 const forbidden=[
  /(?:metaConsentRegistrationFlow|metaConsentTransport|metaConsentController|MetaConsentChoice|metaPixelLoader|metaPixel|metaCapi|metaServerGateway|metaOutboxRepository|metaDeliveryCoordinator)/,

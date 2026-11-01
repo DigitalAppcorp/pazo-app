@@ -1,7 +1,6 @@
--- #169 EXPERIMENTAL / ISOLATED PG17 ONLY: NOT A DEPLOYABLE MIGRATION.
--- Do NOT apply to any hosted Supabase instance. Review privacy, UX and
--- outbox operational model before generating the approved migration via CLI.
--- Requires #168 contract migration and the existing marketing_private schema.
+-- #169 Meta consent, outbox and worker RPCs. The release gate below starts OFF,
+-- so installing this sends nothing and accepts no grant.
+-- Requires the #168 campaign contract migration.
 BEGIN;
 SET LOCAL lock_timeout='5s';
 

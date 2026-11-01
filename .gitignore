@@ -51,3 +51,4 @@ supabase/tests/supporter/fixtures/f16-live-benefits-prerequisites.generated.sql
 artifacts/issue150/
 artifacts/issue153/
 artifacts/admin-visual/
+/artifacts/google-auth/

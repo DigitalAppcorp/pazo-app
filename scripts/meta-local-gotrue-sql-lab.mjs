@@ -51,7 +51,7 @@ export async function runLocalGoTrueSqlMeta({api,key,ownerId,token,dbUrl}={}){
  const sql=localPsql(dbUrl)
  // These DDL files are strictly test-only; the candidate SQL is unmodified.
  sql(fileSql('supabase/tests/marketing/meta-local-gotrue-prerequisites.sql'))
- sql(fileSql('supabase/tests/marketing/meta-outbox-candidate.sql'))
+ sql(fileSql('supabase/migrations/20261101120000_pazo_meta_conversions.sql'))
  console.log('META_SQL_PHASE candidate_schema_installed_local')
  const quoted="'"+ownerId+"'"
  const select=q=>sql(q)

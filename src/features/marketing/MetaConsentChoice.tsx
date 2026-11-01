@@ -45,7 +45,6 @@ const COPY={
   optional:'Optional. PAZO works the same without permission. You can withdraw it to stop future transfers.',
  },
 } as const
-export const META_CHOICES_RELEASED=false
 
 export function MetaConsentChoice({
  lang,onGrant,onWithdraw,onContinue,onPrivacy,busy=false,
@@ -102,13 +101,11 @@ export function MetaConsentChoice({
  }
  return (
   <section aria-labelledby="meta-consent-title"
-   className="pazo-meta-consent mx-auto w-full max-w-md rounded-3xl bg-white p-5 text-[#204E4A]">
-   <style>{'.pazo-meta-consent :is(button,input):focus { box-shadow:0 0 0 3px #204E4A !important; } .pazo-meta-consent button[data-dark-action]:focus { box-shadow:0 0 0 3px #E1E53F !important; }'}</style>
-   <h2 id="meta-consent-title" className="text-xl font-extrabold leading-snug">{t.title}</h2>
+   className="pazo-meta-consent mx-auto w-full max-w-md rounded-3xl bg-white p-5 text-[#204E4A]">   <h2 id="meta-consent-title" className="text-xl font-extrabold leading-snug">{t.title}</h2>
    <p className="mt-3 text-[15px] leading-relaxed">{t.description}</p>
    <p className="mt-3 text-[15px] font-medium">{t.optional}</p>
    <button type="button" onClick={onPrivacy} disabled={disabled}
-    className="my-3 min-h-11 text-[15px] font-semibold underline underline-offset-4 focus-visible:bg-[#E1E53F] focus:shadow-[0_0_0_3px_#E1E53F]">
+    className="my-3 min-h-11 text-[15px] font-semibold underline underline-offset-4 focus-visible:bg-[#E1E53F]">
     {t.link}
    </button>
    {gpc ? <>
@@ -118,24 +115,24 @@ export function MetaConsentChoice({
       {gpcState==='saved'?t.syncSaved:gpcState==='error'?t.syncError:t.syncPending}
     </p>}
     {gpcState==='error'&&<button type="button" onClick={retryWithdrawal}
-      className="min-h-11 text-[15px] font-semibold underline underline-offset-4 focus-visible:bg-[#E1E53F] focus:shadow-[0_0_0_3px_#E1E53F]">
+      className="min-h-11 text-[15px] font-semibold underline underline-offset-4 focus-visible:bg-[#E1E53F]">
       {t.retry}
     </button>}
    </> :
     <label className="my-3 flex min-h-12 items-center gap-3 rounded-2xl bg-[#F1F6F2] px-3 py-3 text-[15px] font-semibold">
      <input type="checkbox" checked={selected} disabled={disabled}
       onChange={e=>setSelected(e.currentTarget.checked)}
-      className="h-5 w-5 accent-[#204E4A] focus-visible:shadow-[0_0_0_4px_#204E4A] focus:shadow-[0_0_0_4px_#204E4A]"/>
+      className="h-5 w-5 accent-[#204E4A]"/>
      <span>{t.toggle}</span>
     </label>}
    {failed && <p role="alert" className="my-2 text-[15px]">{t.error}</p>}
    {!gpc && <button type="button" data-dark-action="" disabled={disabled||!selected}
      onClick={()=>{void accept()}}
-     className="mt-2 min-h-12 w-full rounded-full bg-[#204E4A] px-5 text-[16px] font-bold text-white disabled:opacity-40 focus-visible:shadow-[0_0_0_4px_#E1E53F] focus:shadow-[0_0_0_4px_#E1E53F] focus-visible:underline focus-visible:underline-offset-4">
+     className="mt-2 min-h-12 w-full rounded-full bg-[#204E4A] px-5 text-[16px] font-bold text-white disabled:opacity-40 focus-visible:underline focus-visible:underline-offset-4">
      {t.grant}
    </button>}
    <button type="button" onClick={continueWithoutSharing} disabled={disabled}
-    className="mt-3 min-h-12 w-full rounded-full bg-[#E1E53F] px-5 text-[16px] font-bold text-[#204E4A] disabled:opacity-40 focus-visible:shadow-[0_0_0_4px_#204E4A] focus:shadow-[0_0_0_4px_#204E4A] focus-visible:underline focus-visible:underline-offset-4">
+    className="mt-3 min-h-12 w-full rounded-full bg-[#E1E53F] px-5 text-[16px] font-bold text-[#204E4A] disabled:opacity-40 focus-visible:underline focus-visible:underline-offset-4">
     {t.continue}
    </button>
   </section>

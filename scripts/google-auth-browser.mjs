@@ -66,6 +66,9 @@ async function open(browser,{locale='es-ES',viewport={width:390,height:780},acco
   }
   if(url.pathname==='/rest/v1/rpc/pazo_ensure_my_profile'){s.profile++;return json(null)}
   if(url.pathname==='/functions/v1/pazo-marketing-attribution'){s.attribution++;return json({status:'accepted'},202)}
+  if(url.pathname==='/functions/v1/pazo-meta-grant'){s.grants=(s.grants||0)+1;return json({status:'granted'})}
+  if(url.pathname==='/functions/v1/pazo-meta-receipt'){s.receipts=(s.receipts||0)+1;return json({status:'ready',eventId:'11111111-2222-4333-8444-555555555555',datasetId:'1438916858347709',eventTime:Math.floor(Date.now()/1000)})}
+  if(url.pathname==='/functions/v1/pazo-meta-consent'){s.withdraws=(s.withdraws||0)+1;return json({status:'withdrawn'})}
   if(url.pathname.startsWith('/functions/v1/'))return json({status:'accepted'},202)
   return json([])
  })
@@ -123,6 +126,7 @@ try{
   pass('off_build_keeps_coming_soon_and_no_login_cta')}
  await server.close()
 
+ process.env.VITE_PAZO_META_ENABLED='true'
  process.env.VITE_PAZO_GOOGLE_AUTH_ENABLED='true'
  server=await createServer({server:{host:'127.0.0.1',port:PORT,strictPort:true},logLevel:'error'});await server.listen()
 
@@ -222,6 +226,36 @@ try{
   assert.equal(v.s.authorize.length,0)
   assert.equal(await gateHeading(v.page).count(),0)
   await finish(v);pass('email_password_login_unchanged')}
+
+ // Meta consent: only for a new ad signup, and never loads the SDK with Pixel off.
+ {const v=await open(browser,{account:user(),start:'/'+CAMPAIGN})
+  await signupScreen(v.page);await v.page.getByRole('checkbox').check();await google(v.page).click()
+  const dialog=v.page.getByRole('dialog').filter({hasText:'decides'})
+  await dialog.waitFor()
+  assert.equal(await dialog.getByRole('checkbox').isChecked(),false,'never pre-checked')
+  await dialog.getByRole('button',{name:'Continuar sin permitirlo'}).click()
+  await dialog.waitFor({state:'detached'})
+  assert.equal(v.s.grants||0,0,'declining sends nothing')
+  assert.ok(!v.s.remote.includes('connect.facebook.net'));await finish(v)}
+ {const v=await open(browser,{account:user(),start:'/'+CAMPAIGN})
+  await signupScreen(v.page);await v.page.getByRole('checkbox').check();await google(v.page).click()
+  const dialog=v.page.getByRole('dialog').filter({hasText:'decides'})
+  await dialog.waitFor()
+  await dialog.getByRole('checkbox').check()
+  await dialog.getByRole('button',{name:'Permitir medición'}).click()
+  await until(()=>v.s.grants===1&&v.s.receipts===1,'consent reaches grant and receipt')
+  await dialog.waitFor({state:'detached'})
+  assert.ok(!v.s.remote.some(h=>/facebook/.test(h)),'Pixel off: no browser traffic to Meta')
+  await finish(v)}
+ for(const [name,account,start] of [['organic',user(),'/'],['existing',user({created:OLD,attested:true}),'/'+CAMPAIGN]]){
+  const v=await open(browser,{account,start})
+  await loginScreen(v.page);await google(v.page).click()
+  if(name==='organic'){await gateHeading(v.page).waitFor();await v.page.getByRole('checkbox').check();await v.page.getByRole('button',{name:'Continuar',exact:true}).click()}
+  await until(()=>v.s.profile>=1,'reaches profile');await v.page.waitForTimeout(800)
+  assert.equal(await v.page.getByText('Tú decides').count(),0,name+' is never asked')
+  assert.equal(v.s.grants||0,0);await finish(v)
+ }
+ pass('meta_consent_only_new_ad_signup_decline_grant_no_pixel')
 
  // Public legal pages: same text as the app, and nothing else loads.
  for(const [kind,lang,heading] of [['privacy','es','Privacidad en PAZO'],['privacy','en','Privacy at PAZO'],['terms','es','Reglas de uso de PAZO'],['terms','en','PAZO Community Rules']]){

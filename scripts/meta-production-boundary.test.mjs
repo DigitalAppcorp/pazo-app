@@ -7,20 +7,15 @@ test('current PAZO entrypoints contain no Meta provider, SDK or consent imports'
  const problems=verifyMetaProductionBoundary({sources})
  assert.deepEqual(problems,[])
 })
-test('a released flag is rejected even if browser entrypoints remain unchanged',()=>{
- const sources=readMetaBoundarySources()
- const path='supabase/functions/pazo-meta-worker/index.ts'
- sources[path]=sources[path].replace('const META_WORKER_PROVIDER_APPROVED=false',
-   'const META_WORKER_PROVIDER_APPROVED=true')
- const problems=verifyMetaProductionBoundary({sources})
- assert.ok(problems.some(p=>p.includes('META_WORKER_PROVIDER_APPROVED=false')))
-})
-test('releasing isolated UI without review is rejected',()=>{
- const sources=readMetaBoundarySources()
- const path='src/features/marketing/MetaConsentChoice.tsx'
- sources[path]=sources[path].replace('export const META_CHOICES_RELEASED=false',
-   'export const META_CHOICES_RELEASED=true')
- assert.ok(verifyMetaProductionBoundary({sources}).some(p=>p.includes('META_CHOICES_RELEASED=false')))
+test('a database gate that starts on, or a build switch on by default, is rejected',()=>{
+ for(const [path,from,to] of [
+  ['supabase/migrations/20261101120000_pazo_meta_conversions.sql',' enabled boolean NOT NULL DEFAULT false',' enabled boolean NOT NULL DEFAULT true'],
+  ['src/features/marketing/metaRelease.ts',"env.VITE_PAZO_META_ENABLED === 'true'","env.VITE_PAZO_META_ENABLED !== 'false'"],
+ ]){
+  const sources=readMetaBoundarySources()
+  sources[path]=sources[path].replace(from,to)
+  assert.ok(verifyMetaProductionBoundary({sources}).some(p=>p.startsWith(path)),path)
+ }
 })
 test('direct imports and silent SDK additions to live app are rejected',()=>{
  for(const snippet of [

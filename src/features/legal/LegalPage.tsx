@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { PAZO_MARKETING_PRIVACY_EFFECTIVE_DATE, resolveLegalCopy } from './legalCopy'
+import { pazoPrivacyEffectiveDate, resolveLegalCopy } from './legalCopy'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from './supportContact'
 import type { LegalPageKind } from './legalPageRoute'
 
@@ -10,7 +10,7 @@ const link = 'font-semibold underline underline-offset-4 focus-visible:bg-[#E1E5
 // Same text as the in-app dialog, from the same source. Measurement choices
 // need an account, so they stay in the app and are only pointed to here.
 export function LegalPage({ kind, lang }: Props) {
-  const copy = resolveLegalCopy(kind, lang, kind === 'privacy' ? PAZO_MARKETING_PRIVACY_EFFECTIVE_DATE : undefined)
+  const copy = resolveLegalCopy(kind, lang, kind === 'privacy' ? pazoPrivacyEffectiveDate() : undefined)
   const other = lang === 'es' ? 'en' : 'es'
   useEffect(() => { document.title = `${copy.heading} · PAZO` }, [copy.heading])
 

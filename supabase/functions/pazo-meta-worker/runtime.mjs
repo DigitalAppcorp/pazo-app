@@ -11,7 +11,7 @@ import {resolveMetaBackend} from '../_shared/metaSupabaseOrigin.mjs'
 export function createMetaWorkerRuntime({
   released=false,privacyReviewed=false,matchFieldsApproved=false,
   providerApproved=false,url=null,isolatedOrigin=null,serviceKey=null,
-  readSecret=()=>undefined,
+  readSecret=()=>undefined,authenticate=null,
   readApprovedMatchField=null,apiVersion=null,
   fetchImpl=fetch,clock=()=>Date.now(),cryptoImpl=crypto,
 }={}) {
@@ -26,10 +26,10 @@ export function createMetaWorkerRuntime({
     url,isolatedOrigin,serviceKey,readApprovedMatchField,fetchImpl,
   })
   if(!repository)return createMetaWorkerHandler()
-  const authenticate=createMetaWorkerAuthenticator({readSecret,cryptoImpl})
   return createMetaWorkerHandler({
     released:true,privacyReviewed:true,matchFieldsApproved:true,
-    providerApproved:true,authenticate,
+    providerApproved:true,
+    authenticate:authenticate??createMetaWorkerAuthenticator({readSecret,cryptoImpl}),
     run:()=>runMetaCapiWorker({
       releaseEnabled:true,privacyGateApproved:true,repository,
       apiVersion,readSecret,fetchImpl,clock,

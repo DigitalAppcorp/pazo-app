@@ -6,7 +6,7 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import {createMetaWithdrawalHandler} from './withdrawCore.mjs'
 import {createMetaWithdrawalProvider} from './withdrawAdapter.mjs'
 
-const META_WITHDRAW_ENDPOINT_RELEASED=false
+const META_WITHDRAW_ENDPOINT_RELEASED=true
 function setup(){
   if(!META_WITHDRAW_ENDPOINT_RELEASED)return createMetaWithdrawalHandler()
   try {

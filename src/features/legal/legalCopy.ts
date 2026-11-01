@@ -133,8 +133,32 @@ for(const lang of ['es','en'] as const){
  }]}
 }
 
-export function resolveLegalCopy(kind: LegalKind, lang: LegalLanguage, effectiveDate: unknown = PAZO_LEGAL_EFFECTIVE_DATE): LegalText {
-  const copy=legalPreview[kind][lang]
+const FEATURE_ENV=(import.meta.env??{}) as Record<string,unknown>
+// Must be set to the real publication date when these texts first go live.
+export const pazoPrivacyEffectiveDate=(env:Record<string,unknown>=FEATURE_ENV)=>
+  parseLegalEffectiveDate(env.VITE_PAZO_PRIVACY_EFFECTIVE_DATE)??PAZO_MARKETING_PRIVACY_EFFECTIVE_DATE
+const GOOGLE_NOTICE={"es":{"heading":"Acceso con Google","text":"Si eliges Continuar con Google, Google confirma tu identidad y comparte con Supabase, nuestro proveedor de autenticación, tu correo electrónico y si está verificado, tu nombre, tu foto de perfil y un identificador de tu cuenta de Google. PAZO usa estos datos para crear tu cuenta, permitirte entrar y reconocerla si vuelves. No los usa para completar tu perfil público. PAZO no recibe tu contraseña de Google. Google también procesa tu inicio de sesión y sabe que accediste a PAZO. Si ya tienes una cuenta de PAZO con el mismo correo verificado, Google se añade como otra forma de entrar a esa cuenta. Google no nos comparte tu edad, por lo que te pedimos confirmar que tienes 18 años o más, y guardamos la fecha de esa confirmación. Puedes retirar el acceso de PAZO desde tu cuenta de Google; eso no elimina tu cuenta de PAZO. Para solicitarlo, incluso si decidiste no continuar por no tener 18 años, escribe al correo de privacidad."},"en":{"heading":"Sign in with Google","text":"If you choose Continue with Google, Google confirms your identity and shares with Supabase, our authentication provider, your email address and whether it is verified, your name, your profile photo and an identifier for your Google account. PAZO uses this data to create your account, sign you in and recognize you when you return. It does not use it to complete your public profile. PAZO does not receive your Google password. Google also processes your sign-in and knows that you accessed PAZO. If you already have a PAZO account with the same verified email, Google is added as another way to sign in to that account. Google does not share your age with us, so we ask you to confirm that you are 18 or older and we store the date of that confirmation. You can remove PAZO's access from your Google account; this does not delete your PAZO account. To request deletion, including if you chose not to continue because you are under 18, write to the privacy email."}} as const
+const META_NOTICE={"es":"Medición opcional de registros con Meta. Solo si llegaste desde un anuncio, tu cuenta es nueva y marcas expresamente una casilla inicialmente vacía, compartimos con Meta el evento CompleteRegistration, un identificador aleatorio del evento, su fecha, la dirección de la página, un hash SHA-256 de tu correo electrónico, que sigue siendo un dato personal, y el agente de usuario de tu navegador. Lo hacemos para medir nuestros anuncios, y Meta puede tratar estos datos según sus propias condiciones. No añadimos tu nombre, identificadores de cuenta o de mascota, publicaciones, cuidados, ubicación GPS, datos de pago ni códigos de campaña. Rechazarlo no cambia el uso de PAZO. Si tu navegador envía Global Privacy Control, no pedimos este permiso y registramos tu exclusión. Puedes retirarlo en esta política para detener envíos futuros; no se pueden deshacer los ya realizados. Los eventos pendientes se eliminan con el registro de atribución, en 14 días; tu preferencia se conserva hasta eliminar la cuenta.","en":"Optional registration measurement with Meta. Only if you arrived from an ad, your account is new and you expressly tick an initially empty box, we share with Meta the CompleteRegistration event, a random event identifier, its time, the page address, a SHA-256 hash of your email address, which is still personal data, and your browser user agent. We do this to measure our ads, and Meta may process this data under its own terms. We do not add your name, account or pet identifiers, posts, care records, GPS location, payment data or campaign codes. Declining does not change how PAZO works. If your browser sends Global Privacy Control, we do not ask for this permission and we record your opt-out. You can withdraw it in this policy to stop future transfers; those already made cannot be undone. Pending events are deleted with the attribution record within 14 days; your preference is kept until the account is deleted."} as const
+const META_PIXEL_NOTICE={"es":" En ese caso también cargamos Meta Pixel en tu navegador: Meta recibe además tu dirección IP, la página y la página de origen, datos técnicos del dispositivo y la cookie _fbp, y puede recibir _fbc. Solo se carga en páginas sin parámetros y al retirar el permiso borramos esas cookies de PAZO.","en":" In that case we also load Meta Pixel in your browser: Meta additionally receives your IP address, the page and referring page, technical device data and the _fbp cookie, and may receive _fbc. It only loads on pages without parameters, and withdrawing permission removes those cookies from PAZO."} as const
+const META_DENIALS=[/[^.]*\bMeta\b[^.]*\./g]
+// The published text describes exactly what this build does.
+function withFeatures(copy:LegalText,kind:LegalKind,lang:LegalLanguage,env:Record<string,unknown>):LegalText{
+  const google=env.VITE_PAZO_GOOGLE_AUTH_ENABLED==='true',meta=env.VITE_PAZO_META_ENABLED==='true'
+  if(!google&&!meta)return copy
+  let sections=[...copy.sections]
+  if(kind==='terms'&&google)sections=sections.map(s=>s.heading==='Edad mínima'
+    ?{...s,text:s.text.replace('La declaración de edad en el registro','La declaración de edad al registrarte, también si usas Google,')}
+    :s.heading==='Minimum age'?{...s,text:s.text.replace('The age declaration at registration','The age declaration at registration, including when you use Google,')}:s)
+  if(kind==='privacy'){
+    if(meta)sections=sections.map(s=>({...s,text:META_DENIALS.reduce((t,r)=>t.replace(r,''),s.text).trim()}))
+    const extra=[...(google?[GOOGLE_NOTICE[lang]]:[]),...(meta?[{heading:lang==='es'?'Medición con Meta':'Measurement with Meta',
+      text:META_NOTICE[lang]+(env.VITE_PAZO_META_PIXEL_ENABLED==='true'?META_PIXEL_NOTICE[lang]:'')}]:[])]
+    sections.splice(2,0,...extra)
+  }
+  return {...copy,sections}
+}
+export function resolveLegalCopy(kind: LegalKind, lang: LegalLanguage, effectiveDate: unknown = PAZO_LEGAL_EFFECTIVE_DATE, env: Record<string,unknown> = FEATURE_ENV): LegalText {
+  const copy=withFeatures(legalPreview[kind][lang],kind,lang,env)
   const date = parseLegalEffectiveDate(effectiveDate)
   if (!date) return copy
   const dateNotice = lang === 'es' ? `Fecha de vigencia: ${date}.` : `Effective date: ${date}.`

@@ -1,7 +1,7 @@
 # PAZO #169 — Inventario de datos Meta Pixel/CAPI y decisiones de privacidad (BORRADOR, 31-oct-2026)
 
 **Estado: REVIEW CANDIDATE / NO-GO. No es dictamen legal, consentimiento publicado ni permiso de transmisión.**
-**Origen:** inspección directa de `metaConversion.mjs`, `metaCapi.mjs`, `metaPixelLoader.mjs`, `metaConsentTransport.mjs`, `metaGpcSync.mjs`, `MetaConsentChoice.tsx`, `meta-outbox-candidate.sql` de PR #171. Fuente pública: [CPPA FAQ](https://cppa.ca.gov/faq), [CPPA regulación en vigor (índice)](https://cppa.ca.gov/regulations/), [SDK oficial Meta CAPI](https://github.com/facebook/facebook-python-business-sdk) y [especificación oficial archivada de CAPI](https://github.com/facebookarchive/Facebook-Server-Side-API-Swagger). Las exigencias precisas de Meta y la ley aplicable deben revalidarse antes de liberar.
+**Origen:** inspección directa de `metaConversion.mjs`, `metaCapi.mjs`, `metaPixelLoader.mjs`, `metaConsentTransport.mjs`, `metaGpcSync.mjs`, `MetaConsentChoice.tsx`, `20261101120000_pazo_meta_conversions.sql` de PR #171. Fuente pública: [CPPA FAQ](https://cppa.ca.gov/faq), [CPPA regulación en vigor (índice)](https://cppa.ca.gov/regulations/), [SDK oficial Meta CAPI](https://github.com/facebook/facebook-python-business-sdk) y [especificación oficial archivada de CAPI](https://github.com/facebookarchive/Facebook-Server-Side-API-Swagger). Las exigencias precisas de Meta y la ley aplicable deben revalidarse antes de liberar.
 
 ## Regla mínima
 

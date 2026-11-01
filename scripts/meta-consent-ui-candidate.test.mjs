@@ -16,7 +16,7 @@ fs.writeFileSync(filename,ts.transpileModule(src,{
  compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2023,
   jsx:ts.JsxEmit.ReactJSX},
 }).outputText)
-const {MetaConsentChoice,META_CHOICES_RELEASED}=await import(pathToFileURL(filename).href)
+const {MetaConsentChoice}=await import(pathToFileURL(filename).href)
 let root
 const flush=async action=>act(async()=>{
  if(action)await action()
@@ -49,9 +49,6 @@ test.afterEach(async()=>{
  delete globalThis.navigator
 })
 test.after(()=>fs.rmSync(work,{recursive:true,force:true}))
-test('UI is hardcoded OFF and not linked to the production runtime',()=>{
- assert.equal(META_CHOICES_RELEASED,false)
-})
 for(const lang of ['es','en'])test(lang+': default unchecked, no grant or irreversible withdrawal on skip',async()=>{
  let grants=0,withdrawals=0,continued=0
  await render({lang,onGrant:async()=>{grants++;return true},

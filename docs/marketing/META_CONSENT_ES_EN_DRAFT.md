@@ -56,7 +56,7 @@ The live [privacy policy](../../src/features/legal/legalCopy.ts) still says **no
 
 - Design OS: accessible ES/EN UX (minimum text size 15px in consent UI, no coercive color or prechecked checkbox, focus return, small mobile viewport, no pressure or account blocking); compare against PAZO visual system. **NOT_TESTED** with actual browser.
 - Legal counsel/product owner: determine California CCPA applicability and disclosure obligations, GPC & opt-out, data minimization, treatment of potential hashed email (still personal information), allowed Meta match fields, retention and dataset ownership. **PENDING**. California CPPA reference: https://cppa.ca.gov/faq .
-- Supabase: apply **reviewed** migration via safe CLI workflow only after GO. Current candidate SQL is in `supabase/tests/marketing/meta-outbox-candidate.sql` and is NOT deployable.
+- Supabase: apply **reviewed** migration via safe CLI workflow only after GO. Current candidate SQL is in `supabase/migrations/20261101120000_pazo_meta_conversions.sql` and is NOT deployable.
 - Auth: authenticated grant only (new `grantCore.mjs` and `grantAdapter.mjs` are OFF; `pazo-meta-grant/index.ts` is OFF). Existing Auth and first-party measurement must continue on failed Meta permission.
 - Meta: no data sharing, SDK, CAPI requests or Meta Test Events until separate privacy and deployment authorization. Pixel `eventID` and CAPI `event_id` must match.
 - No advertising spend or publication of the three creatives under this work.

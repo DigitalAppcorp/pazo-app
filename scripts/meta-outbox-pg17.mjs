@@ -7,7 +7,7 @@ import {sql,sqlAsync,file} from './marketing-sql-lab.mjs'
 // Real Supabase GoTrue already has email; add it ONLY to this disposable mock.
 sql('ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS email text')
 const before=sql('SELECT row_to_json(g) FROM marketing_private.collection_gate g')
-file('supabase/tests/marketing/meta-outbox-candidate.sql')
+file('supabase/migrations/20261101120000_pazo_meta_conversions.sql')
 assert.equal(sql('SELECT row_to_json(g) FROM marketing_private.collection_gate g'),before)
 const owner='16900000-0000-4000-8000-000000000001'
 const inactive='16900000-0000-4000-8000-000000000002'

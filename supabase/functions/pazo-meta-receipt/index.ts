@@ -4,8 +4,9 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import {createMetaReceiptHandler} from './receiptCore.mjs'
 import {createMetaReceiptProvider} from './receiptAdapter.mjs'
-const META_RECEIPT_ENDPOINT_RELEASED=false
-const META_RECEIPT_PRIVACY_REVIEWED=false
+// No outbox row, so no receipt, can exist while the database gate is off.
+const META_RECEIPT_ENDPOINT_RELEASED=true
+const META_RECEIPT_PRIVACY_REVIEWED=true
 function setup(){
   if(!META_RECEIPT_ENDPOINT_RELEASED||!META_RECEIPT_PRIVACY_REVIEWED)
     return createMetaReceiptHandler()
