@@ -8,9 +8,9 @@ import {createMarketingSingleUseVerifier} from './singleUseVerifier.mjs'
 const MARKETING_LANDING_RELEASED=true
 const BEHAVIOR_PREREG_RELEASED=true
 const INTELLIGENCE_EXPERIENCE_RELEASED=true
-// OFF until docs/marketing/CAMPAIGN_EXPERIENCE_RUNBOOK.md is followed.
-const INTELLIGENCE_CAMPAIGN_EXPERIENCE_RELEASED=false
-const INTELLIGENCE_EXPERIENCE_DETAILS_RELEASED=false
+// Released by the PO on 1-nov-2026. Collection still depends on each SQL gate.
+const INTELLIGENCE_CAMPAIGN_EXPERIENCE_RELEASED=true
+const INTELLIGENCE_EXPERIENCE_DETAILS_RELEASED=true
 function setup(){
   if(!MARKETING_LANDING_RELEASED)return createMarketingLandingHandler()
   try {
