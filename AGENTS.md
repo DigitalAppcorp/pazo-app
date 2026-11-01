@@ -1,3 +1,9 @@
+## PAZO Video OS — dirección editorial vigente (1-nov-2026; solo documentación)
+
+Para cualquier guion, video, anuncio narrativo o continuidad de producción, leer primero [hoja de ruta y handoff editorial](docs/marketing/PAZO_VIDEO_EDITORIAL_ROADMAP_20261101.md) y el [método reutilizable de valor primero](https://github.com/DigitalAppcorp/project-brain-os/blob/main/knowledge/video-production/VALUE_FIRST_EDITORIAL_METHOD.md). El PO prioriza contenido que aporte valor a dueños de mascotas, UNA línea principal por pieza, sin mezclar utilidad, comedia, enfoque local y venta indiscriminadamente. El director entrega un guion audiovisual **completo**; Claude Code produce sin rehacer tres prototipos aislados del hook. Humor absurdo, sarcasmo, giros y diálogo son recursos opcionales; ningún formato tiene resultados de audiencia validados. **Estado: estrategia aceptada, primer concepto en preparación, sin video/producción/publicación/gasto autorizados.** No subir recursos publicitarios a GitHub; no alterar PAZO.
+
+---
+
 ## Producción vigente — Administración visual y confiabilidad #161 (29-oct-2026)
 
 GO explícito del PO: «sube todo a produccion». PR162 **merged**; runtime de producción `16b705d65e8de54afa2c1600a24e2bb23802b99a`, Vercel `dpl_BJ3xLUNFJf6HQJiQ5XydywM9pcHj` READY/production, alias `pazo-app.vercel.app`. [Acta de lanzamiento](docs/admin-visual/PRODUCTION_RELEASE_20261029.md) y [registro instalado](docs/admin-visual/PRODUCTION_RELEASE.json) son la referencia actual.
