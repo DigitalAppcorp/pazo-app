@@ -2,8 +2,20 @@
 
 **Fecha de decisión:** 1 de noviembre de 2026.  
 **Propietario de la decisión:** Product Owner (PO) de PAZO.  
-**Estado (actualización del PO 2026-11-01):** DIRECCIÓN EDITORIAL ACEPTADA / CONCEPTO 01 R2 ACEPTADO / R3 GUION INTEGRAL PENDIENTE DE CIERRE / SIN VIDEO PRODUCIDO / SIN RESULTADOS DE AUDIENCIA DE ESTA LÍNEA.  
+**Estado (actualización posterior del PO 2026-11-01):** VIDEO 01 GUION R3 ENTREGADO Y RENDER EN CURSO SEGÚN PO (ARCHIVO FINAL/QA NO VERIFICADOS); VIDEO 02 REORIENTADO A ESCENAS ACTUADAS QUE EXPLICAN QUÉ ES PAZO; NO HAY CONCEPTO 02 ACEPTADO NI RESULTADOS DE AUDIENCIA VERIFICADOS.  
 **Uso:** punto de entrada para el próximo director creativo, Codex, Claude Code u otro agente. **No es permiso para producir, publicar, pagar ni modificar PAZO.**
+
+## NUEVA PRIORIDAD DEL PO — CORRECCIÓN PARA VIDEO 02 (1-nov-2026)
+
+**Feedback explícito:** el PO considera que se estaba desperdiciando la producción en historias genéricas o educativas sin conexión clara con el producto. Priorizar ahora **actuaciones y escenas cotidianas con personajes interactuando**, donde una persona que nunca ha oído hablar de PAZO comprenda **qué es y por qué le interesa**. El valor para el dueño de mascota sigue siendo importante, pero debe surgir de una **función real de PAZO integrada causalmente en la historia**. Evitar videos de consejos que terminan en un logo decorativo.
+
+- Video 01 «El manual del sospechoso»: el PO aprobó la historia y el guion R3; reportó que **ya se estaba renderizando**. No confundir este reporte con archivo exportado, QA o publicación verificados.
+- Video 02: propuesta de detective de perro desaparecido **rechazada** por no sentirse cotidiana. «Camera Roll Problem» **rechazada** porque no conectó con la historia. «The Longest Walk Ever» fue propuesta después, pero el PO **rechazó la línea de videos sin sentido comercial/explicación de PAZO**; no producir el guion de caminata como siguiente video.
+- Próxima dirección para Video 02: **spot cotidiano actuado / descubrimiento de PAZO**. Abrir con curiosidad genuina de un segundo personaje, demostrar en un teléfono real una función verificable (preferiblemente pasaporte QR), expresar en diálogo orgánico que PAZO es una aplicación gratuita para dueños de mascotas y, solo si la historia permite, introducir la Agenda como segunda evidencia breve. El remate debe provenir de la interacción, no de sarcasmo prefabricado ni de una ficha de consejos.
+- **Veto:** si al ver el video alguien todavía pregunta «¿Qué es PAZO?», falla el objetivo. Si quitamos PAZO y la historia apenas cambia, también falla. No intentar explicar todos los módulos en una pieza; usar una serie futura de escenas independientes para distintos beneficios.
+- **Verificación factual:** código de PassportModal confirma QR descargable/compartible y ficha pública con opción de enviar un aviso de hallazgo; no rastreo GPS. CareModal dispone de agenda de cuidados, citas y recordatorios dentro de la app: **NO envía notificaciones push** según el propio texto UI. Comprobar funcionamiento alojado y capturar recorrido real antes de afirmar prestación o renderizar una demostración. No inventar conversiones ni resultados.
+
+Esta corrección tiene prioridad sobre el orden editorial inicial «valor práctico con marca opcional» solo para la **nueva serie de descubrimiento de PAZO**. Las cinco líneas continúan como abanico futuro, pero la **prioridad inmediata** es dar a conocer la aplicación a través de actuaciones.
 
 ## 0. Leer esto primero al retomar
 
