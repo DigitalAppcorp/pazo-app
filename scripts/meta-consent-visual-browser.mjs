@@ -143,15 +143,10 @@ try{
         outlineWidth:getComputedStyle(node).outlineWidth}
      })
      assert.equal(firstFocus.tag,'BUTTON')
-     // Native keyboard outlines are valid accessible focus indicators too.
-     // Do not reject an actual visible outline just because Tailwind's
-     // background/shadow styles did not appear in this isolated lab.
-     const hasOutline=firstFocus.outlineStyle!=='none'
-       &&parseFloat(firstFocus.outlineWidth)>0
-     assert.ok(firstFocus.background!=='rgba(0, 0, 0, 0)'
-       ||firstFocus.shadow!=='none'||hasOutline,
-       'focused privacy link needs a visible background, shadow, or outline: '
-       +JSON.stringify(firstFocus))
+     // Permanent PO rule: focus changes the surface, never draws a contour.
+     assert.notEqual(firstFocus.background,'rgba(0, 0, 0, 0)',JSON.stringify(firstFocus))
+     assert.equal(firstFocus.shadow,'none',JSON.stringify(firstFocus))
+     assert.equal(firstFocus.outlineStyle,'none',JSON.stringify(firstFocus))
      await page.keyboard.press('Tab')
      assert.equal(await page.evaluate(()=>document.activeElement?.tagName),'INPUT')
      await page.keyboard.press('Tab')
@@ -160,8 +155,7 @@ try{
        shadow:getComputedStyle(document.activeElement).boxShadow,
      }))
      assert.equal(finalFocus.tag,'BUTTON')
-     assert.notEqual(finalFocus.shadow,'none',
-       'continue action must have keyboard-only visible focus shadow')
+     assert.equal(finalFocus.shadow,'none','focus never draws a contour')
      const permission=section.locator('input[type=checkbox]')
      await permission.check()
      assert.ok(await permission.isChecked())

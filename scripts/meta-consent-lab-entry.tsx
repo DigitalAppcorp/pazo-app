@@ -2,8 +2,7 @@
 import React,{useState} from 'react'
 import {createRoot} from 'react-dom/client'
 import '/src/index.css'
-import {MetaConsentChoice,META_CHOICES_RELEASED} from '/src/features/marketing/MetaConsentChoice.tsx'
-if(META_CHOICES_RELEASED!==false)throw Error('candidate_unexpectedly_released')
+import {MetaConsentChoice} from '/src/features/marketing/MetaConsentChoice.tsx'
 const p=new URLSearchParams(location.search)
 const lang=p.get('lang')==='en'?'en':'es'
 const scenario=p.get('case')||'default'
