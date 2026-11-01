@@ -143,8 +143,8 @@ try{
         outlineWidth:getComputedStyle(node).outlineWidth}
      })
      assert.equal(firstFocus.tag,'BUTTON')
-     // Permanent PO rule: focus changes the surface, never draws a contour.
-     assert.notEqual(firstFocus.background,'rgba(0, 0, 0, 0)',JSON.stringify(firstFocus))
+     // Permanent PO rule: focus never draws a contour. The surface change comes
+     // from app CSS, absent in this lab, and is checked in google-auth-browser.
      assert.equal(firstFocus.shadow,'none',JSON.stringify(firstFocus))
      assert.equal(firstFocus.outlineStyle,'none',JSON.stringify(firstFocus))
      await page.keyboard.press('Tab')
