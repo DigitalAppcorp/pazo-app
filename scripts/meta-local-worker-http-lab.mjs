@@ -113,8 +113,10 @@ export async function runMetaLocalWorkerHttpLab({api,serviceKey,dbUrl}={}){
  console.log('META_WORKER_HTTP_PHASE no_duplicate_after_settlement')
 
  // Rejection and GPC leave nothing to send, whoever holds the dispatch secret.
+ // The screen's decline writes nothing: no grant means no purpose row.
  const rejected=await signup()
- assert.equal(service(`SELECT public.pazo_meta_withdraw_candidate('${rejected.id}')`),'t')
+ assert.equal(sql(`SELECT count(*) FROM marketing_private.meta_purpose_candidate
+   WHERE owner_id='${rejected.id}'`),'0')
  const gpc=await signup()
  assert.equal(service(`SELECT public.pazo_meta_grant_first_session_candidate(
    '${gpc.id}','pazo-meta-conversions-v1',true)`),'f')
