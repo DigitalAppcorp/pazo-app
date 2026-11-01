@@ -38,6 +38,9 @@ export async function runMetaLocalWorkerHttpLab({api,serviceKey,dbUrl}={}){
  // With the repo's verify_jwt setting the handler itself makes every decision.
  const expectDenied=async(options,code)=>{
   const r=await call(worker,options)
+  // Status values only; the handler never returns identifiers or secrets.
+  console.log('META_WORKER_HTTP_DIAG denied_expected='+code+' observed='+r.status
+   +' handler_status='+String(r.data?.status).replace(/[^a-z_]/g,''))
   assert.equal(r.status,code,JSON.stringify(Object.keys(options)))
   assert.deepEqual(r.data,{status:'not_available'})
  }
@@ -80,6 +83,8 @@ export async function runMetaLocalWorkerHttpLab({api,serviceKey,dbUrl}={}){
  const eventId=sql(`SELECT event_id::text FROM marketing_private.meta_outbox_candidate
    WHERE owner_id='${owner.id}'`)
  const accepted=await call(worker)
+ console.log('META_WORKER_HTTP_DIAG authorized_status='+accepted.status
+  +' handler_status='+String(accepted.data?.status).replace(/[^a-z_]/g,''))
  assert.equal(accepted.status,200,'empty POST must reach the handler through Kong')
  assert.deepEqual(accepted.data,{status:'accepted'})
  assert.equal(statusOf(owner.id),'sent')
