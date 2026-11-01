@@ -160,8 +160,8 @@ test('positive Meta permission cannot start without an available withdrawal chan
 
 function browserWithSyntheticSdk(){
  const scripts=[]
- const dom={head:{appendChild:e=>scripts.push(e)},createElement:()=>({})}
- const browser={document:dom,navigator:{globalPrivacyControl:false}}
+ const dom={referrer:'',head:{appendChild:e=>scripts.push(e)},createElement:()=>({})}
+ const browser={document:dom,navigator:{globalPrivacyControl:false},location:{href:'https://pazo-app.vercel.app/',hostname:'pazo-app.vercel.app'}}
  return {scripts,dom,browser}
 }
 test('explicit withdrawal revokes owned SDK synchronously before async server receipt',async()=>{

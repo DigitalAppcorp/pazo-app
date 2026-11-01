@@ -24,10 +24,10 @@ const makeProof=(id=EVENT)=>buildMetaRegistration({
 })
 const browserFixture=()=>{
  const scripts=[]
- const document={head:{appendChild:el=>scripts.push(el)},
+ const document={referrer:'',head:{appendChild:el=>scripts.push(el)},
    createElement:()=>({})}
  return {scripts,document,browser:{
-  document,navigator:{globalPrivacyControl:false}
+  document,navigator:{globalPrivacyControl:false},location:{href:'https://pazo-app.vercel.app/',hostname:'pazo-app.vercel.app'}
  }}
 }
 const browserOpts=(proof,f,stillAllowed=()=>true)=>({

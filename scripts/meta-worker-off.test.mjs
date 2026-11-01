@@ -53,7 +53,7 @@ test('reject browser origin, cookie, body, wrong method and wrong bearer before 
   {method:'GET'},{auth:OTHER,headers:{origin:'https://pazo-app.vercel.app'}},
   {headers:{cookie:'session=synthetic'}},{auth:''},
   {auth:'short'},{body:'{"ownerId":"spoofed"}'},
-  {body:''},{headers:{'content-length':'9'}},
+  {headers:{'content-length':'9'}},
  ]) {
   const x=await handler(req(options))
   assert.notEqual(x.status,200,JSON.stringify(options))
@@ -61,6 +61,34 @@ test('reject browser origin, cookie, body, wrong method and wrong bearer before 
  }
  assert.equal(runs,0)
  assert.equal(verifications,0)
+})
+test('empty stream from the gateway is accepted; bytes or a stalled stream are not',async()=>{
+ const open=()=>{
+  let runs=0
+  return {runs:()=>runs,handler:createMetaWorkerHandler({
+   released:true,privacyReviewed:true,matchFieldsApproved:true,
+   providerApproved:true,authenticate:async()=>true,
+   run:async()=>{runs++;return {status:'accepted'}},
+  })}
+ }
+ const streamed=source=>new Request('https://pazo.invalid/worker',{method:'POST',
+  duplex:'half',headers:{authorization:'Bearer '+SECRET},
+  body:new ReadableStream(source)})
+ const empty=open()
+ assert.deepEqual(await read(await empty.handler(streamed({start:c=>c.close()}))),
+  {http:200,status:'accepted'})
+ assert.equal(empty.runs(),1)
+ let pulls=0
+ const flood=open()
+ assert.deepEqual(await read(await flood.handler(streamed({
+  pull:c=>{pulls++;c.enqueue(new Uint8Array(1024))},
+ }))),{http:400,status:'not_available'})
+ assert.equal(flood.runs(),0)
+ assert.ok(pulls<8,'stops at the first byte instead of buffering the body')
+ const stalled=open()
+ assert.deepEqual(await read(await stalled.handler(streamed({pull:()=>new Promise(()=>{})}))),
+  {http:400,status:'not_available'})
+ assert.equal(stalled.runs(),0)
 })
 test('wrong schedule key cannot invoke CAPI worker',async()=>{
  const verify=createMetaWorkerAuthenticator({readSecret:()=>SECRET})

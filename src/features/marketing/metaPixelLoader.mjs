@@ -6,6 +6,21 @@ const PIXEL_URL='https://connect.facebook.net/en_US/fbevents.js'
 const DATASET=/^[1-9][0-9]{5,24}$/
 const UUID4=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const ownedPixelQueues=new WeakMap()
+// The real SDK sends the full page URL (dl) and referrer (rl) to Meta, so Auth
+// tokens, confirmation codes or UTMs there would leave PAZO. Require clean ones.
+const cleanUrl=value=>{
+  if(value==='')return true
+  try{const url=new URL(value);return url.search===''&&url.hash===''&&!url.username}
+  catch{return false}
+}
+const hasCleanPageContext=browser=>{
+  try{
+    return typeof browser.location?.href==='string'&&browser.location.href!==''
+      &&cleanUrl(browser.location.href)
+      &&typeof browser.document.referrer==='string'
+      &&cleanUrl(browser.document.referrer)
+  }catch{return false}
+}
 /** Revoke ONLY the Pixel bootstrap PAZO created after consent. Avoid
  * touching an independently installed Facebook Pixel or stale session.
  * This revokes future SDK sends, not disclosures already made.
@@ -61,7 +76,8 @@ export async function loadMetaPixelForVerifiedSignup({
   }) || !DATASET.test(String(datasetId)) || !browser?.document
      || dom!==browser.document || typeof dom.createElement!=='function'
      || typeof eventId!=='string' || !UUID4.test(eventId)
-     || typeof stillAllowed!=='function' || !stillPermitted())
+     || typeof stillAllowed!=='function' || !stillPermitted()
+     || !hasCleanPageContext(browser))
     return {status:'suppressed'}
   // A different / pre-existing Pixel bootstrap would make ownership ambiguous.
   if (browser.fbq || browser._fbq) return {status:'existing_pixel'}

@@ -8,6 +8,25 @@ const reply=(status,code)=>new Response(JSON.stringify({status}),{
     'x-content-type-options':'nosniff',
   },
 })
+// A stream that neither ends nor sends a byte in time counts as a body.
+const carriesBytes=async request=>{
+  if(request.body===null)return false
+  const reader=request.body.getReader()
+  let timer
+  const expired=new Promise(resolve=>{timer=setTimeout(()=>resolve({expired:true}),2000)})
+  try{
+    for(;;){
+      const chunk=await Promise.race([reader.read(),expired])
+      if(chunk.expired)return true
+      if(chunk.done)return false
+      if(chunk.value?.length>0)return true
+    }
+  }catch{return true}
+  finally{
+    clearTimeout(timer)
+    reader.cancel().catch(()=>{})
+  }
+}
 export function createMetaWorkerHandler({
   released=false,privacyReviewed=false,matchFieldsApproved=false,
   providerApproved=false,authenticate=null,run=null,
@@ -28,9 +47,9 @@ export function createMetaWorkerHandler({
     const token=request.headers.get('authorization')||''
     if(!/^Bearer [A-Za-z0-9_~.\-]{32,256}$/.test(token))
       return reply('not_available',401)
-    // A worker request has no body stream; reject it without reading any
-    // untrusted bytes (prevents oversized/chunked request memory exhaustion).
-    if(request.body!==null)return reply('not_available',400)
+    // A worker request carries no bytes, but the gateway proxies an empty POST
+    // as an empty stream. Stop at the first byte: never buffers a large body.
+    if(await carriesBytes(request))return reply('not_available',400)
     let allowed=false
     try{allowed=await authenticate(token.slice(7))===true}
     catch{return reply('not_available',401)}

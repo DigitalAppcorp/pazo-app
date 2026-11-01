@@ -5,10 +5,11 @@ import {loadMetaPixelForVerifiedSignup,revokeOwnedMetaPixelConsent}
 const eventId='11111111-2222-4333-8444-555555555555',datasetId='123456789012345'
 function fakeBrowser(gpc=false){
   const appended=[]
-  const dom={head:{appendChild:el=>appended.push(el)},createElement:tag=>{
+  const dom={referrer:'',head:{appendChild:el=>appended.push(el)},createElement:tag=>{
     assert.equal(tag,'script');return {}
   }}
-  return {browser:{navigator:{globalPrivacyControl:gpc},document:dom},
+  return {browser:{navigator:{globalPrivacyControl:gpc},document:dom,
+    location:{href:'https://pazo-app.vercel.app/',hostname:'pazo-app.vercel.app'}},
     dom,appended}
 }
 const settings={releaseEnabled:true,privacyGateApproved:true,
@@ -29,6 +30,27 @@ test('default OFF, GPC, QA/admin, missing consent and spoofed ID block SDK load'
   const result=await loadMetaPixelForVerifiedSignup({...settings,...f,stillAllowed:()=>true})
   assert.equal(result.status,'suppressed')
   assert.equal(f.appended.length,0)
+})
+test('URL or referrer carrying tokens, codes or UTMs never loads the SDK',async()=>{
+  const base='https://pazo-app.vercel.app/'
+  for(const [href,referrer] of [
+    [base+'?utm_source=meta',''],[base+'?code=synthetic',''],
+    [base+'#access_token=synthetic',''],['https://u:p@pazo-app.vercel.app/',''],
+    ['not a url',''],['',''],[base,base+'?token_hash=synthetic'],
+    [base,base+'#refresh_token=synthetic'],[base,'not a url'],
+  ]){
+    const f=fakeBrowser(false)
+    f.browser.location={href}
+    f.dom.referrer=referrer
+    const result=await loadMetaPixelForVerifiedSignup({...settings,...f,stillAllowed:()=>true})
+    assert.equal(result.status,'suppressed',href+' / '+referrer)
+    assert.equal(f.appended.length,0)
+    assert.equal(f.browser.fbq,undefined)
+  }
+  const missing=fakeBrowser(false)
+  delete missing.browser.location
+  assert.equal((await loadMetaPixelForVerifiedSignup({...settings,...missing,
+    stillAllowed:()=>true})).status,'suppressed')
 })
 test('SDK is lazy: only with valid consent, queues revoke before init, no auto PageView',async()=>{
   const f=fakeBrowser(false)
@@ -198,7 +220,6 @@ test('revocation removes Meta _fbp/_fbc cookies but leaves PAZO session cookie i
    else jar.set(name,head.slice(name.length+1))
   },
  })
- f.browser.location={hostname:'pazo-app.vercel.app'}
  const pending=loadMetaPixelForVerifiedSignup({...settings,...f,stillAllowed:()=>true})
  f.appended[0].onload()
  assert.equal((await pending).status,'queued')
