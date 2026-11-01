@@ -10,8 +10,9 @@ Fusionar no despliega (`git.deploymentEnabled=false`) ni cambia producción. Cad
 - Gate Meta en `false`: sin consentimiento aceptado, cola ni envío. Google, atribución interna y páginas legales siguen activos.
 - SQL adicional: fuente `20261101130000`, alojada `20261101062705`. Ver [incidente](META_WORKER_INCIDENT_20261101.md).
 - Evento real `76c6420a-3a1d-4fad-a7ba-3b0a85378e27`: Pixel y CAPI llegaron con el mismo `event_id`, pero Meta no ha confirmado la deduplicación.
-- Probado en producción con cuentas reales: retirada, rechazo, cuenta Google existente, primera mascota, Administración y MFA. GPC solo en laboratorio: falta una cuenta nueva desde un navegador con GPC.
-- **Antes de reabrir el gate:** probar GPC, obtener la revisión jurídica que el titular decida y dejar la decisión por escrito. Con Pixel apagado no hay riesgo de doble conteo.
+- Probado en producción con cuentas reales: retirada, rechazo, GPC en Brave (según el titular, ver [auditoría](META_PRIVACY_AUDIT_20261101.md)), cuenta Google existente, primera mascota, Administración y MFA.
+- La pantalla de consentimiento consulta `pazo_meta_consent_available` y no se ofrece con el gate cerrado (fuente `20261101140000`).
+- **Antes de gastar en anuncios:** el titular decide los puntos jurídicos de la auditoría. Con Pixel apagado no hay riesgo de doble conteo.
 
 ## Interruptores
 

@@ -3,6 +3,7 @@
 // durable event against an in-memory fake provider. No Meta, no hosted project.
 import assert from 'node:assert/strict'
 import {createHash,randomUUID} from 'node:crypto'
+import {readFileSync} from 'node:fs'
 import {localPsql} from './meta-local-gotrue-sql-lab.mjs'
 import {currentTickBodyArgument} from './meta-worker-dispatch-source.mjs'
 const SECRET='synthetic_local_worker_dispatch_secret_0123456789'
@@ -156,6 +157,17 @@ export async function runMetaLocalWorkerHttpLab({api,serviceKey,dbUrl}={}){
  assert.equal(statusOf(held.id),'sent')
  assert.equal((await provider()).length,2)
  console.log('META_WORKER_HTTP_PHASE real_pg_net_dispatch_sends_once')
+
+ // What the consent screen asks first: signed-in only, and only the gate's state.
+ sql(readFileSync('supabase/migrations/20261101140000_pazo_meta_consent_availability.sql','utf8'))
+ const available=()=>sql(`SET ROLE authenticated;
+   SET request.jwt.claims='{"sub":"${owner.id}","role":"authenticated"}';
+   SELECT public.pazo_meta_consent_available()`)
+ assert.equal(available(),'t')
+ sql('UPDATE marketing_private.meta_release_gate_candidate SET enabled=false')
+ assert.equal(available(),'f')
+ assert.throws(()=>sql('SET ROLE anon; SELECT public.pazo_meta_consent_available()'))
+ console.log('META_WORKER_HTTP_PHASE consent_availability_follows_gate')
  return {status:'LOCAL_REAL_WORKER_HTTP_PASS',jwtGatewayRejectsDispatchSecret:true,
   handlerReachedWithRepoVerifyJwt:true,realSqlOutbox:true,
   fakeProviderOnly:true,metaNetworkRequests:0,hostedRequests:0}

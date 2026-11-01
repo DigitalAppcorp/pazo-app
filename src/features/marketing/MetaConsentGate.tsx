@@ -9,6 +9,14 @@ import { isMetaPixelEnabled } from './metaRelease'
 
 interface Snapshot { id: string; accessToken: string }
 
+// true or false as the server answered; null when it could not answer.
+const readMetaAvailability = async (): Promise<boolean | null> => {
+  try {
+    const { data, error } = await supabase.rpc('pazo_meta_consent_available')
+    return !error && typeof data === 'boolean' ? data : null
+  } catch { return null }
+}
+
 // Keeps the Auth session readable synchronously; the controller rechecks it
 // before every step so that a switched account can never use a pending grant.
 function useMetaController() {
@@ -46,6 +54,8 @@ export default function MetaConsentGate({ lang }: { lang: 'es' | 'en' }) {
   const controller = useMetaController()
   const eligible = useSyncExternalStore(subscribeMetaConsentEligibility, () => isMetaConsentEligible(user?.id))
   const [closed, setClosed] = useState(false)
+  // Unknown counts as suspended: never offer an acceptance that cannot be saved.
+  const [available, setAvailable] = useState(false)
   const [showPrivacy, setShowPrivacy] = useState(false)
   const synced = useRef<string | null>(null)
 
@@ -56,11 +66,24 @@ export default function MetaConsentGate({ lang }: { lang: 'es' | 'en' }) {
     void controller.syncGpc()
   }, [controller, user?.id])
 
-  if (!controller || !eligible || closed) return null
+  useEffect(() => {
+    if (!eligible) return
+    let active = true
+    void readMetaAvailability().then(state => { if (active) setAvailable(state === true) })
+    return () => { active = false }
+  }, [eligible])
+
+  if (!controller || !eligible || closed || !available) return null
+  // Suspended while the screen was open: leave quietly, there is nothing to fix.
+  const grant = async () => {
+    const granted = await controller.onGrant()
+    if (!granted && await readMetaAvailability() === false) setClosed(true)
+    return granted
+  }
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="meta-consent-title"
       className="fixed inset-0 z-[9998] flex items-center justify-center overflow-y-auto bg-black/40 p-4">
-      <MetaConsentChoice lang={lang} pixelEnabled={isMetaPixelEnabled(import.meta.env)} onGrant={controller.onGrant} onWithdraw={controller.onWithdraw}
+      <MetaConsentChoice lang={lang} pixelEnabled={isMetaPixelEnabled(import.meta.env)} onGrant={grant} onWithdraw={controller.onWithdraw}
         onContinue={() => setClosed(true)} onPrivacy={() => setShowPrivacy(true)}/>
       {showPrivacy && <LegalPreviewDialog kind="privacy" lang={lang} onClose={() => setShowPrivacy(false)}/>}
     </div>
