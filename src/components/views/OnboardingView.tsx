@@ -9,6 +9,7 @@ import {observePrereg} from '../../features/marketing/preregRuntime'
 import { isValidPazoPassword } from '../../features/auth/recoveryFlow'
 import { isGoogleAuthEnabled } from '../../features/auth/googleAuth'
 import { GoogleSignInButton } from '../../features/auth/GoogleSignInButton'
+import { PasswordVisibilityButton } from '../../features/auth/PasswordVisibilityButton'
 import { pazoBuildVersion } from '../../features/release/buildVersion'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { GratitudeWallPreview } from '../../features/supporter/components/GratitudeWallPreview'
@@ -52,6 +53,9 @@ export const OnboardingView = ({
   // Datos del flujo de onboarding
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const passwordsDiffer = passwordConfirm !== '' && passwordConfirm !== password
   const [isOver18, setIsOver18] = useState(false)
   const [googleNeedsAge, setGoogleNeedsAge] = useState(false)
   const ageCheckbox = useRef<HTMLInputElement>(null)
@@ -110,6 +114,11 @@ export const OnboardingView = ({
       return
     }
 
+    if (password !== passwordConfirm) {
+      alert(lang === 'es' ? 'Las contraseñas no coinciden.' : 'Passwords do not match.')
+      return
+    }
+
     if (!isValidPazoPassword(password)) {
       alert(
         lang === 'es'
@@ -125,9 +134,11 @@ export const OnboardingView = ({
       observePrereg(outcome==='failed'?'signup_error':'signup_requested')
       if (outcome === 'authenticated') {
         setPassword('')
+        setPasswordConfirm('')
         setStep('A03')
       } else if (outcome === 'verify_email') {
         setPassword('')
+        setPasswordConfirm('')
         setAwaitingEmailConfirmation(true)
       }
     } catch {
@@ -346,21 +357,42 @@ export const OnboardingView = ({
 
               <div>
                 <label htmlFor="pazo-signup-password" className="block text-[14px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Contraseña" : "Password"}</label>
-                <input
-                  id="pazo-signup-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  minLength={8}
-                  autoComplete="new-password"
-                  className="w-full bg-white rounded-2xl px-3.5 py-3 text-xs text-[#204E4A] focus:outline-none"
-                />
+                <div className="relative">
+                  <input
+                    id="pazo-signup-password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    minLength={8}
+                    autoComplete="new-password"
+                    className="w-full bg-white rounded-2xl py-3 pl-3.5 pr-12 text-xs text-[#204E4A] focus:outline-none"
+                  />
+                  <PasswordVisibilityButton lang={lang} visible={showPassword} onToggle={() => setShowPassword(!showPassword)}/>
+                </div>
                 <span className="block text-[13px] text-[#5C7470] mt-1">
                   {lang === 'es'
                     ? 'Mínimo 8 caracteres, con mayúscula, minúscula y número.'
                     : 'At least 8 characters with uppercase, lowercase, and a number.'}
                 </span>
+              </div>
+
+              <div>
+                <label htmlFor="pazo-signup-password-confirm" className="block text-[14px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Confirmar contraseña" : "Confirm password"}</label>
+                <input
+                  id="pazo-signup-password-confirm"
+                  type={showPassword ? 'text' : 'password'}
+                  value={passwordConfirm}
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
+                  minLength={8}
+                  autoComplete="new-password"
+                  aria-invalid={passwordsDiffer}
+                  className="w-full bg-white rounded-2xl px-3.5 py-3 text-xs text-[#204E4A] focus:outline-none"
+                />
+                {passwordsDiffer && (
+                  <p role="alert" className="mt-1 text-[13px] font-bold text-[#204E4A]">
+                    {lang === 'es' ? 'Las contraseñas no coinciden.' : 'Passwords do not match.'}
+                  </p>
+                )}
               </div>
 
               <label className={`-mx-3 flex min-h-11 items-center gap-2 rounded-2xl px-3 cursor-pointer ${googleNeedsAge ? 'bg-[#E1E53F] font-semibold text-[#204E4A]' : 'text-[#5C7470]'}`}>

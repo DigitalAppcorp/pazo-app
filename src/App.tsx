@@ -2,6 +2,7 @@ import {observeTask,beginTask,observeAnonymous} from './features/marketing/intel
 import {isSupporterNotification} from './features/notifications/supporterNotification'
 import { canUseAccountFeatures } from './features/auth/accountAccess'
 import { recordAdminActivity } from './features/admin/adminDashboardService'
+import { PasswordVisibilityButton } from './features/auth/PasswordVisibilityButton'
 import {useBehaviorObservation} from './features/marketing/useBehaviorObservation'
 import { getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
 import { createRequestScope } from './lib/requestScope'
@@ -2248,16 +2249,9 @@ function PazoMain() {
                         required
                         value={passwordInput}
                         onChange={(e) => setPasswordInput(e.target.value)}
-                        placeholder="••••••••••••"
-                        className="w-full bg-white border-2 border-[#204E4A]/15 rounded-2xl px-4 py-3 pr-16 text-xs text-[#204E4A] focus:outline-none focus:border-[#204E4A] focus:ring-2 focus:ring-[#E1E53F]"
+                        className="w-full bg-white border-2 border-[#204E4A]/15 rounded-2xl px-4 py-3 pr-12 text-xs text-[#204E4A] focus:outline-none focus:border-[#204E4A] focus:ring-2 focus:ring-[#E1E53F]"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-extrabold uppercase tracking-wider text-[#5C7470] hover:text-[#204E4A] bg-[#204E4A]/5 hover:bg-[#204E4A]/10 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
-                      >
-                        {showPassword ? (lang === 'es' ? 'Ocultar' : 'Hide') : (lang === 'es' ? 'Ver' : 'Show')}
-                      </button>
+                      <PasswordVisibilityButton lang={lang} visible={showPassword} onToggle={() => setShowPassword(!showPassword)}/>
                     </div>
                   </div>
 
