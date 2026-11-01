@@ -4,13 +4,13 @@ Fusionar no despliega (`git.deploymentEnabled=false`) ni cambia producción. Cad
 
 ## Estado de producción (1-nov-2026)
 
-Todo publicado por orden del titular, incluido el Pixel antes de demostrar la deduplicación. Los pasos 1 a 6 ya están hechos: no repetirlos.
+**Meta suspendido por orden del titular: la campaña sigue en NO-GO.** Los pasos 1 a 5 ya están hechos: no repetirlos.
 
-- Vercel `dpl_G2gXMR2VtY7JC5GhBYCppm7zRkPf`, con los cuatro interruptores de build activos. Gate Meta en `true`.
-- SQL adicional: fuente `20261101130000` instalada como `20261101062705`. `pg_net` enviaba `{}` y el worker devolvía 400 a cada llamada.
-- Primer registro real: atribución `pazo_la_en_202611`/`app_v2_en`, evento `76c6420a-3a1d-4fad-a7ba-3b0a85378e27`, en `sent`. Meta muestra 1 de navegador y 1 de servidor en PAZO Web.
-- **Deduplicación sin demostrar.** La pestaña de Meta indica que sigue analizando los datos. Antes de leer conversiones, revisar Deduplicación de eventos en Administrador de eventos. Si Meta no deduplica, apagar `VITE_PAZO_META_PIXEL_ENABLED` y desplegar.
-- Sin probar con cuenta real: rechazo de consentimiento, GPC, retirada, cuenta existente y PWA.
+- Vercel `dpl_78VoVXeu7gNvc2MUGT76vyxfrs1A`: Google y Meta activos en build; **Pixel apagado**, CAPI como canal único previsto.
+- Gate Meta en `false`: sin consentimiento aceptado, cola ni envío. Google, atribución interna y páginas legales siguen activos.
+- SQL adicional: fuente `20261101130000`, alojada `20261101062705`. Ver [incidente](META_WORKER_INCIDENT_20261101.md).
+- Evento real `76c6420a-3a1d-4fad-a7ba-3b0a85378e27`: Pixel y CAPI llegaron con el mismo `event_id`, pero Meta no ha confirmado la deduplicación.
+- **Antes de reabrir el gate:** cerrar lo pendiente del informe y decidir por escrito. Con Pixel apagado no hay riesgo de doble conteo.
 
 ## Interruptores
 
@@ -19,7 +19,7 @@ Todo publicado por orden del titular, incluido el Pixel antes de demostrar la de
 | `meta_release_gate_candidate.enabled` | Base de datos | `false` | Sin él no hay consentimiento aceptado, evento ni envío. Es el corte principal |
 | `VITE_PAZO_GOOGLE_AUTH_ENABLED` | Build | apagado | Botón de Google y texto legal de Google |
 | `VITE_PAZO_META_ENABLED` | Build | apagado | Pantalla de consentimiento, retirada y texto legal de Meta |
-| `VITE_PAZO_META_PIXEL_ENABLED` | Build | apagado | SDK en el navegador. Mantener apagado mientras la deduplicación no esté demostrada |
+| `VITE_PAZO_META_PIXEL_ENABLED` | Build | apagado | SDK en el navegador. Mantener apagado mientras Meta no confirme la deduplicación |
 | `VITE_PAZO_PRIVACY_EFFECTIVE_DATE` | Build | sin valor | Fecha real de publicación del texto |
 
 ## Orden

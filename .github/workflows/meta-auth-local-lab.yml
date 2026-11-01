@@ -3,8 +3,10 @@ on:
   # Run once per candidate PR update, instead of duplicate push/PR Docker jobs.
   # This makes the complete GoTrue/Edge/SQL/Chromium result a visible PR check.
   pull_request:
-    branches: [feat/issue168-ads2-attribution]
+    branches: [main, feat/issue168-ads2-attribution]
     paths:
+      - 'scripts/meta-worker-dispatch-source.mjs'
+      - 'supabase/migrations/2026110*_pazo_meta_*.sql'
       - 'scripts/meta-local-auth-lab.mjs'
       - 'scripts/meta-local-auth-edge-flow.mjs'
       - 'scripts/meta-local-gotrue-sql-lab.mjs'
