@@ -9,6 +9,19 @@ import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../services/supabaseClient'
 import { ensureOwnAccountProfile } from '../features/auth/ensureOwnAccountProfile'
 import { classifySignUpResult, type SignUpOutcome } from '../features/auth/signupFlow'
+import {
+  cleanGoogleReturnUrl,
+  clearAdultAttestationIntent,
+  googleRedirectUrl,
+  googleReturnFailure,
+  isGoogleReturn,
+  isNewGoogleAccount,
+  rememberAdultAttestationIntent,
+  requiresAdultAttestation,
+  takeAdultAttestationIntent,
+  type GoogleAuthFailure,
+} from '../features/auth/googleAuth'
+import { GoogleAdultGate } from '../features/auth/GoogleAdultGate'
 import { isRecoveryReturn, isVerifiedRecoverySession, recoveryRedirectUrl } from '../features/auth/recoveryFlow'
 import {
   captureEvent,
@@ -21,6 +34,9 @@ interface AuthContextValue {
   loading: boolean
   signUp: (email: string, password: string) => Promise<SignUpOutcome>
   signIn: (email: string, password: string) => Promise<boolean>
+  signInWithGoogle: (adultConfirmed: boolean) => Promise<boolean>
+  googleAuthFailure: GoogleAuthFailure | null
+  clearGoogleAuthFailure: () => void
   signOut: () => Promise<void>
   isPasswordRecovery: boolean
   recoverySessionVerified: boolean
@@ -44,6 +60,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // A query string is only a UI marker, NOT proof that the recovery link
   // created a session. Supabase must emit PASSWORD_RECOVERY first.
   const [recoverySessionVerified, setRecoverySessionVerified] = useState(false)
+  const [googleAuthFailure, setGoogleAuthFailure] = useState<GoogleAuthFailure | null>(
+    () => googleReturnFailure(window.location.search, window.location.hash)
+  )
+  const [savingAttestationFor, setSavingAttestationFor] = useState<string | null>(null)
 
   // Session bootstrap is independent from the splash animation.
   // A hung getSession must not trap the user behind the splash forever.
@@ -51,6 +71,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let cancelled = false
     let resolved = false
     let observedUserId: string | null = null
+    let googleReturnPending = isGoogleReturn(window.location.search)
+
+    // Codes and tokens must not stay visible to analytics, referrers or history.
+    const settleGoogleReturn = (session: Session | null) => {
+      if (!googleReturnPending) return
+      googleReturnPending = false
+      if (!session?.user) setGoogleAuthFailure((current) => current ?? 'failed')
+      const clean = cleanGoogleReturnUrl(window.location.href)
+      if (clean !== null) window.history.replaceState(window.history.state, '', clean)
+    }
 
     setLoading(true)
     setAuthBootstrapError(false)
@@ -66,6 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const nextUser = session?.user ?? null
       if (observedUserId && observedUserId !== nextUser?.id) clearLocalMarketingAttribution()
       observedUserId = nextUser?.id ?? null
+      settleGoogleReturn(session)
       setUser(nextUser)
       setObservabilityUser(nextUser?.id ?? null)
       setAuthBootstrapError(false)
@@ -91,12 +122,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (event === 'SIGNED_IN') {
         captureEvent('auth_session_signed_in')
       }
-      if (['SIGNED_IN','INITIAL_SESSION','TOKEN_REFRESHED'].includes(event)) {
+      const googleSignup = Boolean(session?.user && isNewGoogleAccount(session.user, Date.now()))
+      if (['SIGNED_IN','INITIAL_SESSION','TOKEN_REFRESHED'].includes(event) || (event === 'USER_UPDATED' && googleSignup)) {
         if (session?.user) {
+          // An existing account signing in with Google is not a new signup.
+          if (googleSignup) stageMarketingSignupRequested(session.user.id)
           stageMarketingSignupVerified(session.user.created_at, session.user.email_confirmed_at, session.user.id)
           // Auth callback must return before invoking another Supabase method.
           // Avoid a client session-lock deadlock; marketing remains fire-and-forget.
-          window.setTimeout(() => { void submitAutomaticMarketingAttribution(session.user.id, session.access_token) }, 0)
+          // Nothing leaves the browser until a new Google account confirms 18+.
+          if (!requiresAdultAttestation(session.user))
+            window.setTimeout(() => { void submitAutomaticMarketingAttribution(session.user.id, session.access_token) }, 0)
         }
       }
     })
@@ -125,8 +161,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Auth identities can survive a prelaunch fixture reset even if profiles do not.
   // Keep the application behind a reversible bootstrap gate until the server restores
   // the minimal profile owned by the signed-in account.
+  const adultAttestationPending = Boolean(user && !isPasswordRecovery && requiresAdultAttestation(user))
+
+  const saveAdultAttestation = async (): Promise<boolean> => {
+    const { error } = await supabase.auth.updateUser({
+      data: { pazo_adult_attested_at: new Date().toISOString() },
+    })
+    if (error) captureEvent('auth_google_failed', { error_code: error.code || null })
+    return !error
+  }
+
+  // The signup screen already asked. Saved after the redirect, when a user exists.
+  const pendingAttestationUserId = adultAttestationPending ? user?.id ?? null : null
   useEffect(() => {
-    if (!user?.id) {
+    if (!pendingAttestationUserId) return
+    let intent = false
+    try { intent = takeAdultAttestationIntent(window.sessionStorage, Date.now()) } catch { /* the gate asks */ }
+    if (!intent) return
+    setSavingAttestationFor(pendingAttestationUserId)
+    // Leaves the Auth callback first; a failure falls back to the visible gate.
+    window.setTimeout(() => {
+      void saveAdultAttestation().finally(() => setSavingAttestationFor(null))
+    }, 0)
+  }, [pendingAttestationUserId])
+
+  useEffect(() => {
+    if (!user?.id || adultAttestationPending) {
       setProfileStatus(null)
       return
     }
@@ -156,7 +216,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       cancelled = true
       window.clearTimeout(watchdog)
     }
-  }, [user?.id, profileRetry])
+  }, [user?.id, profileRetry, adultAttestationPending])
 
   const signUp = async (email: string, password: string): Promise<SignUpOutcome> => {
     const { data, error } = await supabase.auth.signUp({ email, password })
@@ -197,6 +257,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     captureEvent('auth_signin_succeeded')
     return true
   }
+
+  const signInWithGoogle = async (adultConfirmed: boolean): Promise<boolean> => {
+    try {
+      if (adultConfirmed) rememberAdultAttestationIntent(window.sessionStorage, Date.now())
+      else clearAdultAttestationIntent(window.sessionStorage)
+    } catch { /* storage denied: the gate asks after the redirect */ }
+    captureEvent('auth_google_started')
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: googleRedirectUrl(window.location.origin),
+          // Shared devices: choosing the account avoids entering the wrong one.
+          queryParams: { prompt: 'select_account' },
+        },
+      })
+      if (error) captureEvent('auth_google_failed', { error_code: error.code || null })
+      return !error
+    } catch {
+      captureEvent('auth_google_failed', { error_code: null })
+      return false
+    }
+  }
+
+  const clearGoogleAuthFailure = () => setGoogleAuthFailure(null)
 
   const requestPasswordReset = async (email: string): Promise<boolean> => {
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
@@ -253,6 +338,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loading,
         signUp,
         signIn,
+        signInWithGoogle,
+        googleAuthFailure,
+        clearGoogleAuthFailure,
         signOut,
         isPasswordRecovery,
         recoverySessionVerified,
@@ -271,6 +359,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             Reintentar
           </button>
         </div>
+      ) : adultAttestationPending && !savingAttestationFor ? (
+        <GoogleAdultGate onConfirm={saveAdultAttestation} onDecline={signOut}/>
       ) : user && !isPasswordRecovery && (profileStatus?.userId !== user.id || profileStatus.status === 'loading') ? (
         <div role="status" className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex items-center justify-center px-6">
           <p className="font-bold text-sm">Preparando tu cuenta…</p>
