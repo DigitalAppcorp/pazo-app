@@ -25,7 +25,7 @@ self.addEventListener('push', (event) => {
       body: typeof data.body === 'string' ? data.body : '',
       tag: typeof data.tag === 'string' ? data.tag : 'pazo',
       icon: '/pwa-icon-192.png',
-      badge: '/pwa-icon-192.png',
+      badge: '/pwa-badge-96.png',
     }),
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
       for (const client of windows) client.postMessage({ type: 'pazo-push-received' })

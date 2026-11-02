@@ -49,6 +49,9 @@ function icon(size, maskable = false) {
       raw[pos+3] = 255
     }
   }
+  return png(size, raw)
+}
+function png(size, raw) {
   const header = Buffer.alloc(13)
   header.writeUInt32BE(size, 0)
   header.writeUInt32BE(size, 4)
@@ -61,6 +64,25 @@ function icon(size, maskable = false) {
     chunk('IEND', Buffer.alloc(0)),
   ])
 }
+// Android draws the status-bar icon from transparency alone, so it has to be a silhouette.
+function badge(size) {
+  const raw = Buffer.alloc(size * (1 + size * 4))
+  for (let py = 0; py < size; py++) {
+    const row = py * (1 + size * 4)
+    for (let px = 0; px < size; px++) {
+      let coverage = 0
+      for (let yy = 0; yy < 4; yy++) for (let xx = 0; xx < 4; xx++) {
+        const x = 0.54 + ((px + (xx + .5) / 4) / size - .5) * 0.62
+        const y = 0.465 + ((py + (yy + .5) / 4) / size - .5) * 0.62
+        if (containsPaw(x,y)) coverage++
+      }
+      const pos = row + 1 + px * 4
+      raw.fill(255, pos, pos + 3)
+      raw[pos+3] = Math.round(255 * coverage / 16)
+    }
+  }
+  return png(size, raw)
+}
 for (const [file, size, maskable] of [
   ['public/pwa-icon-192.png', 192, false],
   ['public/pwa-icon-512.png', 512, false],
@@ -69,4 +91,5 @@ for (const [file, size, maskable] of [
 ]) {
   writeFileSync(file, icon(size, maskable))
 }
-console.log('PAZO PWA icons: generated 192, 512, maskable and Apple touch icons')
+writeFileSync('public/pwa-badge-96.png', badge(96))
+console.log('PAZO PWA icons: generated 192, 512, maskable, Apple touch and push badge icons')
