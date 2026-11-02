@@ -108,7 +108,7 @@ El Product Owner **aprobó 14 días de retención en tablas activas para una fut
 
 **Funciones confirmadas en código main a esta fecha, sujetas a verificación funcional/alojada al producir piezas:**
 - **Pasaporte/QR de mascota:** `src/components/modals/PassportModal.tsx` genera, permite compartir y descargar QR, regenerar su enlace; ruta pública `PublicRescueView` permite enviar avistamientos. Presentarlo como identificación/medio de contacto, nunca como GPS ni garantía de recuperar mascotas.
-- **Cuidados y agenda:** `src/components/modals/CareModal.tsx` permite crear/editar cuidados, recurrencias, seleccionar «Recordarme», completar y consultar historial. No prometer notificaciones push automáticas sin prueba real.
+- **Cuidados y agenda:** `src/components/modals/CareModal.tsx` permite crear/editar cuidados, recurrencias, seleccionar «Recordarme», completar y consultar historial. Los avisos push existen desde el 1-nov-2026 y dependen de que la persona los active; en iPhone requieren la app en la pantalla de inicio. Ver `PAZO_DATA_INVENTORY.md`.
 - **Alerta de mascota perdida:** `src/components/modals/AlertModal.tsx` permite activar/cerrar alerta y compartir enlace; `src/services/rescueService.ts` gestiona avistamientos. No prometer alertas masivas automáticas ni búsquedas garantizadas.
 - **Lugares:** `src/components/views/MapView.tsx` incluye categorías y check-in; se preparan direcciones. La instalación OFF solo verificó el catálogo público: el render visual del mapa tiene una limitación pendiente; **no convertirlo en promesa visual hasta que esa ruta pase QA real**.
 No presentar fake doors o funciones futuras como disponibles.

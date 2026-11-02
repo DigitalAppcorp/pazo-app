@@ -1,5 +1,6 @@
 import type { Pet } from '../../../types/pazo'
 import { IconAlert, IconPin, IconPaw, IconClose } from '../../../components/icons/PazoIcons'
+import { PushControl } from '../../push/PushControl'
 
 interface Props {
   pet: Pet
@@ -55,6 +56,8 @@ export const ActiveLostAlertPanel = (props: Props) => {
           {details.trim() && <p className="mt-1 line-clamp-3 whitespace-pre-wrap break-words text-[11px] text-[#5C7470]">{details}</p>}
         </div>
       </div>
+
+      <PushControl lang={lang} variant="offer" />
 
       <section aria-label={es?'Compartir búsqueda':'Share search'} className="rounded-[1.6rem] bg-[#EDF3E6] p-3.5">
         <div className="flex items-center gap-2.5">

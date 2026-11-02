@@ -503,3 +503,9 @@ verify_jwt = true
 enabled = false
 verify_jwt = false
 entrypoint = "./functions/pazo-meta-worker/index.ts"
+
+# The dispatch token is not a JWT, so the gateway would reject it before the
+# handler. workerCore rejects anything but the scheduler's single-use token.
+[functions.pazo-push-worker]
+verify_jwt = false
+entrypoint = "./functions/pazo-push-worker/index.ts"
