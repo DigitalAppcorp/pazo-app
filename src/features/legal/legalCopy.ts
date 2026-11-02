@@ -22,10 +22,12 @@ export function parseLegalEffectiveDate(value: unknown): string | null {
   return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value ? value : null
 }
 export const PAZO_LEGAL_EFFECTIVE_DATE = parseLegalEffectiveDate(import.meta.env?.VITE_PAZO_LEGAL_EFFECTIVE_DATE)
-/** Legal operator and state of registration as provided by the Product Owner.
- * No independent registry verification or street address is claimed.
+/** Proposed new operator identity, supplied by the Product Owner.
+ * Do not deploy until the LLC-to-individual asset transition is documented
+ * and any required merchant/provider re-verification is addressed.
+ * Operating location is not a statement of entity registration.
  */
-export const PAZO_LEGAL_OPERATOR_NAME = 'Alvarado Solutions LLC' as const
+export const PAZO_LEGAL_OPERATOR_NAME = 'Brandon Estuardo Alvarado Vasquez' as const
 export const PAZO_LEGAL_OPERATOR_REGISTRATION_STATE = 'California' as const
 // Policy text adopted for the beta on 2026-10-10, not an acceptance record.
 // Publication remains subject to the release gates and explicit Product Owner GO.
@@ -34,9 +36,9 @@ export const legalPreview: Record<LegalKind, Record<LegalLanguage, LegalText>> =
     es: {
       heading: 'Privacidad en PAZO',
       introduction: 'Política de privacidad preparada para la versión beta. La fecha de vigencia se fijará al publicarla.',
-      alert: 'La fecha de vigencia se fijará al publicar la beta. Operador: Alvarado Solutions LLC (California). Privacidad: appdigital.corp@gmail.com. Las solicitudes de baja se revisan manualmente; solicitarla no elimina automáticamente tu cuenta.',
+      alert: 'La fecha de vigencia se fijará al publicar la beta. Operador: Brandon Estuardo Alvarado Vasquez (persona física, California). Privacidad: appdigital.corp@gmail.com. Las solicitudes de baja se revisan manualmente; solicitarla no elimina automáticamente tu cuenta.',
       sections: [
-        { heading: 'Responsable de PAZO', text: `PAZO es operado por ${PAZO_LEGAL_OPERATOR_NAME}, empresa registrada en ${PAZO_LEGAL_OPERATOR_REGISTRATION_STATE}, Estados Unidos. Para consultas sobre datos personales, escribe al correo de privacidad que se muestra al final de esta política.` },
+        { heading: 'Responsable de PAZO', text: `PAZO es operado por ${PAZO_LEGAL_OPERATOR_NAME}, persona física que opera desde ${PAZO_LEGAL_OPERATOR_REGISTRATION_STATE}, Estados Unidos. Para consultas sobre datos personales, escribe al correo de privacidad que se muestra al final de esta política.` },
         { heading: 'Cuenta y contenido', text: 'PAZO usa correo electrónico para autenticar la cuenta. Los perfiles de mascotas, publicaciones, fotos y comentarios que compartes pueden ser visibles para otras personas según la función utilizada.' },
         { heading: 'Información privada', text: 'Cuidados, documentos de mascotas y ciertos reportes de rescate requieren controles de acceso. No publiques contraseñas ni información privada dentro de comentarios o publicaciones públicas.' },
         { heading: 'Ubicación y lugares', text: 'El GPS del dispositivo se solicita únicamente al elegir Usar mi ubicación; se utiliza durante la sesión para centrar el mapa y calcular distancias, y no se almacena como coordenada exacta en el historial de lugares. Los check-ins sí guardan lugar, mascota, fecha y visibilidad elegida. Mapbox y la OpenStreetMap Foundation pueden recibir solicitudes técnicas sobre las zonas que se muestran al cargar el mapa, junto con datos de conexión como la dirección IP. El GPS exacto no se registra como un evento de analítica de PAZO.' },
@@ -61,9 +63,9 @@ export const legalPreview: Record<LegalKind, Record<LegalLanguage, LegalText>> =
     en: {
       heading: 'Privacy at PAZO',
       introduction: 'Privacy policy prepared for the PAZO beta. The effective date will be set when it is published.',
-      alert: 'The effective date will be set when the beta is published. Operator: Alvarado Solutions LLC (California). Privacy contact: appdigital.corp@gmail.com. Account deletion requests are handled through manual review; submitting one does not automatically erase your account.',
+      alert: 'The effective date will be set when the beta is published. Operator: Brandon Estuardo Alvarado Vasquez (sole proprietor, California). Privacy contact: appdigital.corp@gmail.com. Account deletion requests are handled through manual review; submitting one does not automatically erase your account.',
       sections: [
-        { heading: 'PAZO operator', text: `PAZO is operated by ${PAZO_LEGAL_OPERATOR_NAME}, a company registered in ${PAZO_LEGAL_OPERATOR_REGISTRATION_STATE}, United States. For questions about your personal information, contact the privacy email shown below.` },
+        { heading: 'PAZO operator', text: `PAZO is operated by ${PAZO_LEGAL_OPERATOR_NAME}, an individual operating from ${PAZO_LEGAL_OPERATOR_REGISTRATION_STATE}, United States. For questions about your personal information, contact the privacy email shown below.` },
         { heading: 'Account and content', text: 'PAZO uses an email address for account authentication. Pet profiles, posts, photos and comments you share may be visible to others depending on the feature.' },
         { heading: 'Private information', text: 'Care schedules, pet documents and some rescue reports require access controls. Do not place passwords or private information in public posts or comments.' },
         { heading: 'Location and places', text: 'Device GPS is requested only when you choose Use my location. It is used during the session to center the map and calculate distances, and is not stored as precise coordinates in place history. Check-ins do store the place, pet, date and selected visibility. Mapbox and the OpenStreetMap Foundation may receive technical requests indicating areas displayed on the map, together with connection data such as an IP address. Exact device GPS is not recorded as a PAZO analytics event.' },
@@ -92,7 +94,7 @@ export const legalPreview: Record<LegalKind, Record<LegalLanguage, LegalText>> =
       introduction: 'Términos y reglas de uso preparados para la versión beta. La fecha de vigencia se fijará al publicarlos.',
       alert: 'La fecha de vigencia se fijará al publicar la beta. PAZO es una comunidad para personas de 18 años o más. Para reclamaciones, reportes o dudas sobre el servicio, utiliza el contacto de soporte indicado.',
       sections: [
-        { heading: 'Operador del servicio', text: `PAZO es operado por ${PAZO_LEGAL_OPERATOR_NAME}, empresa registrada en ${PAZO_LEGAL_OPERATOR_REGISTRATION_STATE}, Estados Unidos. Puedes comunicar dudas o reclamaciones al correo de soporte que aparece al final.` },
+        { heading: 'Operador del servicio', text: `PAZO es operado por ${PAZO_LEGAL_OPERATOR_NAME}, persona física que opera desde ${PAZO_LEGAL_OPERATOR_REGISTRATION_STATE}, Estados Unidos. Puedes comunicar dudas o reclamaciones al correo de soporte que aparece al final.` },
         { heading: 'Edad mínima', text: 'PAZO está diseñado para personas mayores de 18 años. La declaración de edad en el registro no representa una verificación de identidad.' },
         { heading: 'Comunidad segura', text: 'No publiques acoso, amenazas, spam, contenido ilegal ni datos privados de terceros sin permiso. Eres responsable de los materiales que compartes.' },
         { heading: 'Moderación', text: 'Otras personas pueden denunciar contenido y un moderador puede restringir su visibilidad. La retirada de archivos requiere revisión individual y puede no ser inmediata. Puedes solicitar la revisión de una decisión escribiendo al soporte; no existe un sistema automático de apelaciones.' },
@@ -106,7 +108,7 @@ export const legalPreview: Record<LegalKind, Record<LegalLanguage, LegalText>> =
       introduction: 'Terms and community rules prepared for the beta. The effective date will be set when they are published.',
       alert: 'The effective date will be set when the beta is published. PAZO is a community for adults 18 and older. For complaints, reports or service questions, use the support contact below.',
       sections: [
-        { heading: 'Service operator', text: `PAZO is operated by ${PAZO_LEGAL_OPERATOR_NAME}, a company registered in ${PAZO_LEGAL_OPERATOR_REGISTRATION_STATE}, United States. Contact the support email below for questions or complaints.` },
+        { heading: 'Service operator', text: `PAZO is operated by ${PAZO_LEGAL_OPERATOR_NAME}, an individual operating from ${PAZO_LEGAL_OPERATOR_REGISTRATION_STATE}, United States. Contact the support email below for questions or complaints.` },
         { heading: 'Minimum age', text: 'PAZO is intended for adults 18 and older. The age declaration at registration is not identity verification.' },
         { heading: 'Safe community', text: 'Do not post harassment, threats, spam, unlawful material or private information about others without permission. You are responsible for what you share.' },
         { heading: 'Moderation', text: 'Other users can report content and moderators can restrict visibility. Removing stored files requires individual review and may not be immediate. You may request review of a decision by contacting support; there is no automated appeals system.' },
