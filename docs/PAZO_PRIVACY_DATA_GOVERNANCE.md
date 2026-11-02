@@ -385,3 +385,5 @@ El PO autorizó instrumentar resultados mínimos bajo los controles actuales. La
 # Web Push (1-nov-2026, autorizado por el PO; aviso sin revisión jurídica)
 
 El permiso se pide únicamente tras tocar Activar avisos, nunca al abrir la app. Los avisos son de servicio: avistamientos, nuevos miembros y recordatorios de cuidados, cada uno con su interruptor. No se usa push para promoción. El texto del mensaje es fijo y no contiene datos de la mascota ni contenido escrito por personas, porque aparece en pantallas bloqueadas y pasa por el servicio de notificaciones del dispositivo. Cerrar sesión borra la suscripción de ese teléfono. Detalle de datos, conservación y proveedores en `PAZO_DATA_INVENTORY.md`.
+
+Avisos a administración: el operador recibe un aviso de texto fijo por cada mascota nueva y cada cuenta confirmada, sin nombre ni correo. No cambia qué datos ve el operador, solo cuándo se entera. No es marketing y no llega a otros usuarios.

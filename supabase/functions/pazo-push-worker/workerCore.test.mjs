@@ -40,6 +40,23 @@ test('lock-screen copy is fixed per kind and language',()=>{
   assert.equal(pushMessage('supporter_campaign','es','x'),null)
 })
 
+test('administrator notices carry no name or email',()=>{
+  assert.match(JSON.parse(pushMessage('admin_new_pet','es','x').payload).title,/Nueva mascota/)
+  assert.match(JSON.parse(pushMessage('admin_new_account','en','x').payload).title,/New account/)
+})
+
+test('administrator notices skip test accounts and can never block a registration',()=>{
+  const sql=readFileSync(new URL('../../migrations/20261103110000_pazo_push_admin_signals.sql',import.meta.url),'utf8')
+  for(const name of ['notify_admins_new_pet','notify_admins_new_account']){
+    const body=sql.match(new RegExp(`function push_private\\.${name}\\(\\)[\\s\\S]*?\\$fn\\$;`))[0]
+    assert.match(body,/is_reporting_owner/,name)
+    assert.match(body,/exception when others/,name)
+    assert.match(body,/is_enabled\(\)/,name)
+    assert.doesNotMatch(body,/new\.(email|name)\b(?! *is)/,name)
+  }
+  assert.match(sql,/not exists\(select 1 from admin_private\.admin_grants a where a\.user_id=auth\.uid\(\)\)/)
+})
+
 test('response codes decide whether to retry, drop the device or give up',()=>{
   assert.equal(classifyStatus(201),'ok')
   assert.equal(classifyStatus(410),'gone')

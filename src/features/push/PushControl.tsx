@@ -107,17 +107,22 @@ export const PushControl = ({ lang, variant }: PushControlProps) => {
 
   if (variant === 'offer') return null
 
-  const toggle = (key: keyof PushPreferences) => {
+  type ToggleKey = 'sightings' | 'community' | 'care' | 'adminNewPets' | 'adminNewAccounts'
+  const toggle = (key: ToggleKey) => {
     if (!preferences) return
     const previous = preferences
     const next = { ...preferences, [key]: !preferences[key] }
     setPreferences(next)
     void savePushPreferences(next).catch(() => setPreferences(previous))
   }
-  const options: { key: keyof PushPreferences; label: string }[] = [
+  const options: { key: ToggleKey; label: string }[] = [
     { key: 'sightings', label: es ? 'Avistamientos' : 'Sightings' },
     { key: 'community', label: es ? 'Comunidad' : 'Community' },
     { key: 'care', label: es ? 'Cuidados' : 'Care' },
+    ...(preferences?.isAdmin ? [
+      { key: 'adminNewPets' as const, label: es ? 'Mascotas nuevas' : 'New pets' },
+      { key: 'adminNewAccounts' as const, label: es ? 'Cuentas nuevas' : 'New accounts' },
+    ] : []),
   ]
 
   return (

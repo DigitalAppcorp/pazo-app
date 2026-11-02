@@ -45,6 +45,26 @@ export const getNotificationCareId = (notification: PazoNotification) =>
     ? notification.sourceId || null
     : null
 
+// The profile is opened only from this typed notice, whose pet reference the server wrote.
+export const getNotificationAdminPetId = (notification: PazoNotification) =>
+  notification.sourceType === 'admin_new_pet'
+    ? notification.petId || null
+    : null
+
+export const adminNotificationCopy = (sourceType: string | undefined, lang: 'es' | 'en') => {
+  if (sourceType === 'admin_new_pet') {
+    return lang === 'es'
+      ? { title: 'Nueva mascota en PAZO', subtitle: 'Toca para ver su perfil.' }
+      : { title: 'New pet on PAZO', subtitle: 'Tap to see its profile.' }
+  }
+  if (sourceType === 'admin_new_account') {
+    return lang === 'es'
+      ? { title: 'Nueva cuenta en PAZO', subtitle: 'Alguien confirmó su registro.' }
+      : { title: 'New account on PAZO', subtitle: 'Someone confirmed their sign-up.' }
+  }
+  return null
+}
+
 export const careNotificationTitle = (lang: 'es' | 'en') =>
   lang === 'es' ? 'Recordatorio de cuidado' : 'Care reminder'
 

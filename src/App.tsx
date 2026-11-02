@@ -5,7 +5,7 @@ import { canUseAccountFeatures } from './features/auth/accountAccess'
 import { recordAdminActivity } from './features/admin/adminDashboardService'
 import { PasswordVisibilityButton } from './features/auth/PasswordVisibilityButton'
 import {useBehaviorObservation} from './features/marketing/useBehaviorObservation'
-import { getNotificationCareId, getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
+import { getNotificationAdminPetId, getNotificationCareId, getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
 import { syncPush } from './features/push/pushService'
 import { createRequestScope } from './lib/requestScope'
 import { lazy, Suspense, useState, useEffect, useLayoutEffect, useRef } from 'react'
@@ -1876,8 +1876,9 @@ function PazoMain() {
     const sightingId = getNotificationSightingId(notification)
     const joinedCommunityId = getNotificationCommunityId(notification)
     const careId = getNotificationCareId(notification)
+    const adminPetId = getNotificationAdminPetId(notification)
     const supporterNotice = isSupporterNotification(notification)
-    if (!canUseAccount || (!sightingId && !joinedCommunityId && !careId && !supporterNotice)) return
+    if (!canUseAccount || (!sightingId && !joinedCommunityId && !careId && !adminPetId && !supporterNotice)) return
 
     setIsNotificationsOpen(false)
     if (supporterNotice) {
@@ -1890,6 +1891,8 @@ function PazoMain() {
       setSelectedSightingId(sightingId)
     } else if (careId) {
       setIsCareOpen(true)
+    } else if (adminPetId) {
+      setSelectedPublicProfileId(adminPetId)
     }
 
     if (!notification.read) {
