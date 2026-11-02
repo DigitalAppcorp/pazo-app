@@ -53,6 +53,14 @@ test('only the typed administrator notice opens a pet profile',()=>{
  assert.equal(adminNotificationCopy('admin_new_account','en').title,'New account on PAZO')
  assert.equal(adminNotificationCopy('sighting','es'),null)
 })
+test('closing the bell clears notices without silencing what must be opened',()=>{
+ const source=readFileSync(new URL('../notifications/markSeen.ts',import.meta.url),'utf8')
+ const types=source.match(/SEEN_ON_CLOSE_TYPES = \[([^\]]+)\]/)[1]
+ for(const type of ['admin_new_account','admin_new_pet','care_reminder','community_join'])assert.ok(types.includes(type),type)
+ assert.doesNotMatch(types,/sighting|supporter/)
+ assert.match(source,/\.is\('read_at', null\)/)
+ assert.match(readFileSync(new URL('../../App.tsx',import.meta.url),'utf8'),/onClose=\{handleCloseNotifications\}/)
+})
 test('the service worker opens the bell and never follows a URL from a message',()=>{
  const sw=readFileSync(new URL('../../../public/sw.js',import.meta.url),'utf8')
  assert.match(sw,/addEventListener\('push'/)
