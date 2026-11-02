@@ -7,6 +7,7 @@ import { PasswordVisibilityButton } from './features/auth/PasswordVisibilityButt
 import {useBehaviorObservation} from './features/marketing/useBehaviorObservation'
 import { getNotificationAdminPetId, getNotificationCareId, getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
 import { syncPush } from './features/push/pushService'
+import { markNotificationsSeen } from './features/notifications/markSeen'
 import { createRequestScope } from './lib/requestScope'
 import { lazy, Suspense, useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
@@ -1870,6 +1871,19 @@ function PazoMain() {
     if (!isDemoUser) void refreshNotifications()
   }
 
+  const handleCloseNotifications = () => {
+    setIsNotificationsOpen(false)
+    if (isDemoUser || unreadNotificationCount === 0) return
+    const isCurrent = accountRequests.capture()
+    void markNotificationsSeen()
+      .then(() => {
+        if (isCurrent()) void refreshNotifications()
+      })
+      .catch((error) => {
+        if (isCurrent()) console.error('Error marking notifications as seen:', error)
+      })
+  }
+
   const handleOpenNotification = async (notification: PazoNotification) => {
     const isCurrent = accountRequests.capture()
 
@@ -2699,7 +2713,7 @@ function PazoMain() {
 
             <NotificationsModal
               isOpen={isNotificationsOpen}
-              onClose={() => setIsNotificationsOpen(false)}
+              onClose={handleCloseNotifications}
               notifications={notifications}
               onOpenNotification={handleOpenNotification}
               onLoadMore={() => void loadMoreNotifications()}
