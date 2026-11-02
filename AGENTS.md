@@ -1,3 +1,13 @@
+## Producción vigente — avisos push (1-nov-2026 hora local; 2-nov UTC)
+
+GO del PO en chat: «publica y súbelo todo a producción». PR 189, `main` `3e6be759`, Vercel `pazo-p9tj9fw6a-digitalapp.vercel.app`. Rollback de app: `pazo-n3p7ht7p8-digitalapp.vercel.app`.
+
+SQL instalado: fuente `20261103100000` → hospedada `20261102025044`; fuente `20261103100100` → hospedada `20261102025415`. **No reinstalar ni ejecutar `db push` global.** Edge `pazo-push-worker` v1, `verify_jwt=false`. Crons `pazo_push_worker_v1`, `pazo_push_care_v1`, `pazo_push_retention_v1`. Apagar: `update push_private.release_gate set enabled=false`; la campana sigue funcionando. La clave VAPID la generó el worker y vive en Vault; no rotarla sin plan, porque invalida las suscripciones hasta que cada teléfono abra la app.
+
+Observado: entrega real en producción cola → worker → FCM → Chrome en 34 s, con datos de prueba borrados; migración 48/48 en transacción revertida; cifrado contra el vector RFC 8291. **NOT_TESTED: iPhone (servicio de Apple), teléfono Android real y el botón con una sesión real.** No afirmar entrega en iPhone hasta observarla. Aviso de privacidad vigente 2026-11-01 sin revisión jurídica. [Inventario](docs/PAZO_DATA_INVENTORY.md).
+
+---
+
 ## Producción vigente — panel reorganizado y mediciones por anuncio (1-nov-2026)
 
 GO del PO en chat: «de una vez publícalo» y «Sí, enciéndelas». PR 184 y 186. Vercel `dpl_H4yVqnMX7pFCRfqEuLR3s76PYENF`, main `cb003eff`. Rollback de app: `dpl_Fdf2aXMUU1HyPsEVrX8C3dCPFEqa` tiene el panel anterior; `dpl_HDHCEW5Pwb9LHcvUYXxVPNHnSF4z`, el panel nuevo sin mediciones.
