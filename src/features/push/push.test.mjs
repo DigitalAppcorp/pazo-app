@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import {inflateSync} from 'node:zlib'
 import {bytesToUrlBase64,detectPushEnvironment,urlBase64ToBytes} from './pushSupport.ts'
-import {careNotificationTitle,formatNotificationTime,getNotificationCareId,mapNotificationRow} from '../notifications/notificationSource.ts'
+import {adminNotificationCopy,careNotificationTitle,formatNotificationTime,getNotificationAdminPetId,getNotificationCareId,mapNotificationRow} from '../notifications/notificationSource.ts'
 
 const android='Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/130.0 Mobile Safari/537.36'
 const iphone='Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 Version/18.1 Mobile/15E148 Safari/604.1'
@@ -44,6 +44,14 @@ test('the bell shows real time and opens care reminders by their typed source',(
  assert.equal(getNotificationCareId(mapped),'care-1')
  assert.equal(getNotificationCareId(mapNotificationRow({...row,type:'sighting'})),null)
  assert.equal(careNotificationTitle('en'),'Care reminder')
+})
+test('only the typed administrator notice opens a pet profile',()=>{
+ const row={id:'1',type:'admin_new_pet',title:'t',body:'b',read_at:null,created_at:'2026-11-01',pet_id:'pet-1',source_id:null}
+ assert.equal(getNotificationAdminPetId(mapNotificationRow(row)),'pet-1')
+ assert.equal(getNotificationAdminPetId(mapNotificationRow({...row,type:'sighting'})),null)
+ assert.equal(getNotificationAdminPetId(mapNotificationRow({...row,type:'admin_new_account',pet_id:null})),null)
+ assert.equal(adminNotificationCopy('admin_new_account','en').title,'New account on PAZO')
+ assert.equal(adminNotificationCopy('sighting','es'),null)
 })
 test('the service worker opens the bell and never follows a URL from a message',()=>{
  const sw=readFileSync(new URL('../../../public/sw.js',import.meta.url),'utf8')

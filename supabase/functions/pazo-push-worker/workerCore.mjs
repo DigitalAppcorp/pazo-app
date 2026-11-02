@@ -19,6 +19,16 @@ const COPY={
     en:{title:'Care reminder',body:'Your pet has a care task coming up.'},
     urgency:'normal',ttl:43200,
   },
+  admin_new_pet:{
+    es:{title:'Nueva mascota en PAZO',body:'Toca para ver su perfil.'},
+    en:{title:'New pet on PAZO',body:'Tap to see its profile.'},
+    urgency:'normal',ttl:86400,
+  },
+  admin_new_account:{
+    es:{title:'Nueva cuenta en PAZO',body:'Alguien confirmó su registro.'},
+    en:{title:'New account on PAZO',body:'Someone confirmed their sign-up.'},
+    urgency:'normal',ttl:86400,
+  },
 }
 
 export function pushMessage(kind,lang,id){

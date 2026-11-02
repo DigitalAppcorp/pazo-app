@@ -709,3 +709,7 @@ Opcional: solo existe si la persona toca Activar avisos y acepta el permiso del 
 | Clave privada VAPID | Firmar envíos; generada en el servidor, cifrada en Vault | Sin datos personales; no sale del servidor |
 
 A Apple, Google, Mozilla o Microsoft solo llega el endpoint y un mensaje cifrado con texto fijo por tipo: sin nombre de mascota, ubicación, título de cuidado ni datos de quien reporta. El navegador conserva la suscripción; PAZO no añade claves a localStorage. Los eventos no se reutilizan para marketing: no hay push de Amigo de PAZO, likes ni comentarios. Las cuentas de prueba reciben avisos, y cualquier métrica debe filtrarlas con `marketing_private.is_reporting_owner`. Apagado general: `push_private.release_gate.enabled=false`.
+
+### Avisos a administración (1-nov-2026, autorizado por el PO)
+
+Cada mascota nueva y cada cuenta confirmada generan un aviso solo para las cuentas de `admin_private.admin_grants`, salvo que el dueño sea cuenta de prueba o administrador (`marketing_private.is_reporting_owner`). Se guarda en `public.notifications`: tipo, texto fijo y, en mascotas, la referencia a la mascota; nunca correo, nombre ni contenido. Conservación: 30 días; el aviso de mascota se borra también al borrar la mascota. `push_private.preferences` añade dos interruptores solo para administradores. Al tocar el aviso de mascota se abre su perfil público ya existente. Una cuenta de prueba nueva cuenta como real hasta marcarla.
