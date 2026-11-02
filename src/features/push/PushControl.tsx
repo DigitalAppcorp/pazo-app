@@ -90,7 +90,7 @@ export const PushControl = ({ lang, variant }: PushControlProps) => {
 
   if (!active) {
     return (
-      <div className="rounded-[23px] bg-[#E7F0DA] px-3.5 py-3.5">
+      <div>
         <button
           type="button"
           onClick={() => void activate()}
@@ -98,7 +98,7 @@ export const PushControl = ({ lang, variant }: PushControlProps) => {
           className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#204E4A] px-4 text-[14px] font-extrabold text-white transition-colors hover:bg-[#183B38] focus-visible:bg-[#183B38] disabled:opacity-60"
         >
           <Bell />
-          {busy ? (es ? 'Activando…' : 'Turning on…') : (es ? 'Activar avisos en este teléfono' : 'Turn on alerts on this phone')}
+          {busy ? (es ? 'Activando…' : 'Turning on…') : (es ? 'Activar avisos' : 'Turn on alerts')}
         </button>
         {failed && <p role="status" className="mt-2 text-center text-[12px] font-semibold text-[#5C7470]">{es ? 'No se pudo activar. Inténtalo de nuevo.' : 'Could not turn on. Try again.'}</p>}
       </div>
@@ -121,11 +121,11 @@ export const PushControl = ({ lang, variant }: PushControlProps) => {
   ]
 
   return (
-    <details className="rounded-[23px] bg-[#F3F6EA] px-3.5 py-1">
+    <details className="group rounded-[23px] bg-[#F3F6EA] px-3.5 py-1">
       <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-[13px] font-extrabold text-[#204E4A]">
         <Bell />
         {es ? 'Avisos activos' : 'Alerts on'}
-        <span aria-hidden="true" className="ml-auto text-[18px] leading-none">＋</span>
+        <span aria-hidden="true" className="ml-auto text-[18px] leading-none transition-transform group-open:rotate-45">＋</span>
       </summary>
       <div className="space-y-1 pb-2">
         {preferences && options.map(({ key, label }) => (
