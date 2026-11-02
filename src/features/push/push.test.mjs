@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
+import {inflateSync} from 'node:zlib'
 import {bytesToUrlBase64,detectPushEnvironment,urlBase64ToBytes} from './pushSupport.ts'
 import {careNotificationTitle,formatNotificationTime,getNotificationCareId,mapNotificationRow} from '../notifications/notificationSource.ts'
 
@@ -50,6 +51,20 @@ test('the service worker opens the bell and never follows a URL from a message',
  assert.match(sw,/showNotification/)
  assert.match(sw,/openWindow\('\/\?open=notifications'\)/)
  assert.doesNotMatch(sw,/data\.url|caches\.|localStorage/)
+})
+test('the Android status-bar icon is a transparent white paw, not the opaque app icon',()=>{
+ const sw=readFileSync(new URL('../../../public/sw.js',import.meta.url),'utf8')
+ assert.match(sw,/badge: '\/pwa-badge-96\.png'/)
+ const png=readFileSync(new URL('../../../public/pwa-badge-96.png',import.meta.url))
+ assert.equal(png.readUInt32BE(16),96)
+ const idat=png.indexOf('IDAT')
+ const raw=inflateSync(png.subarray(idat+4,idat+4+png.readUInt32BE(idat-4)))
+ const alpha=(x,y)=>raw[y*(1+96*4)+1+x*4+3]
+ assert.equal(alpha(0,0),0,'corners stay transparent')
+ assert.equal(alpha(95,95),0,'corners stay transparent')
+ let solid=0
+ for(let y=0;y<96;y++)for(let x=0;x<96;x++)if(alpha(x,y)===255)solid++
+ assert.ok(solid>96*96*0.2&&solid<96*96*0.6,'a recognizable silhouette, not a square')
 })
 test('signing out releases the device on every normal path',()=>{
  for(const file of ['../../context/AuthContext.tsx','../../components/views/PetView.tsx']){
