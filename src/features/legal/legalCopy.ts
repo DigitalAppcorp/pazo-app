@@ -1,3 +1,4 @@
+import {stageIndividualOperatorCopy} from './individualOperatorTransition.ts'
 /** #153 prepared notice; release requires the final PO GO. */
 export const INTELLIGENCE_NOTICE_RELEASED=true
 export const CAMPAIGN_EXPERIENCE_NOTICE_RELEASED=true
@@ -169,12 +170,21 @@ function withFeatures(copy:LegalText,kind:LegalKind,lang:LegalLanguage,env:Recor
   }
   return {...copy,sections}
 }
+/** Operator change is staged; the previous published legal/PayPal copy remains immutable.
+ * Only publish with both a verified effective date and an explicit transition approval.
+ */
+function stageOperatorIfApproved(copy:LegalText,kind:LegalKind,lang:LegalLanguage,env:Record<string,unknown>):LegalText {
+  const date=parseLegalEffectiveDate(env.VITE_PAZO_INDIVIDUAL_OPERATOR_EFFECTIVE_DATE)
+  return env.VITE_PAZO_INDIVIDUAL_OPERATOR_TRANSFER_APPROVED==='true' && date
+    ? stageIndividualOperatorCopy(copy,kind,lang,date)
+    : copy
+}
 export function resolveLegalCopy(kind: LegalKind, lang: LegalLanguage, effectiveDate: unknown = PAZO_LEGAL_EFFECTIVE_DATE, env: Record<string,unknown> = FEATURE_ENV): LegalText {
   const copy=withFeatures(legalPreview[kind][lang],kind,lang,env)
   const date = parseLegalEffectiveDate(effectiveDate)
-  if (!date) return copy
+  if (!date) return stageOperatorIfApproved(copy,kind,lang,env)
   const dateNotice = lang === 'es' ? `Fecha de vigencia: ${date}.` : `Effective date: ${date}.`
-  return {
+  return stageOperatorIfApproved({
     ...copy,
     introduction: dateNotice,
     alert: copy.alert.replace(/^[^.]+\./, dateNotice),
@@ -183,5 +193,5 @@ export function resolveLegalCopy(kind: LegalKind, lang: LegalLanguage, effective
       : section.heading === 'Updates and browser signals'
         ? {...section, text: section.text.replace('PAZO will show the effective date when the beta is published.', dateNotice)}
         : section),
-  }
+  },kind,lang,env)
 }
