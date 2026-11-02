@@ -4,6 +4,7 @@ import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { DEMO_POST_MOTIFS } from '../../data/mockData'
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
+import { releasePushForSignOut } from '../../features/push/pushService'
 import { updatePetProfile } from '../../services/petService'
 import { ModerationAccess } from '../../features/moderation/ModerationAccess'
 import { LiquidChoiceTabs } from '../ui/LiquidChoiceTabs'
@@ -259,6 +260,7 @@ export const PetView = ({
     if (isDemo) { onExitDemo?.(); return }
     const confirmMsg = lang === 'es' ? '¿Estás seguro de cerrar sesión?' : 'Are you sure you want to log out?'
     if (window.confirm(confirmMsg)) {
+      await releasePushForSignOut()
       await supabase.auth.signOut()
       window.location.reload()
     }

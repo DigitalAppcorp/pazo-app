@@ -1,5 +1,6 @@
 import {isSupporterNotification,supporterNotificationCopy} from '../../features/notifications/supporterNotification'
-import { getNotificationCommunityId, getNotificationSightingId } from '../../features/notifications/notificationSource'
+import { careNotificationTitle, formatNotificationTime, getNotificationCareId, getNotificationCommunityId, getNotificationSightingId } from '../../features/notifications/notificationSource'
+import { PushControl } from '../../features/push/PushControl'
 import { useState } from 'react'
 import type { PazoNotification } from '../../types/pazo'
 import { IconCalendar, IconChat, IconCommunity } from '../icons/PazoIcons'
@@ -13,6 +14,7 @@ interface NotificationsModalProps {
   hasMore: boolean
   isLoadingMore: boolean
   lang: 'es' | 'en'
+  canUsePush: boolean
 }
 
 /** Decorative PAZO artwork. No synthetic pets, user activity or notification data. */
@@ -64,6 +66,7 @@ export const NotificationsModal = ({
   hasMore,
   isLoadingMore,
   lang,
+  canUsePush,
 }: NotificationsModalProps) => {
   const [filter, setFilter] = useState<'todas' | 'comunidad'>('todas')
 
@@ -114,6 +117,8 @@ export const NotificationsModal = ({
           </button>
         </header>
 
+        {canUsePush && <PushControl lang={lang} variant="panel" />}
+
         <nav className="grid grid-cols-2 gap-1 rounded-full bg-[#F0F2EA] p-1.5" aria-label={lang === 'es' ? 'Filtrar avisos' : 'Filter notifications'}>
           <button
             type="button"
@@ -161,8 +166,10 @@ export const NotificationsModal = ({
               {filtered.map((item) => {
                 const isSighting = Boolean(getNotificationSightingId(item))
                 const isCommunityJoin = Boolean(getNotificationCommunityId(item))
-                const canOpen = isSighting || isCommunityJoin || isSupporterNotification(item)
-                const localized = supporterNotificationCopy(item,lang)
+                const canOpen = isSighting || isCommunityJoin || Boolean(getNotificationCareId(item)) || isSupporterNotification(item)
+                const localized = item.sourceType === 'care_reminder'
+                  ? { title: careNotificationTitle(lang), subtitle: item.subtitle }
+                  : supporterNotificationCopy(item,lang)
                 const isCare = item.category === 'cuidados'
 
                 return (
@@ -190,7 +197,7 @@ export const NotificationsModal = ({
                       </span>
                       <span className="mt-1 block break-words text-[13px] leading-relaxed text-[#5C7470]">{localized.subtitle}</span>
                       {isSupporterNotification(item)&&<span className="mt-2 block text-[12px] font-bold text-[#204E4A]">{item.sourceType==='supporter_verified'?(lang==='es'?'Revisar mis beneficios':'Review my benefits'):(lang==='es'?'Ver mi participación':'View my participation')}</span>}
-                      <span className="mt-2 block text-[11px] font-semibold text-[#71847F]">{item.timeAgo}</span>
+                      <span className="mt-2 block text-[11px] font-semibold text-[#71847F]">{item.createdAt ? formatNotificationTime(item.createdAt, lang) : item.timeAgo}</span>
                     </span>
                     {canOpen && (
                       <span aria-hidden="true" className="mt-1 text-[22px] font-bold leading-none text-[#204E4A]">›</span>

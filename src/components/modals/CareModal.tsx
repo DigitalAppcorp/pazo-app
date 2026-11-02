@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useModalFocus } from '../../lib/useModalFocus'
+import { PushControl } from '../../features/push/PushControl'
 import type {
   CareCategory,
   CareCompletion,
@@ -269,8 +270,9 @@ export const CareModal = ({
         </div>
 
         <p className="text-[14px] leading-relaxed text-[#5C7470]">{lang==='es'
-          ?'Los recordatorios aparecen dentro de PAZO. No enviamos avisos push.'
-          :'Reminders appear inside PAZO. We do not send push notifications.'}</p>
+          ?'Te recordamos en la campana y en tu teléfono si activas los avisos.'
+          :'We remind you in the bell, and on your phone if you turn on alerts.'}</p>
+        <PushControl lang={lang} variant="offer" />
         {!isEditing && (
           <div className="flex gap-1.5 p-1 bg-[#FAF8F5] rounded-full">
             <button

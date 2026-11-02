@@ -7,6 +7,7 @@ import {
 } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../services/supabaseClient'
+import { releasePushForSignOut } from '../features/push/pushService'
 import { ensureOwnAccountProfile } from '../features/auth/ensureOwnAccountProfile'
 import { classifySignUpResult, type SignUpOutcome } from '../features/auth/signupFlow'
 import { observeSignupFailureCode } from '../features/marketing/experienceDetails'
@@ -332,6 +333,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const signOut = async () => {
+    await releasePushForSignOut()
     await supabase.auth.signOut()
     setObservabilityUser(null)
   }

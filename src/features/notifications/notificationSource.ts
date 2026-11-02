@@ -19,7 +19,7 @@ export const mapNotificationRow = (row: NotificationRow): PazoNotification => ({
   supporterCopyVersion: row.supporter_copy_version,
   title: row.title,
   subtitle: row.body,
-  category: row.type === 'sighting' ? 'comunidad' : 'todas',
+  category: row.type === 'sighting' ? 'comunidad' : row.type === 'care_reminder' ? 'cuidados' : 'todas',
   sourceType: row.type,
   timeAgo: 'Reciente',
   read: Boolean(row.read_at),
@@ -39,3 +39,20 @@ export const getNotificationCommunityId = (notification: PazoNotification) =>
   notification.sourceType === 'community_join'
     ? notification.sourceId || null
     : null
+
+export const getNotificationCareId = (notification: PazoNotification) =>
+  notification.sourceType === 'care_reminder'
+    ? notification.sourceId || null
+    : null
+
+export const careNotificationTitle = (lang: 'es' | 'en') =>
+  lang === 'es' ? 'Recordatorio de cuidado' : 'Care reminder'
+
+export const formatNotificationTime = (createdAt: string, lang: 'es' | 'en', now = Date.now()) => {
+  const minutes = Math.round((new Date(createdAt).getTime() - now) / 60000)
+  if (!Number.isFinite(minutes)) return ''
+  const format = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' })
+  if (minutes > -60) return format.format(Math.min(minutes, 0), 'minute')
+  if (minutes > -1440) return format.format(Math.round(minutes / 60), 'hour')
+  return format.format(Math.round(minutes / 1440), 'day')
+}

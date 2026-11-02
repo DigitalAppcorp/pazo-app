@@ -565,6 +565,7 @@ Debe cerrarse para:
 | Mapbox | mapas | Activo | requests/location-context según uso | usage/privacy/spend review |
 | PayPal | Supporter | Parcial/desactivado en UX | subscription/payment metadata | secrets + real webhook + terms |
 | PostHog | observabilidad | Conectado + privacy-hardened; 0 eventos live | eventos allowlisted/exceptions | env token + first event/error + destination/alert |
+| Apple Push, Google FCM, Mozilla Push, Microsoft WNS | Entrega de avisos push según el dispositivo de cada persona | Activo solo si la persona activa avisos | dirección de entrega; mensaje cifrado con texto fijo; metadatos de entrega del proveedor | sin coste; revisar si cambia el contenido del mensaje |
 | Vercel | hosting/deploy | conector visible pero 0 teams/proyectos | deployment/log metadata | conectar cuenta/proyecto correcto antes de auditar env/spend |
 
 Cualquier proveedor nuevo debe añadirse aquí antes de recibir datos de producción.
@@ -693,3 +694,18 @@ Staging localStorage TTL72h añade signupOwnerId (UUID Auth devuelto por alta) s
 No instalado ni activado en producción. Extensión de `marketing_private`: por cuenta verificada, fechas de QR visible/descarga iniciada/compartición aceptada/cuidado persistido y retorno significativo D7. Sin datos del QR, texto/salud del cuidado, archivos, GPS, email o IDs externos. Owner UUID interno solo para permisos, deduplicación y supresión; ningún ID de mascota se conserva en resultados. Cuenta elegible por las exclusiones QA/admin/fundador actuales; segmentos solo de atribución validada, resto neutro. RPC admin devuelve agregados de grupos allowlisted, sin filas individuales.
 
 Gate de utilidad OFF por defecto, dentro del gate de colección existente; requiere aviso específico y retención saludable de14d. Caducidad14d desde verificación de cuenta, sin extensión por uso; purga existente cada6h y FK de baja. Supresión mantiene solo referencia de cuenta/expiración hasta el cierre de esa misma ventana, impide reingreso y se elimina con cuenta/purga. No nueva Edge, proveedor, Pixel/CAPI, Cron ni contenido clínico. Aviso ES/EN preparado y pruebas en PG17 descartable. [Contrato y evidencias](PAZO_ISSUE142_ACCEPTANCE.md).
+
+## Web Push (1-nov-2026, autorizado por el PO)
+
+Opcional: solo existe si la persona toca Activar avisos y acepta el permiso del sistema. Sin proveedor de pago ni SDK; cifrado RFC 8291 y VAPID propios.
+
+| Dato | Finalidad / acceso | Conservación y baja |
+| --- | --- | --- |
+| `push_private.subscriptions`: cuenta, endpoint, claves p256dh y auth, idioma, fallos, fechas | Entregar avisos; esquema privado con FORCE RLS y sin grants; solo RPC de la propia cuenta y worker | FK Auth CASCADE; se borra al desactivar, al cerrar sesión, con respuesta 404/410 del servicio, tras 20 fallos o 180 días sin uso |
+| `push_private.preferences`: cuenta y tres interruptores | Elegir avistamientos, comunidad y cuidados | FK Auth CASCADE |
+| `push_private.outbox`: cuenta, tipo fijo, referencia al aviso, estado, intentos, fechas | Cola de envío; nunca guarda texto del aviso ni del usuario | FK Auth y aviso CASCADE; 7 días tras cerrar; descarta lo no enviado a las 24 h |
+| `push_private.care_reminder_log`: cuidado y fecha | Evitar repetir un recordatorio | FK CASCADE; 60 días |
+| `public.notifications` tipo `care_reminder`: título del cuidado | Mostrarlo a su dueño en la campana | 30 días |
+| Clave privada VAPID | Firmar envíos; generada en el servidor, cifrada en Vault | Sin datos personales; no sale del servidor |
+
+A Apple, Google, Mozilla o Microsoft solo llega el endpoint y un mensaje cifrado con texto fijo por tipo: sin nombre de mascota, ubicación, título de cuidado ni datos de quien reporta. El navegador conserva la suscripción; PAZO no añade claves a localStorage. Los eventos no se reutilizan para marketing: no hay push de Amigo de PAZO, likes ni comentarios. Las cuentas de prueba reciben avisos, y cualquier métrica debe filtrarlas con `marketing_private.is_reporting_owner`. Apagado general: `push_private.release_gate.enabled=false`.

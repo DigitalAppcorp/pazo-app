@@ -5,7 +5,8 @@ import { canUseAccountFeatures } from './features/auth/accountAccess'
 import { recordAdminActivity } from './features/admin/adminDashboardService'
 import { PasswordVisibilityButton } from './features/auth/PasswordVisibilityButton'
 import {useBehaviorObservation} from './features/marketing/useBehaviorObservation'
-import { getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
+import { getNotificationCareId, getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
+import { syncPush } from './features/push/pushService'
 import { createRequestScope } from './lib/requestScope'
 import { lazy, Suspense, useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
@@ -1874,8 +1875,9 @@ function PazoMain() {
 
     const sightingId = getNotificationSightingId(notification)
     const joinedCommunityId = getNotificationCommunityId(notification)
+    const careId = getNotificationCareId(notification)
     const supporterNotice = isSupporterNotification(notification)
-    if (!canUseAccount || (!sightingId && !joinedCommunityId && !supporterNotice)) return
+    if (!canUseAccount || (!sightingId && !joinedCommunityId && !careId && !supporterNotice)) return
 
     setIsNotificationsOpen(false)
     if (supporterNotice) {
@@ -1886,6 +1888,8 @@ function PazoMain() {
       setActiveTab('comunidades')
     } else if (sightingId) {
       setSelectedSightingId(sightingId)
+    } else if (careId) {
+      setIsCareOpen(true)
     }
 
     if (!notification.read) {
@@ -1928,6 +1932,42 @@ function PazoMain() {
       setHasMoreNotifications(true)
     }
   }, [user?.id, isOnboardingActive, pets.length])
+
+  const refreshNotificationsRef = useRef(refreshNotifications)
+  refreshNotificationsRef.current = refreshNotifications
+
+  useEffect(() => {
+    if (!user?.id || isOnboardingActive || isDemoUser) return
+    void syncPush(lang)
+  }, [user?.id, isOnboardingActive, isDemoUser, lang])
+
+  // The bell catches up when the person comes back or a push arrives while PAZO is open.
+  useEffect(() => {
+    if (!user?.id || isOnboardingActive || isDemoUser) return
+    const open = () => {
+      setIsNotificationsOpen(true)
+      void refreshNotificationsRef.current()
+    }
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void refreshNotificationsRef.current()
+    }
+    const onMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'pazo-open-notifications') open()
+      else if (event.data?.type === 'pazo-push-received') void refreshNotificationsRef.current()
+    }
+    if (new URLSearchParams(window.location.search).get('open') === 'notifications') {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('open')
+      window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash)
+      open()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    navigator.serviceWorker?.addEventListener('message', onMessage)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      navigator.serviceWorker?.removeEventListener('message', onMessage)
+    }
+  }, [user?.id, isOnboardingActive, isDemoUser])
 
   // Messaging is still in development for everyone: never display fictitious unread counts.
   const unreadMessages = 0
@@ -2663,6 +2703,7 @@ function PazoMain() {
               hasMore={hasMoreNotifications}
               isLoadingMore={isNotificationsLoadingMore}
               lang={lang}
+              canUsePush={canUseAccount}
             />
 
             <SightingDetailModal
