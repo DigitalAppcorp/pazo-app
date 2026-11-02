@@ -1,4 +1,4 @@
-import {stageIndividualOperatorCopy} from './individualOperatorTransition'
+import {stageIndividualOperatorCopy} from './individualOperatorTransition.ts'
 /** #153 prepared notice; release requires the final PO GO. */
 export const INTELLIGENCE_NOTICE_RELEASED=true
 export const CAMPAIGN_EXPERIENCE_NOTICE_RELEASED=true
