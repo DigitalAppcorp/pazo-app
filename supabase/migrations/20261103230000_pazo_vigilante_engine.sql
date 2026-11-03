@@ -551,10 +551,10 @@ begin
  end if;
  if (p_changes ? 'priority') and p_changes->>'priority' not in('high','medium','low') then raise exception 'Bad priority' using errcode='22023'; end if;
  update vigilante_private.drafts set
-  title_es=coalesce(vigilante_private.clip(p_changes->>'title_es',120),title_es),
-  body_es=coalesce(vigilante_private.clip(p_changes->>'body_es',1200),body_es),
-  title_en=coalesce(vigilante_private.clip(p_changes->>'title_en',120),title_en),
-  body_en=coalesce(vigilante_private.clip(p_changes->>'body_en',1200),body_en),
+  title_es=case when p_changes ? 'title_es' then vigilante_private.clip(p_changes->>'title_es',120) else title_es end,
+  body_es=case when p_changes ? 'body_es' then vigilante_private.clip(p_changes->>'body_es',1200) else body_es end,
+  title_en=case when p_changes ? 'title_en' then vigilante_private.clip(p_changes->>'title_en',120) else title_en end,
+  body_en=case when p_changes ? 'body_en' then vigilante_private.clip(p_changes->>'body_en',1200) else body_en end,
   priority=coalesce(p_changes->>'priority',priority),
   audience_species=coalesce(v_species,audience_species),
   audience_postal_codes=coalesce(v_postal,audience_postal_codes),
