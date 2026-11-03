@@ -162,6 +162,33 @@ Se apoya en el patrón de avisos push al administrador (`admin_new_pet`, `admin_
 9. **Historial:** cada alerta guarda texto aprobado, fecha y autor de la aprobación. Al rechazar se elige motivo (no es relevante, fuente dudosa, repetida, tono), que alimenta al Vigilante del paso 5.
 10. **Pensado para teléfono:** el PO aprobará casi siempre desde el celular.
 
+## Paso 5 — Vigilante automático (aprobado por el PO, 3-nov-2026; solo planeación)
+
+1. **Tarea programada en Supabase** que revisa cada fuente a su ritmo (calor y humo cada hora; retiros y alertas del condado cada pocas horas).
+2. **Un lector por fuente, aislado.** Si una fuente falla varias veces seguidas, aviso al PO: "La fuente X no responde".
+3. **Hallazgo normalizado:** fuente, fecha, enlace, tipo (retiro, brote, calor, humo), zona, especie, enfermedad o marca y lote.
+4. **Deduplicación** entre repeticiones y entre fuentes.
+5. **Relevancia con reglas fijas, no con IA:** zona con usuarios de PAZO, especie presente, tabla enfermedad → vacuna, marca retirada contra comidas registradas. Lo que no afecta a nadie se archiva sin avisar.
+6. **Prioridad propuesta por reglas** (retiro de comida registrada o brote con mascotas sin protección registrada: alta; calor: media; noticia general: baja) y audiencia según el paso 3.
+7. **Redacción con IA solo al final**, únicamente con datos de la fuente y citándola, sin consejo médico, con límites de caracteres y sin nombres de mascota en pantalla bloqueada, en ES y EN. Una revisión automática compara el borrador con la fuente; si no cuadra, llega marcado "revisar con cuidado".
+8. **Seguridad:** el Vigilante solo crea borradores (el servidor no le permite enviar); claves de fuentes como secretos de Supabase; interruptor para pausarlo desde el panel admin.
+9. **Tope de 3 borradores por día** (decisión del PO); los parecidos se agrupan.
+10. **Aprendizaje visible por reglas:** "fuente dudosa" baja el peso de la fuente; "repetida" amplía la ventana de duplicados; "no es relevante" baja la prioridad de ese tipo.
+11. **Resumen mensual en gráfico** (hallazgos, descartados automáticamente, aprobados, rechazados). Decisión del PO: **solo el resumen**, sin lista de descartados.
+12. **Modo manual (aprobado):** el PO pega un enlace y el Vigilante hace el resto.
+13. **Fases (aprobadas):**
+    - Fase 1: calor del Servicio Meteorológico y retiros de la FDA (confirmar el formato de datos de la FDA), más el modo manual.
+    - Fase 2: humo con AirNow (clave gratuita) y alertas de salud animal del Condado de LA (confirmar cómo publican).
+    - Fase 3: posible alianza con Pet Disease Alerts y cambios de reglas de la ciudad.
+
+### Costo de la IA (estimación, 3-nov-2026)
+
+- **Las suscripciones ChatGPT Plus y Claude Pro no sirven para esto.** Son para usar el chat; un servicio automático en el servidor necesita una clave de API con facturación aparte por uso (consola de Anthropic u OpenAI).
+- Precios de lista de la API de Anthropic por millón de tokens (entrada / salida), según la referencia vigente al 6-oct-2026: Claude Haiku 5.5 USD 0,10 / 0,50; Claude Sonnet 5.5 USD 2 / 10; Claude Opus 5.5 USD 4 / 20. Confirmar en la página de precios antes de contratar.
+- Supuesto por borrador: unos 15.000 tokens de entrada (fuente, instrucciones y revisión) y 2.000 de salida, más margen x2 por el razonamiento del modelo.
+- Con 30 borradores al mes: Haiku menos de USD 0,20; Sonnet alrededor de USD 3; Opus alrededor de USD 6. Con el máximo de 90 (3 por día): Sonnet alrededor de USD 9; Opus alrededor de USD 18.
+- Recomendación: usar el modelo más capaz (Opus 5.5) porque son avisos de salud y la diferencia es de pocos dólares al mes; tope de gasto mensual propuesto USD 20, configurable en el panel. Decisión final de modelo y tope: PO.
+
 ## Riesgo: el panel de notificaciones (revisión 3-nov-2026)
 
 Hoy cada tipo de notificación (`sighting`, `community_join`, `care_reminder`, `new_follower`, `admin_new_pet`, `admin_new_account`, `supporter_campaign`, `supporter_verified`) se maneja repartido en varios lugares:
