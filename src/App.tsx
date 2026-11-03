@@ -1,11 +1,10 @@
 import {observeTask,beginTask,observeAnonymous} from './features/marketing/intelligenceRuntime'
 import {finishDemoTracking,observeArrivalSource,observeSignupFailure,trackDemoScreen} from './features/marketing/experienceDetails'
-import {isSupporterNotification} from './features/notifications/supporterNotification'
 import { canUseAccountFeatures } from './features/auth/accountAccess'
 import { recordAdminActivity } from './features/admin/adminDashboardService'
 import { PasswordVisibilityButton } from './features/auth/PasswordVisibilityButton'
 import {useBehaviorObservation} from './features/marketing/useBehaviorObservation'
-import { getNotificationAdminPetId, getNotificationCareId, getNotificationFollowerId, getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
+import { describeNotification } from './features/notifications/notificationCatalog'
 import { syncPush } from './features/push/pushService'
 import { markNotificationsSeen } from './features/notifications/markSeen'
 import { createRequestScope } from './lib/requestScope'
@@ -1887,29 +1886,28 @@ function PazoMain() {
   const handleOpenNotification = async (notification: PazoNotification) => {
     const isCurrent = accountRequests.capture()
 
-    const sightingId = getNotificationSightingId(notification)
-    const joinedCommunityId = getNotificationCommunityId(notification)
-    const careId = getNotificationCareId(notification)
-    const adminPetId = getNotificationAdminPetId(notification)
-    const followerPetId = getNotificationFollowerId(notification)
-    const supporterNotice = isSupporterNotification(notification)
-    if (!canUseAccount || (!sightingId && !joinedCommunityId && !careId && !adminPetId && !followerPetId && !supporterNotice)) return
+    const target = describeNotification(notification, lang).target
+    if (!canUseAccount || !target) return
 
     setIsNotificationsOpen(false)
-    if (supporterNotice) {
-      window.location.hash = '#/account/supporter?from=notification'
-    } else if (joinedCommunityId) {
-      setCommunityTargetId(joinedCommunityId)
-      setCommunityTargetKey((value) => value + 1)
-      setActiveTab('comunidades')
-    } else if (sightingId) {
-      setSelectedSightingId(sightingId)
-    } else if (careId) {
-      setIsCareOpen(true)
-    } else if (adminPetId) {
-      setSelectedPublicProfileId(adminPetId)
-    } else if (followerPetId) {
-      setSelectedPublicProfileId(followerPetId)
+    switch (target.kind) {
+      case 'supporter':
+        window.location.hash = '#/account/supporter?from=notification'
+        break
+      case 'community':
+        setCommunityTargetId(target.communityId)
+        setCommunityTargetKey((value) => value + 1)
+        setActiveTab('comunidades')
+        break
+      case 'sighting':
+        setSelectedSightingId(target.sightingId)
+        break
+      case 'care':
+        setIsCareOpen(true)
+        break
+      case 'pet_profile':
+        setSelectedPublicProfileId(target.petId)
+        break
     }
 
     if (!notification.read) {

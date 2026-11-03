@@ -1,5 +1,5 @@
-import {isSupporterNotification,supporterNotificationCopy} from '../../features/notifications/supporterNotification'
-import { adminNotificationCopy, careNotificationTitle, formatNotificationTime, getNotificationAdminPetId, getNotificationCareId, getNotificationFollowerId, getNotificationCommunityId, getNotificationSightingId } from '../../features/notifications/notificationSource'
+import { describeNotification, type NotificationIcon, type NotificationTone } from '../../features/notifications/notificationCatalog'
+import { formatNotificationTime } from '../../features/notifications/notificationSource'
 import { PushControl } from '../../features/push/PushControl'
 import { useState } from 'react'
 import type { PazoNotification } from '../../types/pazo'
@@ -56,6 +56,19 @@ const NotificationBell = () => (
     <path d="M16 4c-5.3 0-9.1 3.8-9.1 9.4v3.9c0 2.2-1 4.4-3 6.2-.9.8-.3 2.5 1.1 2.5h22c1.3 0 2-1.7 1.1-2.5-2-1.8-3-4-3-6.2v-3.9C25.1 7.8 21.3 4 16 4Zm0 25.5c3.1 0 4.8-1.3 5.5-2.5h-11c.8 1.2 2.5 2.5 5.5 2.5Z" />
   </svg>
 )
+
+const TONE_CLASSES: Record<NotificationTone, string> = {
+  highlight: 'bg-[#E1E53F]/50 text-[#204E4A]',
+  care: 'bg-[#E7F0DA] text-[#204E4A]',
+  neutral: 'bg-[#F1F3EB] text-[#204E4A]',
+}
+
+const NotificationIconArt = ({ icon }: { icon: NotificationIcon }) => {
+  if (icon === 'calendar') return <IconCalendar size={21} />
+  if (icon === 'chat') return <IconChat size={21} />
+  if (icon === 'community') return <IconCommunity size={21} />
+  return <NotificationBell />
+}
 
 export const NotificationsModal = ({
   isOpen,
@@ -164,13 +177,8 @@ export const NotificationsModal = ({
           ) : (
             <div className="space-y-2.5" aria-live="polite">
               {filtered.map((item) => {
-                const isSighting = Boolean(getNotificationSightingId(item))
-                const isCommunityJoin = Boolean(getNotificationCommunityId(item))
-                const canOpen = isSighting || isCommunityJoin || Boolean(getNotificationCareId(item)) || Boolean(getNotificationAdminPetId(item)) || Boolean(getNotificationFollowerId(item)) || isSupporterNotification(item)
-                const localized = adminNotificationCopy(item.sourceType, lang) ?? (item.sourceType === 'care_reminder'
-                  ? { title: careNotificationTitle(lang), subtitle: item.subtitle }
-                  : supporterNotificationCopy(item,lang))
-                const isCare = item.category === 'cuidados'
+                const view = describeNotification(item, lang)
+                const canOpen = view.target !== null
 
                 return (
                   <button
@@ -186,17 +194,16 @@ export const NotificationsModal = ({
                       (canOpen ? 'cursor-pointer hover:bg-[#E1E53F]/20 focus-visible:bg-[#E1E53F]/25' : 'cursor-default')
                     }
                   >
-                    <span aria-hidden="true" className={'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ' +
-                      (isSighting || isCommunityJoin ? 'bg-[#E1E53F]/50 text-[#204E4A]' : isCare ? 'bg-[#E7F0DA] text-[#204E4A]' : 'bg-[#F1F3EB] text-[#204E4A]')}>
-                      {isCare ? <IconCalendar size={21} /> : isSighting ? <IconChat size={21} /> : isCommunityJoin ? <IconCommunity size={21} /> : <NotificationBell />}
+                    <span aria-hidden="true" className={'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ' + TONE_CLASSES[view.tone]}>
+                      <NotificationIconArt icon={view.icon} />
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-start gap-2">
-                        <span className="min-w-0 flex-1 break-words text-[14px] font-extrabold leading-snug text-[#204E4A]">{localized.title}</span>
+                        <span className="min-w-0 flex-1 break-words text-[14px] font-extrabold leading-snug text-[#204E4A]">{view.title}</span>
                         {!item.read && <span aria-label={lang === 'es' ? 'Nuevo' : 'New'} className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-[#EC7357]" />}
                       </span>
-                      <span className="mt-1 block break-words text-[13px] leading-relaxed text-[#5C7470]">{localized.subtitle}</span>
-                      {isSupporterNotification(item)&&<span className="mt-2 block text-[12px] font-bold text-[#204E4A]">{item.sourceType==='supporter_verified'?(lang==='es'?'Revisar mis beneficios':'Review my benefits'):(lang==='es'?'Ver mi participación':'View my participation')}</span>}
+                      <span className="mt-1 block break-words text-[13px] leading-relaxed text-[#5C7470]">{view.subtitle}</span>
+                      {view.action && <span className="mt-2 block text-[12px] font-bold text-[#204E4A]">{view.action}</span>}
                       <span className="mt-2 block text-[11px] font-semibold text-[#71847F]">{item.createdAt ? formatNotificationTime(item.createdAt, lang) : item.timeAgo}</span>
                     </span>
                     {canOpen && (

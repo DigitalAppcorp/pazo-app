@@ -674,8 +674,11 @@ test('Community join notification: strict source types, modal navigation, recipi
   await act(async()=>renderer.unmount())
 
   const app=fs.readFileSync('src/App.tsx','utf8')
-  assert.ok(app.includes('getNotificationCommunityId(notification)'))
-  assert.ok(app.includes('setCommunityTargetId(joinedCommunityId)'))
+  // The typed community reference now comes from the notification catalog.
+  assert.ok(app.includes('describeNotification(notification, lang).target'))
+  assert.ok(fs.readFileSync('src/features/notifications/notificationCatalog.ts','utf8').includes('getNotificationCommunityId(item)'))
+  assert.ok(app.includes("case 'community':"))
+  assert.ok(app.includes('setCommunityTargetId(target.communityId)'))
   assert.ok(app.includes('setCommunityTargetKey((value) => value + 1)'))
   assert.ok(app.includes("setActiveTab('comunidades')"))
   assert.ok(app.includes('await markNotificationRead(notification.id)'))

@@ -38,8 +38,8 @@ const base={
  INITIAL_PETS:pets,CARE_HISTORY_PAGE_SIZE:2,DOCUMENTS_PAGE_SIZE:2,
  supporterBenefitsUiEnabled:false, isSupporterAccountHash:()=>false,
  normalizeSupporterPaypalCallback:()=>false,stageMarketingLanding(){},
- getNotificationCommunityId:()=>null,getNotificationSightingId:n=>n.sightingId??null,
- isSupporterNotification:()=>false,wasAuthorDeleted:()=>false,
+ describeNotification:n=>({target:n.sightingId?{kind:'sighting',sightingId:n.sightingId}:null}),
+ wasAuthorDeleted:()=>false,
 }
 const db={auth:{onAuthStateChange(fn){listeners.push(fn);return {data:{subscription:{unsubscribe(){listeners=listeners.filter(x=>x!==fn)}}}}}},
  from(table){let filter;const q={select(){return q},in(){return q},eq(k,v){filter=v;return q},order(){return q},range(){return q},
