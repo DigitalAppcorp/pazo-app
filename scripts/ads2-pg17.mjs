@@ -7,11 +7,13 @@ const migration=fs.readdirSync('supabase/migrations').find(p=>p.endsWith('_pazo_
 const before=sql('SELECT row_to_json(g) FROM marketing_private.collection_gate g')
 const history=sql('SELECT coalesce(jsonb_agg(to_jsonb(a) ORDER BY owner_id),\'[]\') FROM marketing_private.acquisition a')
 file('supabase/migrations/'+migration)
+// A separate additive production migration; exercise both in disposable PG17.
+file('supabase/migrations/20261103130000_pazo_ads2_six_creatives.sql')
 assert.equal(sql('SELECT row_to_json(g) FROM marketing_private.collection_gate g'),before)
 assert.equal(sql('SELECT coalesce(jsonb_agg(to_jsonb(a) ORDER BY owner_id),\'[]\') FROM marketing_private.acquisition a'),history)
 for(const report of ['behavior','intelligence'])assert.doesNotThrow(()=>sql(`SET ROLE authenticated;SET "request.jwt.claim.sub"='96000000-0000-4000-8000-000000000031';SET "request.jwt.claims"='{"aal":"aal1"}';SELECT public.pazo_admin_${report}_summary_v1()`))
 runMockCron()
-const codes=['qr_v2_en','cuidados_v2_en','app_v2_en']
+const codes=['qr_v2_en','cuidados_v2_en','app_v2_en','c2_en_01_qr','c2_en_02_care','c2_en_03_alert','c2_en_04_places','c2_en_05_community','c2_en_06_overview']
 for(const [i,c] of codes.entries()){
  const owner=`16800000-0000-4000-8000-00000000000${i+1}`
  sql(`INSERT INTO auth.users(id,created_at,email_confirmed_at) VALUES('${owner}',now()-interval '1 minute',now());INSERT INTO public.profiles(id) VALUES('${owner}')`)
@@ -28,4 +30,4 @@ for(const [i,c] of codes.entries()){
 }
 for(const role of ['anon','authenticated','service_role'])assert.throws(()=>sql(`SET ROLE ${role};SELECT * FROM marketing_private.acquisition`))
 assert.equal(sql("SELECT bool_and(relrowsecurity AND relforcerowsecurity) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='marketing_private' AND c.relkind='r'"),'t')
-console.log(JSON.stringify({status:'PASS',environment:'disposable PG17',campaigns:2,ads2Creatives:3,concurrentDedup:true,historyAndGatesPreserved:true,qaExcluded:true,utility:true,hostedWrites:0}))
+console.log(JSON.stringify({status:'PASS',environment:'disposable PG17',campaigns:2,ads2Creatives:9,concurrentDedup:true,historyAndGatesPreserved:true,qaExcluded:true,utility:true,hostedWrites:0}))

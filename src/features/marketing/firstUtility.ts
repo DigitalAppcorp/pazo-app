@@ -48,7 +48,7 @@ export interface UtilitySummary {
 }
 const object = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-const segments = new Set(['organic','perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en','qr_v2_en','cuidados_v2_en','app_v2_en'])
+const segments = new Set(['organic','perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en','qr_v2_en','cuidados_v2_en','app_v2_en','c2_en_01_qr','c2_en_02_care','c2_en_03_alert','c2_en_04_places','c2_en_05_community','c2_en_06_overview'])
 export function parseUtilitySummary(value: unknown): UtilitySummary {
   const fail = () => { throw Error('PAZO_INVALID_UTILITY_AGGREGATE') }
   if (!object(value) || !['paused','collecting'].includes(String(value.status)) ||

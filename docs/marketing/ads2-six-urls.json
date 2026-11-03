@@ -1,0 +1,36 @@
+{
+  "status": "PREPARED_HOSTED_VERIFICATION_REQUIRED",
+  "campaign": "pazo_la_en_202611",
+  "ads": [
+    {
+      "format": "image",
+      "tracking_label": "QR Passport",
+      "url": "https://pazo-app.vercel.app/?utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_la_en_202611&utm_content=c2_en_01_qr"
+    },
+    {
+      "format": "image",
+      "tracking_label": "Care Planner",
+      "url": "https://pazo-app.vercel.app/?utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_la_en_202611&utm_content=c2_en_02_care"
+    },
+    {
+      "format": "image",
+      "tracking_label": "Lost Pet Alert",
+      "url": "https://pazo-app.vercel.app/?utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_la_en_202611&utm_content=c2_en_03_alert"
+    },
+    {
+      "format": "image",
+      "tracking_label": "Places",
+      "url": "https://pazo-app.vercel.app/?utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_la_en_202611&utm_content=c2_en_04_places"
+    },
+    {
+      "format": "image",
+      "tracking_label": "Communities",
+      "url": "https://pazo-app.vercel.app/?utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_la_en_202611&utm_content=c2_en_05_community"
+    },
+    {
+      "format": "image",
+      "tracking_label": "App Overview",
+      "url": "https://pazo-app.vercel.app/?utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_la_en_202611&utm_content=c2_en_06_overview"
+    }
+  ]
+}
