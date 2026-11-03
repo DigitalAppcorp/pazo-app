@@ -136,6 +136,25 @@ Reutiliza `push_private.outbox` (cola con reintentos), `push_private.preferences
 11. **iPhone:** solo recibe push quien instaló la PWA; los demás ven la alerta en el panel. La tarjeta de aprobación muestra ambos números por separado.
 12. **Métricas por alerta:** entregados, tocados, respuestas (Ya la tiene / No la tiene / No sé) y cuántos desactivaron "Alertas de salud" después (alarma de saturación).
 
+## Paso 4 — bandeja de aprobación (aprobado por el PO, 3-nov-2026; solo planeación)
+
+Se apoya en el patrón de avisos push al administrador (`admin_new_pet`, `admin_new_account`, migración `20261103110000_pazo_push_admin_signals.sql`) y en el panel admin existente (`src/features/admin/components/`). Regla del panel: gráficos y preguntas de negocio; explicaciones solo detrás del botón "i".
+
+1. **Aviso al PO:** push de administrador con texto genérico ("Hay una alerta esperando tu aprobación") y sección "Vigilante" en el panel admin con contador de pendientes.
+2. **Bandeja:** pendientes ordenadas por prioridad y fecha, con prioridad, título, fuente, tiempo hasta caducar y audiencia estimada.
+3. **Tarjeta de aprobación:**
+   - qué pasó (resumen corto y enlace a la fuente oficial con fecha);
+   - audiencia en gráfico: push (vencida / sin registrar), solo panel (sin push o sin PWA), visible en feed (especie y zonas);
+   - vista previa exacta de pantalla bloqueada, tarjeta del panel (mascota de ejemplo) y publicación del feed;
+   - botones Aprobar, Editar, Solo feed, Rechazar.
+4. **Editar:** textos con límite de caracteres y bloqueo de nombres de mascota en el texto de pantalla bloqueada; cambiar prioridad; **solo reducir** la audiencia, nunca ampliarla; vista previa en vivo.
+5. **Antes de enviar:** botón "Enviarme una prueba" (solo al PO) y confirmación con números ("172 ahora, 140 a las 8 a. m.").
+6. **Sin verificación extra al aprobar** (decisión del PO): basta la sesión de administrador. Riesgo aceptado por el PO: con una sesión robada se podría aprobar una alerta con texto falso; los bloqueos automáticos cubren formato y nombres, no la veracidad. Mitigación sin fricción propuesta: aviso al PO cada vez que se aprueba un envío ("Aprobaste: …") para detectar una aprobación ajena, y el botón Cancelar.
+7. **Después de aprobar:** estado en vivo (enviando, enviada), botón Cancelar y resultados en gráfico (entregados, tocados, respuestas, desactivaciones de "Alertas de salud").
+8. **Sin respuesta del PO:** alerta urgente insiste a los 30 minutos y a las 2 horas; nunca se envía sola; si caduca se archiva como "caducó sin aprobar".
+9. **Historial:** cada alerta guarda texto aprobado, fecha y autor de la aprobación. Al rechazar se elige motivo (no es relevante, fuente dudosa, repetida, tono), que alimenta al Vigilante del paso 5.
+10. **Pensado para teléfono:** el PO aprobará casi siempre desde el celular.
+
 ## Riesgo: el panel de notificaciones (revisión 3-nov-2026)
 
 Hoy cada tipo de notificación (`sighting`, `community_join`, `care_reminder`, `new_follower`, `admin_new_pet`, `admin_new_account`, `supporter_campaign`, `supporter_verified`) se maneja repartido en varios lugares:
