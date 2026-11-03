@@ -67,6 +67,7 @@ Datos reales en ese momento: 11 mascotas; 0 con zona; 0 con dieta; 0 vacunas reg
 
 ## Hoja de ruta (orden acordado con el PO)
 
+0. **Panel de notificaciones con catálogo único de tipos y plantillas de tarjeta** (diseño aprobado más abajo). Migrar primero los tipos actuales sin cambiar su comportamiento.
 1. **Captura de datos:** vacunas por tipo (lista cerrada) con vencimiento, y zona estructurada. Diseñar la experiencia para que el dueño lo viva como proteger a su mascota, no como una obligación. *Siguiente tema a planear.*
 2. **Cuenta oficial PAZO** con insignia Oficial visible en el feed; marcar la cuenta del PO como Fundador; reservar el nombre "PAZO" y variantes.
 3. **Push del Vigilante:** nuevo tipo en el outbox y apertura directa de la publicación al tocar el aviso.
@@ -117,6 +118,22 @@ Propuesta (solo planeación):
 4. **Prueba de contrato** (como las que ya usa PAZO): todo tipo permitido en la base de datos y en el worker de push debe existir en el catálogo, y al revés. Si falta uno, la prueba falla antes de publicar.
 5. **Prueba visual** de cada tipo en la biblioteca de pantallas, incluida la tarjeta con botones.
 6. Migrar los tipos actuales al catálogo **sin cambiar su comportamiento** antes de agregar los del Vigilante y la bienvenida.
+
+### Diseño aprobado del panel (PO, 3-nov-2026; solo planeación)
+
+- **Tipo y categoría son cosas distintas.** Cada notificación tiene un *tipo* (nuevo seguidor, alerta epidemiológica, cuidado agendado…) que decide su tarjeta. La *categoría* sigue siendo el filtro del panel y agrupa varios tipos.
+- **Base común para todas las tarjetas:** icono, título, hora, punto de "nuevo" y la línea visual de PAZO.
+- **Cuatro plantillas** sobre esa base; cada tipo elige una y define sus textos, icono, destino y botones:
+  1. *Informativa*: solo avisa (bienvenida, nueva cuenta).
+  2. *Para abrir algo*: lleva a una pantalla (nuevo seguidor, cuidado, nueva mascota).
+  3. *Con respuesta*: trae botones ("Ya la tiene / No la tiene / No sé").
+  4. *Alerta del Vigilante*: fuente oficial con fecha, franja personal ("Esto aplica a Max") y botones.
+- **Orden por fecha de creación**, con tres excepciones:
+  1. Las alertas importantes sin responder quedan fijadas arriba hasta que se respondan o caduquen; luego vuelven a su lugar por fecha.
+  2. Las alertas caducan (brotes, calor): al caducar se ven atenuadas y sin botones.
+  3. Las repetidas se agrupan ("3 nuevos seguidores"). Puede llegar después, pero el catálogo debe preverlo.
+
+Este diseño es el **paso previo** al Vigilante: primero se migran los 8 tipos actuales al catálogo sin cambiar su comportamiento, y después se agregan la bienvenida y los tipos del Vigilante.
 
 Nota: el clic en el push hoy abre siempre el panel de notificaciones. Para el Vigilante se puede conservar esa entrada única (push → panel → publicación), que es más simple y segura que abrir pantallas directamente desde el push.
 
