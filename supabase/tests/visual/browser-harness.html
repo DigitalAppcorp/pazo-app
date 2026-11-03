@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>PAZO QA · Laboratorio visual aislado</title>
+</head>
+<body style="margin:0;background:#efece4">
+<div id="root"></div>
+<script type="module">
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import {AuthProvider} from '/src/context/AuthContext.tsx';
+import {OnboardingView} from '/src/components/views/OnboardingView.tsx';
+import {HomeView} from '/src/components/views/HomeView.tsx';
+import {CommunitiesView} from '/src/components/views/CommunitiesView.tsx';
+import {GlobalSearchView} from '/src/components/views/GlobalSearchView.tsx';
+import {PetView} from '/src/components/views/PetView.tsx';
+import {MapView} from '/src/components/views/MapView.tsx';
+import {CreateModal} from '/src/components/modals/CreateModal.tsx';
+import {CreatePostModal} from '/src/components/modals/CreatePostModal.tsx';
+import {CreateCommunityModal} from '/src/components/modals/CreateCommunityModal.tsx';
+import {AddPetModal} from '/src/components/modals/AddPetModal.tsx';
+import {CareModal} from '/src/components/modals/CareModal.tsx';
+import {DocumentsModal} from '/src/components/modals/DocumentsModal.tsx';
+import {HeaderBar} from '/src/components/HeaderBar.tsx';
+import {BottomNav} from '/src/components/BottomNav.tsx';
+import {SupporterInvitationPrompt} from '/src/features/supporter/components/SupporterInvitationPrompt.tsx';
+import {LostAlertReview} from '/src/features/rescue/components/LostAlertReview.tsx';
+import {ActiveLostAlertPanel} from '/src/features/rescue/components/ActiveLostAlertPanel.tsx';
+import {PasswordRecoveryView} from '/src/features/auth/PasswordRecoveryView.tsx';
+import {LegalPreviewDialog} from '/src/features/legal/LegalPreviewDialog.tsx';
+import {ReportDialog} from '/src/features/moderation/ReportDialog.tsx';
+import {GratitudeWallScene} from '/src/features/supporter/components/GratitudeWallScene.tsx';
+import {VISUAL_CASES} from '/scripts/visual-lab/cases.mjs';
+import {supabase} from '/src/services/supabaseClient.ts';
+import {installSyntheticReadGateway} from '/scripts/visual-lab/synthetic-read-gateway.mjs';
+import {NotificationsModal} from '/src/components/modals/NotificationsModal.tsx';
+import {MessagesModal} from '/src/components/modals/MessagesModal.tsx';
+import {SuggestPlaceModal} from '/src/components/modals/SuggestPlaceModal.tsx';
+import {PassportModal} from '/src/components/modals/PassportModal.tsx';
+import {SightingDetailModal} from '/src/components/modals/SightingDetailModal.tsx';
+import {PublicRescueView} from '/src/components/views/PublicRescueView.tsx';
+import {SupporterOfferB} from '/src/features/supporter/components/SupporterOfferB.tsx';
+import {SupporterBenefitsHome} from '/src/features/supporter/components/SupporterBenefitsHome.tsx';
+import {CommunityFeatureExperimentCard} from '/src/components/validation/CommunityFeatureExperimentCard.tsx';
+import {FeatureIntentChoice} from '/src/features/validation/components/FeatureIntentChoice.tsx';
+import {AdminDashboard} from '/src/features/admin/components/AdminDashboard.tsx';
+import '/src/index.css';
+
+// No export/import in a production bundle. Entry exists ONLY as dev-server HTML,
+// is NOT listed among vite.config.ts production HTML inputs and refuses non-local URLs.
+// Every non-loopback HTTP(S) request is blocked separately by the Playwright runner.
+if (!import.meta.env.DEV || !['127.0.0.1','localhost'].includes(location.hostname)) {
+  document.getElementById('root').textContent = 'Visual QA is available only on local development.';
+  throw new Error('Visual lab only permitted in local development');
+}
+const p=new URLSearchParams(location.search);
+const scene=p.get('case')||'welcome';
+const lang=p.get('lang')==='en'?'en':'es';
+if (!VISUAL_CASES.some(x=>x.id===scene)) throw new Error('Visual fixture not registered: '+scene);
+const spec=VISUAL_CASES.find(x=>x.id===scene);
+installSyntheticReadGateway(supabase,scene);
+window.__PAZO_VISUAL_FIXTURE__={scene,lang,synthetic:true,readOnly:true};
+
+const syntheticPet={
+  id:'00000000-0000-4000-8000-000000000001',name:lang==='es'?'Luna de prueba':'Demo Luna',
+  species:'perro',age:'3',breed:lang==='es'?'Mestiza':'Mixed breed',
+  photoUrl:'',bio:lang==='es'?'Me gusta pasear y conocer mascotas.':'I like walks and meeting pets.',
+  zone:lang==='es'?'Zona de demostración':'Demo area',qrId:'SYNTHETIC-ONLY',
+  interests:['Comunidades de perros','Parques y paseos'],isLost:false
+};
+const examplePost={
+  id:'00000000-0000-4000-8000-000000000002',
+  petId:syntheticPet.id,petName:syntheticPet.name,petSpecies:'perro',petAvatar:'',
+  location:lang==='es'?'Zona de demostración':'Demo area',
+  timeAgo:lang==='es'?'Hace 2 horas':'2 hours ago',
+  text:lang==='es'?'Un paseo tranquilo. Esta publicación es ficticia y no pertenece a ninguna cuenta.':'A quiet walk. This post is synthetic and belongs to no account.',
+  photoUrl:null,likes:12,isLiked:false,isSaved:false,comments:[],commentsCount:0,commentsLoaded:true
+};
+const longText=lang==='es'
+  ? 'Una explicación extensa de esta situación de prueba que permite verificar saltos de línea, desbordamientos y jerarquía. '.repeat(6)
+  : 'A lengthy synthetic explanation to test line breaks, overflow, and reading hierarchy. '.repeat(6);
+const additionalPets=[
+  {...syntheticPet,id:'00000000-0000-4000-8000-000000000003',
+    name:lang==='es'?'Max de prueba':'Demo Max',species:'gato',bio:'Solo QA',isLost:false}
+];
+const careItem={id:'00000000-0000-4000-8000-00000000d001',petId:syntheticPet.id,
+ title:lang==='es'?'Vacunación de prueba':'Demo vaccination',category:'vaccine',
+ dueDate:'2026-11-12',dueTime:'10:30',timezone:'America/Los_Angeles',
+ recurrence:'none',reminderDaysBefore:2,notes:lang==='es'?'Visita ficticia':'Synthetic visit',
+ status:'active',createdAt:'2026-10-20T10:00:00Z',updatedAt:'2026-10-20T10:00:00Z'};
+const careHistory=[{id:'00000000-0000-4000-8000-00000000d002',
+ careItemId:careItem.id,petId:syntheticPet.id,scheduledDate:'2026-10-22',
+ scheduledTime:'10:30',completedAt:'2026-10-22T18:00:00Z',
+ title:careItem.title,category:careItem.category,notes:careItem.notes,
+ recurrence:'none'}];
+const documentItem={id:'00000000-0000-4000-8000-00000000d003',
+ petId:syntheticPet.id,title:lang==='es'?'Cartilla de vacunas QA':'Demo vaccination card',
+ category:'vaccines',originalFileName:'documento-ficticio.pdf',
+ storagePath:'qa-only/NEVER-REAL.pdf',mimeType:'application/pdf',sizeBytes:120000,
+ status:'active',createdAt:'2026-10-22T15:00:00Z',updatedAt:'2026-10-22T15:00:00Z'};
+const demoNotifications=[
+ {id:'00000000-0000-4000-8000-00000000f001',title:lang==='es'?'Recordatorio de cuidados':'Care reminder',
+  subtitle:lang==='es'?'Revisión programada para Luna.':'Scheduled visit for Luna.',
+  category:'cuidados',timeAgo:lang==='es'?'Hace 2 horas':'2 hours ago',read:false},
+ {id:'00000000-0000-4000-8000-00000000f002',title:lang==='es'?'Nueva actividad de comunidad':'New community activity',
+  subtitle:lang==='es'?'Comunidad de pruebas: nuevo mensaje.':'Demo community: new post.',
+  category:'comunidad',timeAgo:lang==='es'?'Ayer':'Yesterday',read:true}
+];
+const demoConversations=[
+ {id:'00000000-0000-4000-8000-00000000f003',personName:lang==='es'?'Usuario de prueba':'Demo user',
+  petName:'Max QA',petSpecies:'gato',petAvatar:'',lastMessage:lang==='es'?'Hola desde el laboratorio':'Hello from QA',
+  timeAgo:lang==='es'?'Hace 3 h':'3h ago',isRequest:false,
+  messages:[{id:'qa-message',sender:'them',text:lang==='es'?'Mensaje ficticio para revisar la conversación':'Synthetic message for conversation UX',
+   timestamp:'2026-10-25T13:00:00Z'}]},
+ {id:'00000000-0000-4000-8000-00000000f004',personName:lang==='es'?'Solicitud ficticia':'Demo request',
+  petName:'Luna QA',petSpecies:'perro',petAvatar:'',
+  lastMessage:lang==='es'?'Quisiera consultar algo':'I have a question',
+  timeAgo:lang==='es'?'Ayer':'Yesterday',isRequest:true,messages:[]}
+];
+const noop=()=>{};
+const neverWrite=async()=>{throw new Error('Visual fixture: write operations are not permitted')};
+const labels={
+  inicio:lang==='es'?'Inicio':'Home',comunidades:lang==='es'?'Comunidades':'Communities',
+  crear:lang==='es'?'Crear':'Create',mapa:lang==='es'?'Mapa':'Map',mascota:lang==='es'?'Mi mascota':'My pet'
+};
+const props={lang,onClose:noop};
+const node=(component,p={})=>React.createElement(component,{...props,...p});
+
+function Fixture(){
+  const [nav,setNav]=React.useState(spec?.template==='nav'?spec.state:'inicio');
+  const [language,setLanguage]=React.useState(lang);
+  const onb=(step)=>node(OnboardingView,{
+    initialStep:step,lang:language,onToggleLang:()=>setLanguage(v=>v==='es'?'en':'es'),
+    onComplete:noop,onSkipToLogin:noop,onQuickDemo:noop
+  });
+  let body;
+  switch(scene){
+    case 'welcome': body=onb('A01');break;
+    case 'signup': body=onb('A02');break;
+    case 'pet-onboarding': body=onb('A03');break;
+    case 'interests': body=onb('A04');break;
+    case 'feed-one':
+    case 'feed-empty': body=node(HomeView,{
+      posts:scene==='feed-one'?[examplePost]:[],canReport:false,
+      onLikePost:noop,onSavePost:noop,onAddComment:neverWrite,onLoadComments:async()=>false,
+      ownedPetIds:[],onSelectPetProfile:noop
+    });break;
+    case 'communities-empty': body=node(CommunitiesView,{currentPet:null,canUseCommunities:false});break;
+    case 'search-disabled':body=node(GlobalSearchView,{canSearch:false,onSelectPet:noop,onSelectCommunity:noop,onSelectPlace:noop});break;
+    case 'pet-summary':body=node(PetView,{
+      currentPet:syntheticPet,canModerate:false,canManagePet:false,onRequireAccount:noop,
+      availablePets:[syntheticPet],onSelectPet:noop,onPetUpdated:noop,onAddPet:noop,
+      careItems:[],onCompleteCare:neverWrite,onOpenQRPassport:noop,onOpenCareAgenda:noop,
+      documentCount:0,onOpenDocuments:noop,onOpenLostAlert:noop,userPosts:[]
+    });break;
+    case 'create-menu':body=node(CreateModal,{isOpen:true,activePetName:syntheticPet.name,activePetSpecies:'perro',canCreate:false,onRequireAccount:noop,onSelectOption:noop});break;
+    case 'create-post':body=node(CreatePostModal,{isOpen:true,currentPet:syntheticPet,onPostCreated:noop});break;
+    case 'create-community':body=node(CreateCommunityModal,{isOpen:true,currentPet:syntheticPet,onCreated:noop});break;
+    case 'add-pet':body=node(AddPetModal,{isOpen:true,onPetCreated:noop});break;
+    case 'care-empty':body=node(CareModal,{
+      isOpen:true,petName:syntheticPet.name,careItems:[],careHistory:[],isLoading:false,error:'',
+      isHistoryLoading:false,hasMoreHistory:false,onLoadMoreHistory:noop,onRetry:noop,
+      onCreateCare:neverWrite,onUpdateCare:neverWrite,onArchiveCare:neverWrite,
+      onCompleteCare:neverWrite,onUndoCompletion:neverWrite
+    });break;
+    case 'documents-empty':body=node(DocumentsModal,{
+      isOpen:true,petName:syntheticPet.name,documents:[],total:0,isLoading:false,error:'',
+      isLoadingMore:false,hasMore:false,onLoadMore:noop,onRetry:noop,
+      onUpload:neverWrite,onUpdate:neverWrite,onDelete:neverWrite,onGetBlob:neverWrite
+    });break;
+    case 'map-unavailable':body=node(MapView,{currentPet:null,canUsePlaces:false});break;
+    case 'nav':body=React.createElement(React.Fragment,null,
+      node(HeaderBar,{lang,onToggleLang:noop,onOpenSearch:noop,onOpenMessages:noop,
+        onOpenNotifications:noop,unreadMessagesCount:2,unreadNotificationsCount:3}),
+      React.createElement('main',{className:'flex-1 p-5'},React.createElement('h1',{className:'text-xl font-black text-[#204E4A]'},lang==='es'?'Vista previa de navegación':'Navigation preview')),
+      node(BottomNav,{activeTab:nav,onSelectTab:setNav,onOpenCreate:noop,labels})
+    );break;
+    case 'invitation':body=node(SupporterInvitationPrompt,{onExplore:noop,onDismiss:noop,onOptOut:noop,previewOnly:true});break;
+    case 'lost-review':body=node(LostAlertReview,{
+      pet:syntheticPet,lastSeen:lang==='es'?'Zona de demostración, Los Ángeles':'Demo area, Los Angeles',
+      dateTime:'2026-10-25T09:30',details:lang==='es'?'Última vez vista cerca del parque. Información sintética.':'Last seen near the park. Synthetic information.',
+      isSaving:false,onEdit:noop,onPublish:noop
+    });break;
+    case 'lost-active':body=node(ActiveLostAlertPanel,{
+      pet:syntheticPet,lastSeen:lang==='es'?'Zona de demostración':'Demo area',
+      details:lang==='es'?'Solo para probar la pantalla de alerta.':'For visual QA only.',
+      isSaving:false,publicUrl:'https://invalid.example/never-real',isLinkLoading:false,
+      linkError:'',shareFeedback:'',isLocalLink:true,onCopy:noop,onWhatsApp:noop,
+      onInstagram:noop,onMore:noop,onRetryLink:noop,onResolve:noop
+    });break;
+    case 'password-expired':body=node(PasswordRecoveryView,{sessionReady:false,onUpdatePassword:neverWrite,onExit:async()=>{}});break;
+    case 'password-ready':body=node(PasswordRecoveryView,{sessionReady:true,onUpdatePassword:neverWrite,onExit:async()=>{}});break;
+    case 'legal-privacy':body=node(LegalPreviewDialog,{kind:'privacy'});break;
+    case 'legal-terms':body=node(LegalPreviewDialog,{kind:'terms'});break;
+    case 'report-post':body=node(ReportDialog,{
+      target:{kind:'feed_post',id:examplePost.id,label:lang==='es'?'Publicación ficticia':'Synthetic post'}
+    });break;
+    case 'wall-empty':body=node(GratitudeWallScene,{
+      rows:[],tab:'all',onTabChange:noop,previewOnly:true,backToWelcome:true
+    });break;    default: {
+      if(!spec?.template)throw Error('Missing real-component template: '+scene);
+      const state=spec.state;
+      if(spec.template==='feed'){
+        const altered={...examplePost, ...(
+          state==='long'?{text:longText}:state==='liked'?{isLiked:true,likes:13}:
+          state==='saved'?{isSaved:true}:state==='comments'?{
+             comments:[{id:'demo-comment',authorPetId:syntheticPet.id,authorName:'Max QA',
+             authorPet:'gato',authorAvatar:'',text:lang==='es'?'Un gran día de paseo':'A lovely walk',timeAgo:'1h'}],
+             commentsCount:1,commentsLoaded:true
+          }:state==='recommended'?{isRecommended:true}:state==='deleted'?{
+             isAuthorDeleted:true,petName:lang==='es'?'Cuenta eliminada':'Deleted account'
+          }:{})};
+        const posts=state==='three'?[altered,{...altered,id:'qa-post-2',petName:'Max QA',likes:4},{...altered,id:'qa-post-3',petName:'Nala QA',likes:27}]:[altered];
+        body=node(HomeView,{posts,canReport:false,onLikePost:noop,onSavePost:noop,
+          onAddComment:neverWrite,onLoadComments:async()=>false,ownedPetIds:[],onSelectPetProfile:noop});break;
+      }
+      if(spec.template==='communities'){
+        body=node(CommunitiesView,{currentPet:syntheticPet,canUseCommunities:true});break;
+      }
+      if(spec.template==='community-feature'){
+        body=node(CommunityFeatureExperimentCard,{moduleKey:state==='places'?'places':'community-events',
+          source:'synthetic-visual-qa',title:state==='places'?(lang==='es'?'Explorar lugares':'Explore places'):(lang==='es'?'Eventos en comunidad':'Community events'),
+          description:lang==='es'?'Función en desarrollo · prueba visual sin votos.':'In development · no votes submitted.'});break;
+      }
+      if(spec.template==='search'){
+        body=node(GlobalSearchView,{canSearch:true,onSelectPet:noop,onSelectCommunity:noop,onSelectPlace:noop});break;
+      }
+      if(spec.template==='nav'){
+        body=React.createElement(React.Fragment,null,
+          node(HeaderBar,{lang,onToggleLang:noop,onOpenSearch:noop,onOpenMessages:noop,
+            onOpenNotifications:noop,unreadMessagesCount:9,unreadNotificationsCount:12}),
+          React.createElement('main',{className:'flex-1 p-5'},React.createElement('h1',{
+            className:'text-xl font-black text-[#204E4A]'},labels[nav])),
+          node(BottomNav,{activeTab:nav,onSelectTab:setNav,onOpenCreate:noop,labels})
+        );break;
+      }
+      if(spec.template==='pet'){
+        const pet={...syntheticPet,isLost:state==='lost',bio:state==='long'?longText:syntheticPet.bio};
+        body=node(PetView,{currentPet:pet,canModerate:false,canManagePet:
+          ['settings','edit','picker'].includes(state),onRequireAccount:noop,
+          availablePets:state==='two'||state==='picker'?[pet,...additionalPets]:[pet],
+          onSelectPet:noop,onPetUpdated:noop,onAddPet:noop,
+          careItems:state==='lost'?[careItem]:[],onCompleteCare:neverWrite,onOpenQRPassport:noop,
+          onOpenCareAgenda:noop,documentCount:1,onOpenDocuments:noop,onOpenLostAlert:noop,
+          userPosts:state==='posts'?[examplePost]:[]
+        });break;
+      }
+      if(spec.template==='care'){
+        body=node(CareModal,{
+          isOpen:true,petName:syntheticPet.name,
+          careItems:['active','history','create'].includes(state)?[careItem]:[],
+          careHistory:state==='history'?careHistory:[],
+          isLoading:state==='loading',error:state==='error'?(lang==='es'?'No se pudieron cargar los cuidados.':'Could not load care items.'):'',
+          isHistoryLoading:false,hasMoreHistory:false,onLoadMoreHistory:noop,onRetry:noop,
+          onCreateCare:neverWrite,onUpdateCare:neverWrite,onArchiveCare:neverWrite,
+          onCompleteCare:neverWrite,onUndoCompletion:neverWrite
+        });break;
+      }
+      if(spec.template==='documents'){
+        const documents=['single','many','uploading'].includes(state)?[
+          {...documentItem,status:state==='uploading'?'uploading':'active'},
+          ...(state==='many'?[{...documentItem,id:'qa-doc-two',category:'medical_history',
+            title:lang==='es'?'Historia clínica QA':'Demo medical history'}]:[])
+        ]:[];
+        body=node(DocumentsModal,{
+          isOpen:true,petName:syntheticPet.name,documents,total:documents.length,
+          isLoading:state==='loading',
+          error:state==='error'?(lang==='es'?'No se pudieron cargar los documentos.':'Could not load documents.'):'',
+          isLoadingMore:false,hasMore:false,onLoadMore:noop,onRetry:noop,
+          onUpload:neverWrite,onUpdate:neverWrite,onDelete:neverWrite,onGetBlob:neverWrite
+        });break;
+      }
+      if(spec.template==='lost-review'){
+        body=node(LostAlertReview,{pet:syntheticPet,lastSeen:lang==='es'?'Parque de demostración':'Demo park',
+          dateTime:'2026-10-25T08:00',details:longText,isSaving:false,onEdit:noop,onPublish:noop});break;
+      }
+      if(spec.template==='lost-active'){
+        body=node(ActiveLostAlertPanel,{
+          pet:syntheticPet,lastSeen:lang==='es'?'Zona de demostración':'Demo area',
+          details:longText,isSaving:false,publicUrl:'',isLinkLoading:false,
+          linkError:lang==='es'?'No se pudo obtener un enlace de prueba.':'Demo link unavailable.',
+          shareFeedback:'',isLocalLink:true,onCopy:noop,onWhatsApp:noop,onInstagram:noop,
+          onMore:noop,onRetryLink:noop,onResolve:noop
+        });break;
+      }
+      if(spec.template==='public-rescue'){
+        body=node(PublicRescueView,{token:'synthetic-invalid-token',fromPreview:true,onBack:noop});break;
+      }
+      if(spec.template==='passport'){
+        body=node(PassportModal,{isOpen:true,pet:syntheticPet});break;
+      }
+      if(spec.template==='sighting'){
+        body=node(SightingDetailModal,{sightingId:'synthetic-invalid-sighting'});break;
+      }
+      if(spec.template==='report'){
+        body=node(ReportDialog,{target:{kind:'feed_comment',id:'qa-comment-01',
+          label:lang==='es'?'Comentario de prueba':'Demo comment'}});break;
+      }
+      if(spec.template==='map'){
+        body=node(MapView,{currentPet:syntheticPet,canUsePlaces:true});break;
+      }
+      if(spec.template==='map-suggest'){
+        body=node(SuggestPlaceModal,{isOpen:true});break;
+      }
+      if(spec.template==='feature-intent'){
+        body=node(FeatureIntentChoice,{moduleKey:'places',source:'synthetic-visual-qa'});break;
+      }
+      if(spec.template==='notifications'){
+        let notifications=state==='empty'?[]:state==='unread'?[demoNotifications[0]]:demoNotifications;
+        body=node(NotificationsModal,{isOpen:true,notifications,
+          onOpenNotification:noop,onLoadMore:noop,hasMore:false,isLoadingMore:false});break;
+      }
+      if(spec.template==='messages'){
+        body=node(MessagesModal,{isOpen:true,isDemo:true,
+          conversations:state==='empty'?[]:demoConversations,
+          onSendMessage:noop});break;
+      }
+      if(spec.template==='offer'){
+        body=node(SupporterOfferB,{
+          children:React.createElement('p',{className:'px-3 py-4 text-sm text-[#204E4A]'},
+            lang==='es'?'QA: Checkout deshabilitado. No se realizará ningún pago.':'QA: Checkout disabled. No payment will be made.')
+        });break;
+      }
+      if(spec.template==='benefits'){
+        body=node(SupporterBenefitsHome,{pet:state==='pet'?syntheticPet:undefined,
+          milestone:state==='pet'?3:0,qa:false,onManageSubscription:noop,onSupport:noop});break;
+      }
+      if(spec.template==='wall'){
+        body=node(GratitudeWallScene,{rows:[],tab:'all',onTabChange:noop,
+          error:true,loading:false,onRetry:noop,previewOnly:true,backToWelcome:true});break;
+      }
+      if(spec.template==='admin'){
+        body=node(AdminDashboard,{onOpenReports:noop});break;
+      }
+      throw Error('Unsupported QA template '+spec.template+' / '+scene);
+    }
+  }
+  if(['invitation','legal-privacy','legal-terms','report-post','report-comment','admin-summary','admin-users','admin-pets','admin-finance','admin-ideas','admin-infra','admin-maintenance','admin-paypal','benefits-no-pet','benefits-pet'].includes(scene))return React.createElement('div',{'data-visual-surface':scene},body);
+  return React.createElement('div',{'data-visual-surface':scene,
+    'data-pazo-app-shell':true,
+    className:'mx-auto flex h-[100dvh] min-h-0 w-full flex-col overflow-hidden bg-[#FAF8F5] text-[#204E4A] sm:h-[860px] sm:max-w-[430px] sm:rounded-[2.8rem] sm:shadow-xl'},
+    ['welcome','signup','pet-onboarding','interests','nav'].includes(scene)
+      ? body
+      : React.createElement('main',{className:'relative flex min-h-0 flex-1 flex-col overflow-y-auto'},body)
+  );
+}
+createRoot(document.getElementById('root')).render(
+  React.createElement(AuthProvider,null,React.createElement(Fixture))
+);
+</script>
+</body>
+</html>
