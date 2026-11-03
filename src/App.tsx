@@ -1016,7 +1016,9 @@ function PazoMain() {
     setLoginMessage('')
   }
 
-  const officialFeedPetId = !isDemoUser && canUseAccount && activeTab === 'inicio' ? currentPet?.id : undefined
+  // Until this account's pets load, currentPet is still the Demo pet; asking with it is rejected by the server.
+  const ownPetsReady = petBootstrap?.userId === user?.id && petBootstrap?.status === 'ready' && !isOnboardingActive
+  const officialFeedPetId = !isDemoUser && canUseAccount && ownPetsReady && activeTab === 'inicio' ? currentPet?.id : undefined
   useEffect(() => {
     if (!officialFeedPetId) return
     let current = true
