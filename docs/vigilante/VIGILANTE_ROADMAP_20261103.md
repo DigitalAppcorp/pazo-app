@@ -116,6 +116,26 @@ Principio del PO: **no pedir datos por adelantado**. El dueño descubre el valor
 
 **Aprobado por el PO (3-nov-2026):** una **tercera fuente "Oficial"** que no compite con los intereses. Trae las publicaciones oficiales vigentes cuya audiencia (especie y código postal) coincide con la mascota actual. Las alertas importantes no vistas van arriba del feed hasta verse o caducar; el resto se intercala por fecha como si fueran de una cuenta seguida. Mientras no exista el código postal (paso 1), solo se puede filtrar por especie.
 
+## Paso 3 — push del Vigilante (aprobado por el PO, 3-nov-2026; solo planeación)
+
+Reutiliza `push_private.outbox` (cola con reintentos), `push_private.preferences`, `push_private.release_gate` (interruptor general) y la entrada única push → panel de notificaciones (`public/sw.js`).
+
+1. **Pantalla bloqueada genérica.** Se respeta la regla de `workerCore.mjs`: nada escrito por un usuario (incluido el nombre de la mascota) llega a la pantalla bloqueada, y no se expone información de salud. El texto del push lo aprueba el PO en cada alerta. Ejemplo: "Alerta de salud cerca de ti. Leptospirosis en LA: toca para ver si aplica a tu mascota." La personalización ("Esto aplica a Max: su vacuna venció") se muestra solo dentro de la app.
+2. **Tipo nuevo "alerta de salud"** en el outbox (ampliar el CHECK de `kind`) y en el catálogo de notificaciones del paso 0.
+3. **Categoría nueva "Alertas de salud"** en las preferencias de push, activada por defecto. Si se apaga, la tarjeta llega igual al panel, sin push.
+4. **Un push por persona y por alerta**, aunque tenga varias mascotas afectadas; dentro de la app: "Aplica a 2 de tus mascotas".
+5. **Recalcular la audiencia justo antes de enviar.** Si el dueño registró la vacuna, ya no se le envía.
+6. **Prioridades:**
+   - alta (retiro de una comida registrada, brote con mascota sin protección registrada, evacuación): envío inmediato;
+   - media: respeta horas de silencio y tope semanal;
+   - baja: sin push, solo feed.
+7. **Horas de silencio:** 9 p. m. a 8 a. m., hora local del usuario; lo nocturno se envía a las 8 a. m. **Solo la evacuación** se salta las horas de silencio.
+8. **Tope:** máximo 2 alertas de prioridad media por semana por persona; el excedente queda solo en el feed.
+9. **Caducidad:** si la alerta caduca antes de enviarse, se cancela.
+10. **Freno:** el PO puede cancelar una alerta aprobada mientras se envía.
+11. **iPhone:** solo recibe push quien instaló la PWA; los demás ven la alerta en el panel. La tarjeta de aprobación muestra ambos números por separado.
+12. **Métricas por alerta:** entregados, tocados, respuestas (Ya la tiene / No la tiene / No sé) y cuántos desactivaron "Alertas de salud" después (alarma de saturación).
+
 ## Riesgo: el panel de notificaciones (revisión 3-nov-2026)
 
 Hoy cada tipo de notificación (`sighting`, `community_join`, `care_reminder`, `new_follower`, `admin_new_pet`, `admin_new_account`, `supporter_campaign`, `supporter_verified`) se maneja repartido en varios lugares:
