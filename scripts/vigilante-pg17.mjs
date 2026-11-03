@@ -67,7 +67,9 @@ rejects(`insert into public.pet_private_details(pet_id,health_conditions) values
 // Reserved names.
 for(const name of ['PAZO','P.a.z.0','Pazo Oficial','PAZO team','Pazó'])
  rejects(`insert into public.pets(owner_id,name,species) values('${ana}','${name}','perro')`,/PAZO_RESERVED_NAME/,`reserved pet name: ${name}`)
-sql(`insert into public.pets(owner_id,name,species) values('${ana}','Paz','otro')`)
+sql(`grant insert(owner_id,name,species) on public.pets to authenticated;create policy pets_owner_insert on public.pets for insert to authenticated with check(owner_id=auth.uid())`)
+sql(as(ana,`insert into public.pets(owner_id,name,species) values('${ana}','Paz','otro')`))
+rejects(as(ana,`insert into public.pets(owner_id,name,species) values('${ana}','PAZO','otro')`),/PAZO_RESERVED_NAME/,'the check also runs when the signed-in user creates the pet')
 check(true,'ordinary names such as "Paz" are allowed')
 rejects(as(ana,`update public.profiles set username='pazo_admin' where id='${ana}'`),/PAZO_RESERVED_NAME/,'reserved usernames are rejected')
 

@@ -127,8 +127,10 @@ language sql immutable set search_path='' as $fn$
 $fn$;
 revoke all on function private.pazo_is_reserved_name(text) from public;
 
+-- Security definer: pets are created by invoker RPCs as the signed-in user, who has no access to
+-- the private schema where the name check lives.
 create or replace function private.pazo_reject_reserved_name() returns trigger
-language plpgsql set search_path='' as $fn$
+language plpgsql security definer set search_path='' as $fn$
 -- Read the column through jsonb: a record field that does not exist on the table would fail at runtime.
 declare v_column text := case when tg_table_name='pets' then 'name' else 'username' end;
  v_value text := to_jsonb(new)->>v_column;
