@@ -129,13 +129,12 @@ revoke all on function private.pazo_is_reserved_name(text) from public;
 
 create or replace function private.pazo_reject_reserved_name() returns trigger
 language plpgsql set search_path='' as $fn$
-declare v_value text := case when tg_table_name='pets' then new.name else new.username end;
+-- Read the column through jsonb: a record field that does not exist on the table would fail at runtime.
+declare v_column text := case when tg_table_name='pets' then 'name' else 'username' end;
+ v_value text := to_jsonb(new)->>v_column;
 begin
- if tg_op='UPDATE' then
-  if (tg_table_name='pets' and new.name is not distinct from old.name)
-   or (tg_table_name='profiles' and new.username is not distinct from old.username) then
-   return new;
-  end if;
+ if tg_op='UPDATE' and v_value is not distinct from to_jsonb(old)->>v_column then
+  return new;
  end if;
  if private.pazo_is_reserved_name(v_value) then
   raise exception 'PAZO_RESERVED_NAME' using errcode='23514', hint='This name is reserved for PAZO.';

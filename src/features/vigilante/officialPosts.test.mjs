@@ -34,7 +34,8 @@ test('PAZO is an author without an account and only the server can publish as it
 test('names that pass for PAZO are reserved for pets and usernames, only when the name changes',()=>{
   assert.match(sql,/create trigger pazo_reserved_pet_name before insert or update of name on public\.pets/)
   assert.match(sql,/create trigger pazo_reserved_username before insert or update of username on public\.profiles/)
-  assert.match(sql,/new\.name is not distinct from old\.name/)
+  assert.match(sql,/v_value is not distinct from to_jsonb\(old\)->>v_column/)
+  assert.doesNotMatch(sql,/new\.username/,'a pets trigger must never name a profiles column')
   const translate=sql.match(/translate\(lower\(coalesce\(p_name,''\)\),'([^']+)','([^']+)'\)/)
   assert.equal([...translate[1]].length,[...translate[2]].length)
   assert.match(sql,/update public\.profiles set is_founder = true\s+where id in\(select g\.user_id from admin_private\.admin_grants g\)/)
