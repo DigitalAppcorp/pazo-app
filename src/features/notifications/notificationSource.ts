@@ -51,7 +51,17 @@ export const getNotificationAdminPetId = (notification: PazoNotification) =>
     ? notification.petId || null
     : null
 
+export const getNotificationFollowerId = (notification: PazoNotification) =>
+  notification.sourceType === 'new_follower'
+    ? notification.sourceId || null
+    : null
+
 export const adminNotificationCopy = (sourceType: string | undefined, lang: 'es' | 'en') => {
+  if (sourceType === 'new_follower') {
+    return lang === 'es'
+      ? { title: 'Tienes un nuevo seguidor', subtitle: 'Toca para ver quién es.' }
+      : { title: 'You have a new follower', subtitle: 'Tap to see who it is.' }
+  }
   if (sourceType === 'admin_new_pet') {
     return lang === 'es'
       ? { title: 'Nueva mascota en PAZO', subtitle: 'Toca para ver su perfil.' }

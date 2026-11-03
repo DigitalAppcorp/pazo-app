@@ -6,6 +6,7 @@ export interface PushPreferences {
   sightings: boolean
   community: boolean
   care: boolean
+  followers: boolean
   isAdmin: boolean
   adminNewPets: boolean
   adminNewAccounts: boolean
@@ -131,6 +132,8 @@ export async function savePushPreferences(value: PushPreferences) {
     p_care: value.care,
   })
   if (error || data !== true) throw error ?? new Error('Push preferences were not saved.')
+  const followers = await supabase.rpc('pazo_push_set_followers_preference', { p_followers: value.followers })
+  if (followers.error || followers.data !== true) throw followers.error ?? new Error('Push preferences were not saved.')
   if (!value.isAdmin) return
   const admin = await supabase.rpc('pazo_push_set_admin_preferences', {
     p_pets: value.adminNewPets,
