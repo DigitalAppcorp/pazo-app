@@ -15,6 +15,8 @@ interface NotificationRow {
   alert_reason?: string | null
   alert_vaccine_type?: string | null
   alert_answer?: string | null
+  title_en?: string | null
+  body_en?: string | null
 }
 
 export const mapNotificationRow = (row: NotificationRow): PazoNotification => ({
@@ -32,6 +34,8 @@ export const mapNotificationRow = (row: NotificationRow): PazoNotification => ({
   sourceId: row.source_id,
   alertReason: row.alert_reason === 'expired' || row.alert_reason === 'unregistered' || row.alert_reason === 'applies' ? row.alert_reason : null,
   alertVaccineType: isVaccineType(row.alert_vaccine_type) ? row.alert_vaccine_type : null,
+  titleEn: row.title_en ?? null,
+  bodyEn: row.body_en ?? null,
   alertAnswer: row.alert_answer === 'has_it' || row.alert_answer === 'not_yet' || row.alert_answer === 'unsure' ? row.alert_answer : null,
 })
 

@@ -1,0 +1,40 @@
+name: Vigilante isolated gates
+on:
+  pull_request:
+    branches: [main]
+  # The Vigilante PRs are stacked; pushes to their branches run the same gates.
+  push:
+    branches: ['feat/vigilante-**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  vigilante-pg17:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: vigilante
+          POSTGRES_PASSWORD: synthetic-vigilante-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGDATABASE: vigilante
+      PGPASSWORD: synthetic-vigilante-only
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run test:vigilante
+      - run: npm run test:vigilante:pg17

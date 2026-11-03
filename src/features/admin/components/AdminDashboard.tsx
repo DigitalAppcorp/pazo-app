@@ -7,6 +7,7 @@ import {AdminSupportInbox} from '../../support/components/AdminSupportInbox'
 import {AdminGiftBenefits} from '../../support/components/AdminGiftBenefits'
 import {AdminMaintenanceControls} from '../../maintenance/AdminMaintenanceControls'
 import {AdminLiveFinanceSummary} from './AdminLiveFinanceSummary'
+import {AdminVigilanteInbox} from '../../vigilante/admin/AdminVigilanteInbox'
 import { AdminGlyph,AdminDonut,AdminCohortColumns,AdminModuleRings,type AdminGlyphName } from './AdminVisuals'
 import { InfoTip,PulseTile,RankBars } from './AdminClarity'
 import {
@@ -14,7 +15,7 @@ import {
  type AdminOverview,type AdminUser,type AdminExperiment,type AdminVoter,type AdminAudience,
 } from '../adminDashboardService'
 
-type Section='summary'|'users'|'pets'|'finance'|'activity'|'marketing'|'behavior'|'content'|'ideas'|'places'|'infra'|'reports'|'paypal'|'support'|'gifts'|'maintenance'
+type Section='summary'|'users'|'pets'|'finance'|'activity'|'marketing'|'behavior'|'content'|'ideas'|'places'|'infra'|'reports'|'paypal'|'support'|'gifts'|'maintenance'|'vigilante'
 type NavGroup='home'|'people'|'growth'|'money'|'ops'
 const navGroups:{key:NavGroup;es:string;en:string}[]=[
  {key:'home',es:'',en:''},
@@ -35,6 +36,7 @@ const sections:{key:Section;es:string;en:string;icon:AdminGlyphName;group:NavGro
  {key:'places',es:'Lugares',en:'Places',icon:'pin',group:'growth'},
  {key:'finance',es:'Membresías',en:'Memberships',icon:'crown',group:'money'},
  {key:'gifts',es:'Beneficios de cortesía',en:'Complimentary benefits',icon:'heart',group:'money',navEs:'Cortesías',navEn:'Complimentary'},
+ {key:'vigilante',es:'Vigilante',en:'Vigilante',icon:'search',group:'ops'},
  {key:'reports',es:'Denuncias',en:'Reports',icon:'alert',group:'ops'},
  {key:'support',es:'Soporte',en:'Support',icon:'search',group:'ops'},
  {key:'maintenance',es:'Mantenimiento',en:'Maintenance',icon:'clock',group:'ops'},
@@ -89,9 +91,9 @@ function PageTools({lang,show,showRefresh,loading,overview,onRefresh,children}:{
  </div>
 }
 
-export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onClose:()=>void;onOpenReports?:()=>void}){
+export function AdminDashboard({lang,onClose,onOpenReports,initialSection='summary'}:{lang:'es'|'en';onClose:()=>void;onOpenReports?:()=>void;initialSection?:'summary'|'vigilante'}){
  const visibleSections=sections.filter(item=>item.key!=='reports'||Boolean(onOpenReports))
- const [section,setSection]=useState<Section>('summary')
+ const [section,setSection]=useState<Section>(initialSection)
  const [period,setPeriod]=useState<7|30|90>(30)
  const [overview,setOverview]=useState<AdminOverview|null>(null)
  const [users,setUsers]=useState<AdminUser[]>([])
@@ -229,6 +231,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
      {section==='support'&&<AdminSupportInbox lang={lang}/>}
      {section==='gifts'&&<AdminGiftBenefits lang={lang}/>}
      {section==='maintenance'&&<AdminMaintenanceControls lang={lang}/>}
+     {section==='vigilante'&&<AdminVigilanteInbox lang={lang}/>}
      {section==='marketing'&&<AdminMarketingPanel lang={lang} period={period}/>}
      {section==='summary'&&error&&!overview&&<div role="alert" className="flex items-center justify-between gap-3 rounded-[16px] bg-[#F9E7DE] px-4 py-2 text-[13px] text-[#823E2D]">
        {l('No fue posible cargar las cifras generales.','General figures could not be loaded.')}

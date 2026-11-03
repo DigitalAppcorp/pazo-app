@@ -107,7 +107,7 @@ export const PushControl = ({ lang, variant }: PushControlProps) => {
 
   if (variant === 'offer') return null
 
-  type ToggleKey = 'sightings' | 'community' | 'care' | 'followers' | 'healthAlerts' | 'adminNewPets' | 'adminNewAccounts'
+  type ToggleKey = 'sightings' | 'community' | 'care' | 'followers' | 'healthAlerts' | 'adminNewPets' | 'adminNewAccounts' | 'adminVigilante'
   const toggle = (key: ToggleKey) => {
     if (!preferences) return
     const previous = preferences
@@ -124,6 +124,7 @@ export const PushControl = ({ lang, variant }: PushControlProps) => {
     ...(preferences?.isAdmin ? [
       { key: 'adminNewPets' as const, label: es ? 'Mascotas nuevas' : 'New pets' },
       { key: 'adminNewAccounts' as const, label: es ? 'Cuentas nuevas' : 'New accounts' },
+      { key: 'adminVigilante' as const, label: es ? 'Alertas del Vigilante' : 'Vigilante alerts' },
     ] : []),
   ]
 

@@ -29,6 +29,7 @@ export type NotificationTarget =
   | { kind: 'pet_profile'; petId: string }
   | { kind: 'pet_edit'; petId: string }
   | { kind: 'official_post'; postId: string }
+  | { kind: 'admin_vigilante' }
 
 // Data the app already holds that a notice may show inside the app (never on a lock screen).
 export interface NotificationContext {
@@ -165,7 +166,9 @@ export const NOTIFICATION_KINDS = {
         : item.alertReason === 'unregistered'
           ? (lang === 'es' ? `¿${name} ya tiene esta vacuna?` : `Does ${name} already have this vaccine?`)
           : (lang === 'es' ? `Esto aplica a ${name}.` : `This applies to ${name}.`)
-      return { title: item.title, subtitle: `${personal} ${item.subtitle}`.trim() }
+      const title = lang === 'en' && item.titleEn ? item.titleEn : item.title
+      const body = lang === 'en' && item.bodyEn ? item.bodyEn : item.subtitle
+      return { title, subtitle: `${personal} ${body}`.trim() }
     },
     target: (item) => (item.sourceId ? { kind: 'official_post', postId: item.sourceId } : null),
     responses: (item, lang, context) => {
@@ -177,6 +180,24 @@ export const NOTIFICATION_KINDS = {
         { answer: 'unsure', label: lang === 'es' ? 'No sé' : 'Not sure' },
       ]
     },
+  },
+  admin_vigilante_pending: {
+    template: 'open',
+    icon: 'bell',
+    tone: 'highlight',
+    copy: (_item, lang) => lang === 'es'
+      ? { title: 'Hay una alerta esperando tu aprobación', subtitle: 'Abre la bandeja del Vigilante.' }
+      : { title: 'An alert is waiting for your approval', subtitle: 'Open the Vigilante inbox.' },
+    target: () => ({ kind: 'admin_vigilante' }),
+  },
+  admin_vigilante_approved: {
+    template: 'open',
+    icon: 'bell',
+    tone: 'neutral',
+    copy: (item, lang) => lang === 'es'
+      ? { title: 'Se aprobó una alerta del Vigilante', subtitle: `${item.subtitle} Si no fuiste tú, cancélala en la bandeja.` }
+      : { title: 'A Vigilante alert was approved', subtitle: `${item.subtitle} If it was not you, cancel it in the inbox.` },
+    target: () => ({ kind: 'admin_vigilante' }),
   },
   supporter_campaign: supporterKind,
   supporter_verified: supporterKind,

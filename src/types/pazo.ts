@@ -359,4 +359,6 @@ export interface PazoNotification {
   alertReason?: 'expired' | 'unregistered' | 'applies' | null
   alertVaccineType?: VaccineType | null
   alertAnswer?: 'has_it' | 'not_yet' | 'unsure' | null
+  titleEn?: string | null
+  bodyEn?: string | null
 }

@@ -11,6 +11,7 @@ export interface PushPreferences {
   isAdmin: boolean
   adminNewPets: boolean
   adminNewAccounts: boolean
+  adminVigilante?: boolean
 }
 
 const browserHasPush = () =>
@@ -143,4 +144,6 @@ export async function savePushPreferences(value: PushPreferences) {
     p_accounts: value.adminNewAccounts,
   })
   if (admin.error || admin.data !== true) throw admin.error ?? new Error('Push preferences were not saved.')
+  const vigilante = await supabase.rpc('pazo_push_set_admin_vigilante_preference', { p_enabled: value.adminVigilante !== false })
+  if (vigilante.error || vigilante.data !== true) throw vigilante.error ?? new Error('Push preferences were not saved.')
 }

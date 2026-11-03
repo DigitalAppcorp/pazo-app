@@ -31,6 +31,16 @@ const COPY={
     en:{title:'We have a health alert for your pet',body:'Tap to see if it applies to your pet.'},
     urgency:'high',ttl:43200,
   },
+  admin_vigilante_pending:{
+    es:{title:'Hay una alerta esperando tu aprobación',body:'Abre la bandeja del Vigilante.'},
+    en:{title:'An alert is waiting for your approval',body:'Open the Vigilante inbox.'},
+    urgency:'high',ttl:43200,
+  },
+  admin_vigilante_approved:{
+    es:{title:'Se aprobó una alerta del Vigilante',body:'Si no fuiste tú, cancélala en la bandeja.'},
+    en:{title:'A Vigilante alert was approved',body:'If it was not you, cancel it in the inbox.'},
+    urgency:'high',ttl:43200,
+  },
   admin_new_pet:{
     es:{title:'Nueva mascota en PAZO',body:'Toca para ver su perfil.'},
     en:{title:'New pet on PAZO',body:'Tap to see its profile.'},

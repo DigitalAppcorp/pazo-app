@@ -1972,6 +1972,10 @@ function PazoMain() {
       case 'official_post':
         setActiveTab('inicio')
         break
+      case 'admin_vigilante':
+        setActiveTab('mascota')
+        window.location.hash = '#/admin/vigilante'
+        break
       case 'pet_edit': {
         const pet = pets.find((item) => item.id === target.petId)
         if (!pet) {

@@ -6,6 +6,8 @@ export interface OfficialPost {
   id: string
   title: string
   body: string
+  titleEn: string | null
+  bodyEn: string | null
   sourceName: string
   sourceUrl: string
   sourcePublishedAt: string
@@ -20,6 +22,8 @@ interface OfficialPostRow {
   id: string
   title: string
   body: string
+  title_en?: string | null
+  body_en?: string | null
   source_name: string
   source_url: string
   source_published_at: string
@@ -40,6 +44,8 @@ export const mapOfficialPostRow = (row: OfficialPostRow): OfficialPost | null =>
     id: row.id,
     title: row.title,
     body: row.body,
+    titleEn: row.title_en ?? null,
+    bodyEn: row.body_en ?? null,
     sourceName: row.source_name,
     sourceUrl: row.source_url,
     sourcePublishedAt: row.source_published_at,

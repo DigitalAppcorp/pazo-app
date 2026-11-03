@@ -66,7 +66,9 @@
     "test:ads2:pg17": "node scripts/ads2-pg17.mjs",
     "test:campaign-experience": "node --experimental-strip-types --test src/features/marketing/campaignExperience.test.mjs src/features/marketing/experienceDetails.test.mjs",
     "test:campaign-experience:pg17": "node scripts/campaign-experience-pg17.mjs",
-    "test:experience-details:browser": "node scripts/experience-details-browser.mjs"
+    "test:experience-details:browser": "node scripts/experience-details-browser.mjs",
+    "test:vigilante": "node --experimental-strip-types --test src/features/notifications/notificationCatalog.test.mjs src/features/care/vaccineTypes.test.mjs src/features/vigilante/privateDetails.test.mjs src/features/vigilante/officialPosts.test.mjs src/features/vigilante/admin/vigilanteAdmin.test.mjs supabase/functions/pazo-vigilante-worker/workerCore.test.mjs supabase/functions/pazo-push-worker/workerCore.test.mjs",
+    "test:vigilante:pg17": "node scripts/vigilante-pg17.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

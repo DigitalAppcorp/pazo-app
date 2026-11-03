@@ -67,7 +67,7 @@ test('a new follower notice carries no pet name',()=>{
 })
 
 test('every notice is high urgency so a sleeping phone still shows it',()=>{
-  for(const kind of ['sighting','community_join','care_reminder','new_follower','admin_new_pet','admin_new_account','health_alert'])
+  for(const kind of ['sighting','community_join','care_reminder','new_follower','admin_new_pet','admin_new_account','health_alert','admin_vigilante_pending','admin_vigilante_approved'])
     assert.equal(pushMessage(kind,'es','x').urgency,'high',kind)
 })
 

@@ -7,7 +7,7 @@ const sql=readFileSync(new URL('../../../supabase/migrations/20261103210000_pazo
 const row=(id,priority,published_at,extra={})=>({id,title:'T',body:'B',source_name:'FDA',source_url:'https://fda.gov/x',source_published_at:'2026-11-03',priority,published_at,expires_at:null,likes:'2',liked:true,...extra})
 
 test('official posts map strictly and drop anything unexpected',()=>{
-  assert.deepEqual(mapOfficialPostRow(row('a','high','2026-11-03T10:00:00Z')),{id:'a',title:'T',body:'B',sourceName:'FDA',sourceUrl:'https://fda.gov/x',sourcePublishedAt:'2026-11-03',priority:'high',publishedAt:'2026-11-03T10:00:00Z',expiresAt:null,likes:2,isLiked:true})
+  assert.deepEqual(mapOfficialPostRow(row('a','high','2026-11-03T10:00:00Z')),{id:'a',title:'T',body:'B',titleEn:null,bodyEn:null,sourceName:'FDA',sourceUrl:'https://fda.gov/x',sourcePublishedAt:'2026-11-03',priority:'high',publishedAt:'2026-11-03T10:00:00Z',expiresAt:null,likes:2,isLiked:true})
   assert.equal(mapOfficialPostRow(row('b','urgent','2026-11-03T10:00:00Z')),null)
   assert.equal(mapOfficialPostRow(row('c','low','2026-11-03T10:00:00Z',{source_url:'javascript:alert(1)'})),null)
 })

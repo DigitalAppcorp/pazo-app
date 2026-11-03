@@ -28,10 +28,12 @@ interface OfficialPostCardProps {
 // PAZO is not a pet: no profile to open, no follow, no comments. Health alerts send
 // questions to the vet instead of a comment thread.
 export const OfficialPostCard = ({ post, lang, onToggleLike }: OfficialPostCardProps) => {
+  const title = lang === 'en' && post.titleEn ? post.titleEn : post.title
+  const body = lang === 'en' && post.bodyEn ? post.bodyEn : post.body
   const share = async () => {
     const url = `${window.location.origin}/?oficial=${encodeURIComponent(post.id)}`
     try {
-      if (navigator.share) await navigator.share({ title: post.title, text: post.title, url })
+      if (navigator.share) await navigator.share({ title, text: title, url })
       else await navigator.clipboard?.writeText(url)
     } catch {
       // The person closed the share sheet.
@@ -56,8 +58,8 @@ export const OfficialPostCard = ({ post, lang, onToggleLike }: OfficialPostCardP
         </div>
       </div>
       <div className="space-y-2 px-4 pb-4">
-        <h3 className="text-[15px] font-black leading-snug text-[#204E4A]">{post.title}</h3>
-        <p className="whitespace-pre-line text-xs leading-relaxed text-[#204E4A]">{post.body}</p>
+        <h3 className="text-[15px] font-black leading-snug text-[#204E4A]">{title}</h3>
+        <p className="whitespace-pre-line text-xs leading-relaxed text-[#204E4A]">{body}</p>
         <p className="text-[12px] font-semibold text-[#5C7470]">
           {lang === 'es' ? '¿Dudas? Consulta a tu veterinario.' : 'Questions? Ask your vet.'}
         </p>
