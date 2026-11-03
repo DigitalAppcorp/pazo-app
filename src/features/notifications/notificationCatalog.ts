@@ -62,6 +62,27 @@ interface NotificationKind {
 
 const storedCopy = (item: PazoNotification): NotificationCopy => ({ title: item.title, subtitle: item.subtitle })
 
+// The database writes these two in Spanish; English readers get the same notice translated.
+// The reporter's own message is left as they wrote it.
+const SIGHTING_TITLE_ES = 'Nuevo aviso sobre '
+const SIGHTING_LOCATION_ES = ' · Ubicación: '
+const sightingCopy = (item: PazoNotification, lang: 'es' | 'en'): NotificationCopy => {
+  if (lang === 'es') return storedCopy(item)
+  const title = item.title.startsWith(SIGHTING_TITLE_ES) ? 'New report about ' + item.title.slice(SIGHTING_TITLE_ES.length) : item.title
+  const at = item.subtitle.lastIndexOf(SIGHTING_LOCATION_ES)
+  const subtitle = at < 0 ? item.subtitle : item.subtitle.slice(0, at) + ' · Location: ' + item.subtitle.slice(at + SIGHTING_LOCATION_ES.length)
+  return { title, subtitle }
+}
+
+const communityJoinCopy = (item: PazoNotification, lang: 'es' | 'en'): NotificationCopy => {
+  if (lang === 'es') return storedCopy(item)
+  const community = item.subtitle.match(/«(.*)»/)?.[1]
+  return {
+    title: 'New member in your community',
+    subtitle: community ? `Someone joined your community “${community}”.` : 'Someone joined your community.',
+  }
+}
+
 const adminCopy = (item: PazoNotification, lang: 'es' | 'en') =>
   adminNotificationCopy(item.sourceType, lang) ?? storedCopy(item)
 
@@ -95,7 +116,7 @@ export const NOTIFICATION_KINDS = {
     icon: 'chat',
     tone: 'highlight',
     styleNeedsTarget: true,
-    copy: storedCopy,
+    copy: sightingCopy,
     target: (item) => {
       const sightingId = getNotificationSightingId(item)
       return sightingId ? { kind: 'sighting', sightingId } : null
@@ -106,7 +127,7 @@ export const NOTIFICATION_KINDS = {
     icon: 'community',
     tone: 'highlight',
     styleNeedsTarget: true,
-    copy: storedCopy,
+    copy: communityJoinCopy,
     target: (item) => {
       const communityId = getNotificationCommunityId(item)
       return communityId ? { kind: 'community', communityId } : null

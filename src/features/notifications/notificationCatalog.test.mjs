@@ -61,6 +61,15 @@ test('a community join opens that community',()=>{
   assert.equal(describeNotification(row('community_join'),'en').icon,'bell')
 })
 
+test('sighting and community notices stored in Spanish read in English, keeping the reporter message',()=>{
+  const sighting=row('sighting',{source_id:'s1',title:'Nuevo aviso sobre Luna',body:'La vi en el parque · Ubicación: Echo Park'})
+  assert.deepEqual([describeNotification(sighting,'es').title,describeNotification(sighting,'es').subtitle],['Nuevo aviso sobre Luna','La vi en el parque · Ubicación: Echo Park'])
+  assert.deepEqual([describeNotification(sighting,'en').title,describeNotification(sighting,'en').subtitle],['New report about Luna','La vi en el parque · Location: Echo Park'])
+  const join=row('community_join',{source_id:'c1',title:'Nuevo miembro en tu comunidad',body:'Alguien se unió a tu comunidad «Perros de Silver Lake».'})
+  assert.equal(describeNotification(join,'es').subtitle,'Alguien se unió a tu comunidad «Perros de Silver Lake».')
+  assert.deepEqual([describeNotification(join,'en').title,describeNotification(join,'en').subtitle],['New member in your community','Someone joined your community “Perros de Silver Lake”.'])
+})
+
 test('a care reminder keeps the calendar and its fixed title even without a reference',()=>{
   const view=describeNotification(row('care_reminder',{source_id:'care-1'}),'en')
   assert.equal(view.title,'Care reminder')
