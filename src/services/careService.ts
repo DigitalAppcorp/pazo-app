@@ -1,5 +1,6 @@
 import {beginTask} from '../features/marketing/intelligenceRuntime'
 import { supabase } from './supabaseClient'
+import { isVaccineType } from '../features/care/vaccineTypes'
 import type {
   CareCompletion,
   CareItem,
@@ -28,6 +29,7 @@ const mapCareItem = (row: any): CareItem => ({
       ? null
       : (Number(row.reminder_days_before) as Exclude<CareReminderDays, null>),
   notes: row.notes,
+  vaccineType: isVaccineType(row.vaccine_type) ? row.vaccine_type : null,
   status: row.status,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
@@ -55,13 +57,15 @@ const toCareWritePayload = (input: CareItemInput) => ({
   recurrence: input.recurrence,
   reminder_days_before: input.reminderDaysBefore,
   notes: input.notes?.trim() || null,
+  // The database only accepts a vaccine type on vaccine items.
+  vaccine_type: input.category === 'vaccine' ? input.vaccineType ?? null : null,
 })
 
 export const fetchActiveCareItems = async (petId: string): Promise<CareItem[]> => {
   const { data, error } = await supabase
     .from('care_items')
     .select(
-      'id,pet_id,title,category,due_date,due_time,timezone,recurrence,reminder_days_before,notes,status,created_at,updated_at'
+      'id,pet_id,title,category,due_date,due_time,timezone,recurrence,reminder_days_before,notes,vaccine_type,status,created_at,updated_at'
     )
     .eq('pet_id', petId)
     .eq('status', 'active')
@@ -108,7 +112,7 @@ export const createCareItem = async (
       ...toCareWritePayload(input),
     })
     .select(
-      'id,pet_id,title,category,due_date,due_time,timezone,recurrence,reminder_days_before,notes,status,created_at,updated_at'
+      'id,pet_id,title,category,due_date,due_time,timezone,recurrence,reminder_days_before,notes,vaccine_type,status,created_at,updated_at'
     )
     .single()
 
@@ -130,7 +134,7 @@ export const updateCareItem = async (
     .eq('id', careItemId)
     .eq('status', 'active')
     .select(
-      'id,pet_id,title,category,due_date,due_time,timezone,recurrence,reminder_days_before,notes,status,created_at,updated_at'
+      'id,pet_id,title,category,due_date,due_time,timezone,recurrence,reminder_days_before,notes,vaccine_type,status,created_at,updated_at'
     )
     .single()
 
@@ -198,7 +202,7 @@ export const fetchCareReminderCandidates = async (
   const { data, error } = await supabase
     .from('care_items')
     .select(
-      'id,pet_id,title,category,due_date,due_time,timezone,recurrence,reminder_days_before,notes,status,created_at,updated_at'
+      'id,pet_id,title,category,due_date,due_time,timezone,recurrence,reminder_days_before,notes,vaccine_type,status,created_at,updated_at'
     )
     .in('pet_id', petIds)
     .eq('status', 'active')

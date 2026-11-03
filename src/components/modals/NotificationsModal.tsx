@@ -3,7 +3,7 @@ import { formatNotificationTime } from '../../features/notifications/notificatio
 import { PushControl } from '../../features/push/PushControl'
 import { useState } from 'react'
 import type { PazoNotification } from '../../types/pazo'
-import { IconCalendar, IconChat, IconCommunity } from '../icons/PazoIcons'
+import { IconCalendar, IconChat, IconCommunity, IconPaw } from '../icons/PazoIcons'
 
 interface NotificationsModalProps {
   isOpen: boolean
@@ -15,6 +15,8 @@ interface NotificationsModalProps {
   isLoadingMore: boolean
   lang: 'es' | 'en'
   canUsePush: boolean
+  // Names of the owner's own pets, shown inside the app only.
+  petNames?: Record<string, string>
 }
 
 /** Decorative PAZO artwork. No synthetic pets, user activity or notification data. */
@@ -67,6 +69,7 @@ const NotificationIconArt = ({ icon }: { icon: NotificationIcon }) => {
   if (icon === 'calendar') return <IconCalendar size={21} />
   if (icon === 'chat') return <IconChat size={21} />
   if (icon === 'community') return <IconCommunity size={21} />
+  if (icon === 'paw') return <IconPaw size={21} />
   return <NotificationBell />
 }
 
@@ -80,6 +83,7 @@ export const NotificationsModal = ({
   isLoadingMore,
   lang,
   canUsePush,
+  petNames,
 }: NotificationsModalProps) => {
   const [filter, setFilter] = useState<'todas' | 'comunidad'>('todas')
 
@@ -177,7 +181,7 @@ export const NotificationsModal = ({
           ) : (
             <div className="space-y-2.5" aria-live="polite">
               {filtered.map((item) => {
-                const view = describeNotification(item, lang)
+                const view = describeNotification(item, lang, { petName: (petId) => petNames?.[petId] })
                 const canOpen = view.target !== null
 
                 return (

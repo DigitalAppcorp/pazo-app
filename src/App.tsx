@@ -376,6 +376,8 @@ function PazoMain() {
   const [placeTargetId, setPlaceTargetId] = useState<string | null>(null)
   const [placeTargetKey, setPlaceTargetKey] = useState(0)
   const [isAddPetOpen, setIsAddPetOpen] = useState(false)
+  // Bumped by the welcome notice to open the pet's edit form.
+  const [petEditRequestKey, setPetEditRequestKey] = useState(0)
   const [isPassportOpen, setIsPassportOpen] = useState(false)
   const [isCareOpen, setIsCareOpen] = useState(false)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
@@ -1908,6 +1910,17 @@ function PazoMain() {
       case 'pet_profile':
         setSelectedPublicProfileId(target.petId)
         break
+      case 'pet_edit': {
+        const pet = pets.find((item) => item.id === target.petId)
+        if (!pet) {
+          setIsAddPetOpen(true)
+          break
+        }
+        if (pet.id !== currentPet?.id) selectActivePet(pet)
+        setActiveTab('mascota')
+        setPetEditRequestKey((value) => value + 1)
+        break
+      }
     }
 
     if (!notification.read) {
@@ -2514,6 +2527,7 @@ function PazoMain() {
                   {activeTab === 'mascota' && (
                     <PetView
                       currentPet={currentPet}
+                      editRequestKey={petEditRequestKey}
                       canManagePet={canUseAccount}
                       isDemo={isDemoUser}
                       onExitDemo={() => leaveDemo('welcome')}
@@ -2654,6 +2668,7 @@ function PazoMain() {
               isOpen={canUseAccount && isCareOpen}
               onClose={() => setIsCareOpen(false)}
               petName={currentPet.name}
+              petSpecies={currentPet.species}
               careItems={careItems}
               careHistory={careHistory}
               isLoading={isCareLoading}
@@ -2722,6 +2737,7 @@ function PazoMain() {
               isLoadingMore={isNotificationsLoadingMore}
               lang={lang}
               canUsePush={canUseAccount}
+              petNames={Object.fromEntries(pets.map((pet) => [pet.id, pet.name]))}
             />
 
             <SightingDetailModal

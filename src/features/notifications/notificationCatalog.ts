@@ -16,7 +16,7 @@ import { isSupporterNotification, supporterNotificationCopy } from './supporterN
 
 // The card family a type uses. 'respond' and 'alert' are reserved for the Vigilante.
 export type NotificationTemplate = 'info' | 'open' | 'respond' | 'alert'
-export type NotificationIcon = 'bell' | 'calendar' | 'chat' | 'community'
+export type NotificationIcon = 'bell' | 'calendar' | 'chat' | 'community' | 'paw'
 export type NotificationTone = 'highlight' | 'care' | 'neutral'
 
 // Where a notice leads. Every reference comes from a typed getter, never from a bare UUID.
@@ -26,6 +26,12 @@ export type NotificationTarget =
   | { kind: 'sighting'; sightingId: string }
   | { kind: 'care'; careId: string }
   | { kind: 'pet_profile'; petId: string }
+  | { kind: 'pet_edit'; petId: string }
+
+// Data the app already holds that a notice may show inside the app (never on a lock screen).
+export interface NotificationContext {
+  petName?: (petId: string) => string | undefined
+}
 
 interface NotificationCopy {
   title: string
@@ -38,8 +44,8 @@ interface NotificationKind {
   tone: NotificationTone
   // Icon and tone only apply while the notice can be opened; otherwise it shows as a plain notice.
   styleNeedsTarget?: boolean
-  copy: (item: PazoNotification, lang: 'es' | 'en') => NotificationCopy
-  action?: (item: PazoNotification, lang: 'es' | 'en') => string | null
+  copy: (item: PazoNotification, lang: 'es' | 'en', context: NotificationContext) => NotificationCopy
+  action?: (item: PazoNotification, lang: 'es' | 'en', context: NotificationContext) => string | null
   target: (item: PazoNotification) => NotificationTarget | null
 }
 
@@ -120,6 +126,23 @@ export const NOTIFICATION_KINDS = {
     target: (item) => petProfile(getNotificationAdminPetId(item)),
   },
   admin_new_account: { ...plainKind, copy: adminCopy },
+  welcome: {
+    template: 'open',
+    icon: 'paw',
+    tone: 'highlight',
+    copy: (item, lang, context) => {
+      const name = (item.petId && context.petName?.(item.petId)) || (lang === 'es' ? 'tu mascota' : 'your pet')
+      return lang === 'es'
+        ? { title: 'Te damos la bienvenida a PAZO', subtitle: `Cuéntanos más de ${name}: su peso, qué come y su salud. Así te avisamos solo de lo que le importa. Puedes cambiarlo cuando quieras.` }
+        : { title: 'Welcome to PAZO', subtitle: `Tell us more about ${name}: weight, food and health. We'll only alert you about what matters to them. Change it anytime.` }
+    },
+    action: (item, lang, context) => {
+      const name = item.petId ? context.petName?.(item.petId) : undefined
+      if (lang === 'es') return name ? `Completar el perfil de ${name}` : 'Completar su perfil'
+      return name ? `Complete ${name}'s profile` : 'Complete the profile'
+    },
+    target: (item) => (item.petId ? { kind: 'pet_edit', petId: item.petId } : null),
+  },
   supporter_campaign: supporterKind,
   supporter_verified: supporterKind,
   system: plainKind,
@@ -141,16 +164,16 @@ const kindOf = (sourceType: string | undefined): NotificationKind =>
     : plainKind
 
 // An unknown type or an invalid reference falls back to a plain notice that cannot be opened.
-export const describeNotification = (item: PazoNotification, lang: 'es' | 'en'): NotificationView => {
+export const describeNotification = (item: PazoNotification, lang: 'es' | 'en', context: NotificationContext = {}): NotificationView => {
   const kind = kindOf(item.sourceType)
   const target = kind.target(item)
   const styled = !kind.styleNeedsTarget || target !== null
   return {
-    ...kind.copy(item, lang),
+    ...kind.copy(item, lang, context),
     template: kind.template,
     icon: styled ? kind.icon : 'bell',
     tone: styled ? kind.tone : 'neutral',
-    action: kind.action?.(item, lang) ?? null,
+    action: kind.action?.(item, lang, context) ?? null,
     target,
   }
 }
