@@ -57,6 +57,15 @@ test('administrator notices skip test accounts and can never block a registratio
   assert.match(sql,/not exists\(select 1 from admin_private\.admin_grants a where a\.user_id=auth\.uid\(\)\)/)
 })
 
+test('a new follower notice carries no pet name',()=>{
+  assert.equal(JSON.parse(pushMessage('new_follower','es','x').payload).title,'Tienes un nuevo seguidor')
+  const sql=readFileSync(new URL('../../migrations/20261103120000_pazo_push_new_follower.sql',import.meta.url),'utf8')
+  const body=sql.match(/function push_private\.notify_new_follower\(\)[\s\S]*?\$fn\$;/)[0]
+  assert.match(body,/interval '7 days'/)
+  assert.match(body,/exception when others/)
+  assert.doesNotMatch(body,/\bname\b/)
+})
+
 test('response codes decide whether to retry, drop the device or give up',()=>{
   assert.equal(classifyStatus(201),'ok')
   assert.equal(classifyStatus(410),'gone')

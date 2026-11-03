@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import {inflateSync} from 'node:zlib'
 import {bytesToUrlBase64,detectPushEnvironment,urlBase64ToBytes} from './pushSupport.ts'
-import {adminNotificationCopy,careNotificationTitle,formatNotificationTime,getNotificationAdminPetId,getNotificationCareId,mapNotificationRow} from '../notifications/notificationSource.ts'
+import {adminNotificationCopy,careNotificationTitle,formatNotificationTime,getNotificationAdminPetId,getNotificationCareId,getNotificationFollowerId,mapNotificationRow} from '../notifications/notificationSource.ts'
 
 const android='Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/130.0 Mobile Safari/537.36'
 const iphone='Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 Version/18.1 Mobile/15E148 Safari/604.1'
@@ -53,10 +53,16 @@ test('only the typed administrator notice opens a pet profile',()=>{
  assert.equal(adminNotificationCopy('admin_new_account','en').title,'New account on PAZO')
  assert.equal(adminNotificationCopy('sighting','es'),null)
 })
+test('a follower notice opens the follower, and only that typed notice does',()=>{
+ const row={id:'1',type:'new_follower',title:'t',body:'b',read_at:null,created_at:'2026-11-02',pet_id:'mine',source_id:'follower'}
+ assert.equal(getNotificationFollowerId(mapNotificationRow(row)),'follower')
+ assert.equal(getNotificationFollowerId(mapNotificationRow({...row,type:'sighting'})),null)
+ assert.equal(adminNotificationCopy('new_follower','en').title,'You have a new follower')
+})
 test('closing the bell clears notices without silencing what must be opened',()=>{
  const source=readFileSync(new URL('../notifications/markSeen.ts',import.meta.url),'utf8')
  const types=source.match(/SEEN_ON_CLOSE_TYPES = \[([^\]]+)\]/)[1]
- for(const type of ['admin_new_account','admin_new_pet','care_reminder','community_join'])assert.ok(types.includes(type),type)
+ for(const type of ['admin_new_account','admin_new_pet','care_reminder','community_join','new_follower'])assert.ok(types.includes(type),type)
  assert.doesNotMatch(types,/sighting|supporter/)
  assert.match(source,/\.is\('read_at', null\)/)
  assert.match(readFileSync(new URL('../../App.tsx',import.meta.url),'utf8'),/onClose=\{handleCloseNotifications\}/)

@@ -1,5 +1,5 @@
 import {isSupporterNotification,supporterNotificationCopy} from '../../features/notifications/supporterNotification'
-import { adminNotificationCopy, careNotificationTitle, formatNotificationTime, getNotificationAdminPetId, getNotificationCareId, getNotificationCommunityId, getNotificationSightingId } from '../../features/notifications/notificationSource'
+import { adminNotificationCopy, careNotificationTitle, formatNotificationTime, getNotificationAdminPetId, getNotificationCareId, getNotificationFollowerId, getNotificationCommunityId, getNotificationSightingId } from '../../features/notifications/notificationSource'
 import { PushControl } from '../../features/push/PushControl'
 import { useState } from 'react'
 import type { PazoNotification } from '../../types/pazo'
@@ -166,7 +166,7 @@ export const NotificationsModal = ({
               {filtered.map((item) => {
                 const isSighting = Boolean(getNotificationSightingId(item))
                 const isCommunityJoin = Boolean(getNotificationCommunityId(item))
-                const canOpen = isSighting || isCommunityJoin || Boolean(getNotificationCareId(item)) || Boolean(getNotificationAdminPetId(item)) || isSupporterNotification(item)
+                const canOpen = isSighting || isCommunityJoin || Boolean(getNotificationCareId(item)) || Boolean(getNotificationAdminPetId(item)) || Boolean(getNotificationFollowerId(item)) || isSupporterNotification(item)
                 const localized = adminNotificationCopy(item.sourceType, lang) ?? (item.sourceType === 'care_reminder'
                   ? { title: careNotificationTitle(lang), subtitle: item.subtitle }
                   : supporterNotificationCopy(item,lang))

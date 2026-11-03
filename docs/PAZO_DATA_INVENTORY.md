@@ -713,3 +713,7 @@ A Apple, Google, Mozilla o Microsoft solo llega el endpoint y un mensaje cifrado
 ### Avisos a administración (1-nov-2026, autorizado por el PO)
 
 Cada mascota nueva y cada cuenta confirmada generan un aviso solo para las cuentas de `admin_private.admin_grants`, salvo que el dueño sea cuenta de prueba o administrador (`marketing_private.is_reporting_owner`). Se guarda en `public.notifications`: tipo, texto fijo y, en mascotas, la referencia a la mascota; nunca correo, nombre ni contenido. Conservación: 30 días; el aviso de mascota se borra también al borrar la mascota. `push_private.preferences` añade dos interruptores solo para administradores. Al tocar el aviso de mascota se abre su perfil público ya existente. Una cuenta de prueba nueva cuenta como real hasta marcarla.
+
+### Aviso de nuevo seguidor (2-nov-2026, pedido por el PO)
+
+Cuando una mascota empieza a seguir a otra, el dueño de la seguida recibe un aviso en `public.notifications` con tipo, texto fijo, la mascota seguida (`pet_id`) y la que sigue (`source_id`); nunca nombres. Como máximo uno por pareja cada 7 días. Se borra a los 30 días o al borrar la mascota seguida. Interruptor `followers` en `push_private.preferences`. Al tocarlo se abre el perfil público de quien sigue. Aplica también a cuentas de prueba, porque es social y no estadística.

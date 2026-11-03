@@ -19,6 +19,11 @@ const COPY={
     en:{title:'Care reminder',body:'Your pet has a care task coming up.'},
     urgency:'normal',ttl:43200,
   },
+  new_follower:{
+    es:{title:'Tienes un nuevo seguidor',body:'Toca para ver quién es.'},
+    en:{title:'You have a new follower',body:'Tap to see who it is.'},
+    urgency:'normal',ttl:86400,
+  },
   admin_new_pet:{
     es:{title:'Nueva mascota en PAZO',body:'Toca para ver su perfil.'},
     en:{title:'New pet on PAZO',body:'Tap to see its profile.'},
