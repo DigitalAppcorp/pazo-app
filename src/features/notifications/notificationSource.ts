@@ -1,4 +1,5 @@
 import type { PazoNotification } from '../../types/pazo'
+import { isVaccineType } from '../care/vaccineTypes.ts'
 
 interface NotificationRow {
   supporter_copy_version?: string | null
@@ -11,6 +12,9 @@ interface NotificationRow {
   created_at: string
   pet_id: string | null
   source_id: string | null
+  alert_reason?: string | null
+  alert_vaccine_type?: string | null
+  alert_answer?: string | null
 }
 
 export const mapNotificationRow = (row: NotificationRow): PazoNotification => ({
@@ -26,6 +30,9 @@ export const mapNotificationRow = (row: NotificationRow): PazoNotification => ({
   createdAt: row.created_at,
   petId: row.pet_id,
   sourceId: row.source_id,
+  alertReason: row.alert_reason === 'expired' || row.alert_reason === 'unregistered' || row.alert_reason === 'applies' ? row.alert_reason : null,
+  alertVaccineType: isVaccineType(row.alert_vaccine_type) ? row.alert_vaccine_type : null,
+  alertAnswer: row.alert_answer === 'has_it' || row.alert_answer === 'not_yet' || row.alert_answer === 'unsure' ? row.alert_answer : null,
 })
 
 // A UUID by itself does not establish the kind of entity it references.

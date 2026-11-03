@@ -1,7 +1,7 @@
-import { describeNotification, type NotificationIcon, type NotificationTone } from '../../features/notifications/notificationCatalog'
+import { describeNotification, type NotificationAnswer, type NotificationIcon, type NotificationTone } from '../../features/notifications/notificationCatalog'
 import { formatNotificationTime } from '../../features/notifications/notificationSource'
 import { PushControl } from '../../features/push/PushControl'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import type { PazoNotification } from '../../types/pazo'
 import { IconCalendar, IconChat, IconCommunity, IconPaw } from '../icons/PazoIcons'
 
@@ -17,6 +17,8 @@ interface NotificationsModalProps {
   canUsePush: boolean
   // Names of the owner's own pets, shown inside the app only.
   petNames?: Record<string, string>
+  // Health alerts: the owner answers from the card itself.
+  onRespondNotification?: (notification: PazoNotification, answer: NotificationAnswer) => void
 }
 
 /** Decorative PAZO artwork. No synthetic pets, user activity or notification data. */
@@ -84,6 +86,7 @@ export const NotificationsModal = ({
   lang,
   canUsePush,
   petNames,
+  onRespondNotification,
 }: NotificationsModalProps) => {
   const [filter, setFilter] = useState<'todas' | 'comunidad'>('todas')
 
@@ -184,9 +187,8 @@ export const NotificationsModal = ({
                 const view = describeNotification(item, lang, { petName: (petId) => petNames?.[petId] })
                 const canOpen = view.target !== null
 
-                return (
+                const card = (
                   <button
-                    key={item.id}
                     type="button"
                     onClick={() => canOpen && onOpenNotification(item)}
                     disabled={!canOpen}
@@ -214,6 +216,26 @@ export const NotificationsModal = ({
                       <span aria-hidden="true" className="mt-1 text-[22px] font-bold leading-none text-[#204E4A]">›</span>
                     )}
                   </button>
+                )
+                if (view.responses.length === 0) return <Fragment key={item.id}>{card}</Fragment>
+                // Answer buttons sit below the card, never nested inside its button.
+                return (
+                  <div key={item.id} className="space-y-2">
+                    {card}
+                    <div role="group" aria-label={lang === 'es' ? 'Responder al aviso' : 'Answer the alert'} className="flex flex-wrap gap-2 px-3.5">
+                      {view.responses.map((response) => (
+                        <button
+                          key={response.answer}
+                          type="button"
+                          onClick={() => onRespondNotification?.(item, response.answer)}
+                          className={'min-h-11 rounded-full px-4 text-[13px] font-extrabold transition-colors ' +
+                            (response.answer === 'has_it' ? 'bg-[#204E4A] text-[#E1E53F]' : 'bg-[#F1F3EB] text-[#204E4A] hover:bg-[#E7F0DA]')}
+                        >
+                          {response.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )
               })}
             </div>

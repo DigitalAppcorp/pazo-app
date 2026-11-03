@@ -26,6 +26,11 @@ const COPY={
     en:{title:'You have a new follower',body:'Tap to see who it is.'},
     urgency:'high',ttl:86400,
   },
+  health_alert:{
+    es:{title:'Tenemos un aviso de salud para tu mascota',body:'Toca para ver si aplica a tu mascota.'},
+    en:{title:'We have a health alert for your pet',body:'Tap to see if it applies to your pet.'},
+    urgency:'high',ttl:43200,
+  },
   admin_new_pet:{
     es:{title:'Nueva mascota en PAZO',body:'Toca para ver su perfil.'},
     en:{title:'New pet on PAZO',body:'Tap to see its profile.'},

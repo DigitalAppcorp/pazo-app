@@ -4,7 +4,7 @@ import { canUseAccountFeatures } from './features/auth/accountAccess'
 import { recordAdminActivity } from './features/admin/adminDashboardService'
 import { PasswordVisibilityButton } from './features/auth/PasswordVisibilityButton'
 import {useBehaviorObservation} from './features/marketing/useBehaviorObservation'
-import { describeNotification } from './features/notifications/notificationCatalog'
+import { describeNotification, type NotificationAnswer } from './features/notifications/notificationCatalog'
 import { fetchFounderPetIds, fetchOfficialFeed, toggleOfficialPostLike } from './features/vigilante/officialPostsService'
 import type { OfficialPost } from './features/vigilante/officialPosts'
 import { syncPush } from './features/push/pushService'
@@ -63,6 +63,7 @@ import type {
   DocumentCategory,
   PetDocument,
   PazoNotification,
+  VaccineType,
 } from './types/pazo'
 import { INITIAL_PETS } from './data/mockData'
 
@@ -383,6 +384,8 @@ function PazoMain() {
   const [isAddPetOpen, setIsAddPetOpen] = useState(false)
   // Bumped by the welcome notice to open the pet's edit form.
   const [petEditRequestKey, setPetEditRequestKey] = useState(0)
+  // Set when a health alert is answered "has it": the care form opens with that vaccine.
+  const [vaccineDraft, setVaccineDraft] = useState<{ key: number; vaccineType: VaccineType } | null>(null)
   const [isPassportOpen, setIsPassportOpen] = useState(false)
   const [isCareOpen, setIsCareOpen] = useState(false)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
@@ -1033,6 +1036,25 @@ function PazoMain() {
       .catch((error) => console.error('Error loading founder badges:', error))
     return () => { current = false }
   }, [founderSignature])
+
+  const handleRespondNotification = async (notification: PazoNotification, answer: NotificationAnswer) => {
+    if (!canUseAccount) return
+    try {
+      const { data, error } = await supabase.rpc('pazo_answer_health_alert', { p_notification_id: notification.id, p_answer: answer })
+      if (error) throw error
+      if (data !== true) return
+      setNotifications((items) => items.map((item) => item.id === notification.id ? { ...item, alertAnswer: answer, read: true } : item))
+      if (answer === 'has_it' && notification.alertVaccineType) {
+        const pet = pets.find((item) => item.id === notification.petId)
+        if (pet && pet.id !== currentPet?.id) selectActivePet(pet)
+        setIsNotificationsOpen(false)
+        setVaccineDraft((draft) => ({ key: (draft?.key ?? 0) + 1, vaccineType: notification.alertVaccineType! }))
+        setIsCareOpen(true)
+      }
+    } catch (error) {
+      console.error('Error answering health alert:', error)
+    }
+  }
 
   const handleToggleOfficialLike = async (postId: string) => {
     if (!canUseAccount) { requireAccount(); return }
@@ -1947,6 +1969,9 @@ function PazoMain() {
       case 'pet_profile':
         setSelectedPublicProfileId(target.petId)
         break
+      case 'official_post':
+        setActiveTab('inicio')
+        break
       case 'pet_edit': {
         const pet = pets.find((item) => item.id === target.petId)
         if (!pet) {
@@ -2709,6 +2734,7 @@ function PazoMain() {
               onClose={() => setIsCareOpen(false)}
               petName={currentPet.name}
               petSpecies={currentPet.species}
+              vaccineDraft={vaccineDraft}
               careItems={careItems}
               careHistory={careHistory}
               isLoading={isCareLoading}
@@ -2778,6 +2804,7 @@ function PazoMain() {
               lang={lang}
               canUsePush={canUseAccount}
               petNames={Object.fromEntries(pets.map((pet) => [pet.id, pet.name]))}
+              onRespondNotification={(notification, answer) => void handleRespondNotification(notification, answer)}
             />
 
             <SightingDetailModal

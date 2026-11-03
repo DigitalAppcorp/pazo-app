@@ -355,4 +355,8 @@ export interface PazoNotification {
   petId?: string | null
   sourceType?: string
   sourceId?: string | null
+  // Health alerts only: why it reached this pet, which vaccine, and the owner's answer.
+  alertReason?: 'expired' | 'unregistered' | 'applies' | null
+  alertVaccineType?: VaccineType | null
+  alertAnswer?: 'has_it' | 'not_yet' | 'unsure' | null
 }

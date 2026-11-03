@@ -18,6 +18,8 @@ interface CareModalProps {
   onClose: () => void
   petName: string
   petSpecies?: Species
+  // A health alert answered "has it" opens a new vaccine item with its type already chosen.
+  vaccineDraft?: { key: number; vaccineType: VaccineType } | null
   careItems: CareItem[]
   careHistory: CareCompletion[]
   isLoading: boolean
@@ -136,6 +138,7 @@ export const CareModal = ({
   onClose,
   petName,
   petSpecies,
+  vaccineDraft = null,
   careItems,
   careHistory,
   isLoading,
@@ -173,6 +176,15 @@ export const CareModal = ({
   }, [careHistory])
 
   const vaccineOptions = vaccineOptionsFor(petSpecies)
+
+  const [handledDraftKey, setHandledDraftKey] = useState(vaccineDraft?.key ?? 0)
+  if (vaccineDraft && vaccineDraft.key !== handledDraftKey) {
+    setHandledDraftKey(vaccineDraft.key)
+    setForm({ ...emptyForm(), category: 'vaccine', vaccineType: vaccineDraft.vaccineType, title: VACCINE_LABELS[vaccineDraft.vaccineType][lang] })
+    setEditingId(null)
+    setIsEditing(true)
+    setFormError('')
+  }
 
   // Picking a vaccine fills the title, unless the owner already wrote one of their own.
   const chooseVaccine = (type: VaccineType) =>

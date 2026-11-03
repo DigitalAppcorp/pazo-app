@@ -9,6 +9,7 @@ import {
   getNotificationSightingId,
 } from './notificationSource.ts'
 import { isSupporterNotification, supporterNotificationCopy } from './supporterNotification.ts'
+import { VACCINE_LABELS } from '../care/vaccineTypes.ts'
 
 // One entry per notification type. The bell and the app read every decision about a
 // notice from here, so adding a type means adding one entry, and the contract test
@@ -27,10 +28,18 @@ export type NotificationTarget =
   | { kind: 'care'; careId: string }
   | { kind: 'pet_profile'; petId: string }
   | { kind: 'pet_edit'; petId: string }
+  | { kind: 'official_post'; postId: string }
 
 // Data the app already holds that a notice may show inside the app (never on a lock screen).
 export interface NotificationContext {
   petName?: (petId: string) => string | undefined
+}
+
+// Answers a health alert offers; the server records only these three.
+export type NotificationAnswer = 'has_it' | 'not_yet' | 'unsure'
+export interface NotificationResponse {
+  answer: NotificationAnswer
+  label: string
 }
 
 interface NotificationCopy {
@@ -47,6 +56,7 @@ interface NotificationKind {
   copy: (item: PazoNotification, lang: 'es' | 'en', context: NotificationContext) => NotificationCopy
   action?: (item: PazoNotification, lang: 'es' | 'en', context: NotificationContext) => string | null
   target: (item: PazoNotification) => NotificationTarget | null
+  responses?: (item: PazoNotification, lang: 'es' | 'en', context: NotificationContext) => NotificationResponse[]
 }
 
 const storedCopy = (item: PazoNotification): NotificationCopy => ({ title: item.title, subtitle: item.subtitle })
@@ -143,6 +153,31 @@ export const NOTIFICATION_KINDS = {
     },
     target: (item) => (item.petId ? { kind: 'pet_edit', petId: item.petId } : null),
   },
+  health_alert: {
+    template: 'alert',
+    icon: 'bell',
+    tone: 'highlight',
+    copy: (item, lang, context) => {
+      const name = (item.petId && context.petName?.(item.petId)) || (lang === 'es' ? 'tu mascota' : 'your pet')
+      const vaccine = item.alertVaccineType ? VACCINE_LABELS[item.alertVaccineType][lang].toLowerCase() : ''
+      const personal = item.alertReason === 'expired'
+        ? (lang === 'es' ? `Esto aplica a ${name}: su vacuna${vaccine ? ' de ' + vaccine : ''} venció.` : `This applies to ${name}: their ${vaccine ? vaccine + ' ' : ''}vaccine expired.`)
+        : item.alertReason === 'unregistered'
+          ? (lang === 'es' ? `¿${name} ya tiene esta vacuna?` : `Does ${name} already have this vaccine?`)
+          : (lang === 'es' ? `Esto aplica a ${name}.` : `This applies to ${name}.`)
+      return { title: item.title, subtitle: `${personal} ${item.subtitle}`.trim() }
+    },
+    target: (item) => (item.sourceId ? { kind: 'official_post', postId: item.sourceId } : null),
+    responses: (item, lang, context) => {
+      if (item.alertAnswer || (item.alertReason !== 'expired' && item.alertReason !== 'unregistered')) return []
+      const name = item.petId ? context.petName?.(item.petId) : undefined
+      return [
+        { answer: 'has_it', label: lang === 'es' ? (name ? `${name} ya la tiene` : 'Ya la tiene') : (name ? `${name} has it` : 'Has it') },
+        { answer: 'not_yet', label: lang === 'es' ? 'No la tiene' : 'Not yet' },
+        { answer: 'unsure', label: lang === 'es' ? 'No sé' : 'Not sure' },
+      ]
+    },
+  },
   supporter_campaign: supporterKind,
   supporter_verified: supporterKind,
   system: plainKind,
@@ -156,6 +191,7 @@ export interface NotificationView extends NotificationCopy {
   tone: NotificationTone
   action: string | null
   target: NotificationTarget | null
+  responses: NotificationResponse[]
 }
 
 const kindOf = (sourceType: string | undefined): NotificationKind =>
@@ -175,5 +211,6 @@ export const describeNotification = (item: PazoNotification, lang: 'es' | 'en', 
     tone: styled ? kind.tone : 'neutral',
     action: kind.action?.(item, lang, context) ?? null,
     target,
+    responses: kind.responses?.(item, lang, context) ?? [],
   }
 }
