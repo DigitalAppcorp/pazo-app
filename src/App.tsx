@@ -21,6 +21,7 @@ import { pazoBuildVersion } from './features/release/buildVersion'
 import { applyDocumentLanguage, getInitialLanguage, rememberLanguage, type PazoLanguage } from './features/i18n/languagePreference'
 import { PasswordRecoveryView } from './features/auth/PasswordRecoveryView'
 import { PazoSplash } from './features/splash/PazoSplash'
+import { AppUpdatePrompt } from './features/release/AppUpdatePrompt'
 import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
 import { selectFeedPage } from './features/feed/selectFeedPage'
@@ -2212,6 +2213,8 @@ function PazoMain() {
     <div className="h-[100dvh] min-h-0 bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:h-auto sm:min-h-screen sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
       <div data-pazo-app-shell className="w-full sm:max-w-[430px] h-full min-h-0 sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
         <SupporterInvitationCoordinator lang={lang} safe={Boolean(user&&canUseAccount&&!isOnboardingActive&&petBootstrap?.status==='ready'&&!firstUseHint&&activeTab==='inicio'&&!isFeedLoading&&!feedError&&!pets.some(p=>p.isLost)&&!selectedPublicProfileId&&!isSearchOpen&&!isCreateMenuOpen&&!isCreatePostOpen&&!isAddPetOpen&&!isPassportOpen&&!isCareOpen&&!isDocumentsOpen&&!isAlertOpen&&!isMessagesOpen&&!isNotificationsOpen&&!selectedSightingId)}/>
+
+        <AppUpdatePrompt lang={lang} busy={!canShowAppNotice} />
 
         {/* Pantalla exclusiva de perfil público global (flota sobre todo el contenedor) */}
         {selectedPublicProfileId && (

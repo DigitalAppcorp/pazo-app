@@ -1,7 +1,7 @@
 // PAZO pre-preview artifact checks; offline, no external services.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {readFileSync,existsSync,statSync} from 'node:fs'
+import {readFileSync,existsSync,statSync,readdirSync} from 'node:fs'
 import {resolve,join} from 'node:path'
 const dist=resolve('dist')
 const read=(name)=>readFileSync(join(dist,name),'utf8')
@@ -23,6 +23,13 @@ test('installable PWA manifest, icons and SW are in the compiled output',()=>{
   assert.equal(bytes.subarray(1,4).toString(),'PNG')
  }
  for(const file of ['pwa-icon-192.png','pwa-icon-512.png','pwa-icon-maskable-512.png','apple-touch-icon.png','sw.js'])asset(file)
+})
+test('the compiled app carries the same release stamp it publishes in version.json',()=>{
+ const stamp=JSON.parse(read('version.json')).build
+ assert.match(stamp,/^[a-z0-9-]{4,64}$/)
+ // App.tsx loads as a lazy chunk, so every compiled script is searched.
+ const code=readdirSync(join(dist,'assets')).filter(name=>name.endsWith('.js')).map(name=>read('assets/'+name)).join('\n')
+ assert.ok(['"','`',"'"].some(q=>code.includes(q+stamp+q)),'app bundle is not stamped with '+stamp)
 })
 test('built HTML references local JavaScript, styles and manifest',()=>{
  const html=read('index.html')
