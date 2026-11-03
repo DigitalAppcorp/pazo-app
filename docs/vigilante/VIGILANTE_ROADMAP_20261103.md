@@ -153,7 +153,8 @@ Se apoya en el patrón de avisos push al administrador (`admin_new_pet`, `admin_
    - **Aprobar tal cual, Solo feed y Rechazar:** basta la sesión de administrador, sin verificación extra.
    - **Editar una alerta exige la huella o el reconocimiento facial del teléfono del PO** (passkey / WebAuthn con el autenticador del dispositivo). Así, con una sesión robada solo se podrían aprobar borradores que el Vigilante tomó de fuentes oficiales, nunca texto inventado.
    - La regla se aplica **en el servidor**: la función que guarda una edición rechaza el cambio si no hay una verificación biométrica reciente (por ejemplo, de los últimos 5 minutos). Ocultar el botón en la interfaz no basta.
-   - Prever recuperación: una segunda passkey en otro dispositivo o códigos de respaldo, por si el teléfono se pierde o la huella falla.
+   - **Respaldo si el teléfono se pierde (decisión del PO): el código de la app autenticadora (TOTP).** PAZO ya lo usa en el panel admin (`src/features/admin/components/AdminPaypalMfaStepUp.tsx`, `supabase.auth.mfa` con factor `totp`), así que se reutiliza. Condición: la app autenticadora debe estar en un dispositivo distinto del teléfono con la huella, o tener respaldo en la nube; si ambos están en el mismo teléfono, perderlo deja sin respaldo. Guardar además códigos de respaldo en papel.
+   - Al perder el teléfono: entrar con el autenticador, cerrar todas las sesiones abiertas y revocar la passkey del teléfono perdido.
    - Verificar antes de programar si Supabase Auth ofrece passkeys/WebAuthn como segundo factor en la versión del proyecto; si no, verificarlo en una función propia del servidor con una librería estándar de WebAuthn.
    - Se mantiene el aviso al PO cada vez que se aprueba un envío ("Aprobaste: …") y el botón Cancelar.
 7. **Después de aprobar:** estado en vivo (enviando, enviada), botón Cancelar y resultados en gráfico (entregados, tocados, respuestas, desactivaciones de "Alertas de salud").
