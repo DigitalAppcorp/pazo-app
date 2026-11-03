@@ -3,6 +3,10 @@
 Fecha: 3 de noviembre de 2026.
 Estado: **idea aprobada en conversación por el PO; nada implementado.** Este documento es contexto para cualquier agente que retome el trabajo. No autoriza por sí mismo cambios en producción, envíos de push, migraciones ni gastos.
 
+## Estado (3-nov-2026)
+
+**Pasos 0 a 5 implementados y probados, sin publicar.** Paso 0 en `main` (#202, sin desplegar). Pasos 1 a 5 en PR borrador apilados (#203, #204 y el de pasos 3 a 5). Vigilante instalado APAGADO. Publicación, activación y reversión: `docs/vigilante/VIGILANTE_RELEASE_RUNBOOK.md`. Pruebas de integración: `scripts/vigilante-pg17.mjs` en PostgreSQL 17 aislado (workflow `vigilante.yml`).
+
 ## Qué es
 
 Un módulo que vigila fuentes oficiales (retiros de comida, brotes de enfermedades, calor, humo, cambios de reglas en LA), cruza cada noticia con los datos de cada mascota y prepara avisos personalizados. **Nada sale sin la aprobación del PO.**
