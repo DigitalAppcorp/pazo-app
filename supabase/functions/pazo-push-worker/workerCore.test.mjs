@@ -66,6 +66,11 @@ test('a new follower notice carries no pet name',()=>{
   assert.doesNotMatch(body,/\bname\b/)
 })
 
+test('every notice is high urgency so a sleeping phone still shows it',()=>{
+  for(const kind of ['sighting','community_join','care_reminder','new_follower','admin_new_pet','admin_new_account'])
+    assert.equal(pushMessage(kind,'es','x').urgency,'high',kind)
+})
+
 test('response codes decide whether to retry, drop the device or give up',()=>{
   assert.equal(classifyStatus(201),'ok')
   assert.equal(classifyStatus(410),'gone')
