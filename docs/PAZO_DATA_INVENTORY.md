@@ -1,3 +1,26 @@
+## Vigilante pasos 2 a 5 — alertas de salud y fuentes oficiales (3-nov-2026, en rama, NO alojado)
+
+Migraciones 20261103210000, 20261103220000 y 20261103230000 preparadas sin aplicar; el Vigilante se instala APAGADO.
+- official_posts / official_post_likes: publicaciones oficiales de PAZO (sin cuenta de Auth) y me gusta por persona. Lectura pública de lo publicado; nadie escribe salvo la función de aprobación.
+- notifications health_alert: motivo por mascota (vencida, sin registrar, aplica), tipo de vacuna y respuesta del dueño (has_it, not_yet, unsure). Texto almacenado sin nombre de mascota; la pantalla bloqueada usa texto fijo del worker. Retención 30 días como el resto de avisos.
+- push_private.preferences.health_alerts y admin_vigilante: interruptores por persona.
+- vigilante_private (FORCE RLS, sin acceso de clientes): fuentes, hallazgos con datos públicos de la fuente oficial (enlace, fecha, marca, zona), borradores, auditoría de decisiones con texto aprobado y autor; hallazgos sin borrador se purgan a los 90 días. El panel muestra solo conteos, nunca identidades.
+- Fuentes externas leídas por el worker (sin enviar datos de usuarios): api.weather.gov (alertas activas de California, filtradas al Condado de LA) y el RSS de retiros de la FDA. Se identifica con un User-Agent de contacto como pide el NWS.
+- Sin IA ni proveedor nuevo de pago.
+
+---
+
+## Vigilante paso 1 — datos privados de la mascota y del hogar (3-nov-2026, en rama, NO alojado)
+
+Rama feat/vigilante-paso1-datos-20261103; migraciones 20261103200000, 20261103201000 y 20261103202000 preparadas sin aplicar. Todo opcional y visible solo para el dueño (RLS por propietario y guarda de mantenimiento); nunca en el perfil público ni en la ficha del QR, sin proveedor nuevo, analítica ni envío a Meta.
+- care_items.vaccine_type: tipo de vacuna de una lista cerrada en un cuidado de categoría vacuna.
+- household_private_details.postal_code: código postal del hogar (5 dígitos), uno por cuenta, fuera de public.profiles (que es de lectura pública). Uso declarado: avisos de salud por zona del Vigilante.
+- pet_private_details: birth_month (mes aproximado), health_conditions (lista cerrada: alergias, diabetes, cardiaco, respiratorio, convulsiones, otra), food_brand y food_product (texto corto).
+- notifications tipo welcome: aviso en la app, sin push, uno por cuenta; también se crea una vez para las cuentas existentes al aplicar la migración.
+Se eliminan con la cuenta (FK a auth.users con CASCADE en el hogar; filas de mascota existentes). El aviso de privacidad debe reconciliarse antes de publicar: menciona datos de salud de la mascota y código postal.
+
+---
+
 ## #168 — ensayo2 implementado en rama, sin release
 
 

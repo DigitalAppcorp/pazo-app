@@ -250,6 +250,16 @@ export type CareRecurrence =
 
 export type CareReminderDays = 0 | 1 | 2 | 7 | null
 
+export type VaccineType =
+  | 'rabies'
+  | 'dhpp'
+  | 'leptospirosis'
+  | 'bordetella'
+  | 'canine_influenza'
+  | 'fvrcp'
+  | 'felv'
+  | 'other'
+
 export interface CareItem {
   id: string
   petId: string
@@ -261,6 +271,7 @@ export interface CareItem {
   recurrence: CareRecurrence
   reminderDaysBefore: CareReminderDays
   notes?: string | null
+  vaccineType?: VaccineType | null
   status: 'active' | 'completed' | 'archived'
   createdAt: string
   updatedAt: string
@@ -288,6 +299,7 @@ export interface CareItemInput {
   recurrence: CareRecurrence
   reminderDaysBefore: CareReminderDays
   notes?: string | null
+  vaccineType?: VaccineType | null
 }
 
 export type DocumentCategory =
@@ -343,4 +355,10 @@ export interface PazoNotification {
   petId?: string | null
   sourceType?: string
   sourceId?: string | null
+  // Health alerts only: why it reached this pet, which vaccine, and the owner's answer.
+  alertReason?: 'expired' | 'unregistered' | 'applies' | null
+  alertVaccineType?: VaccineType | null
+  alertAnswer?: 'has_it' | 'not_yet' | 'unsure' | null
+  titleEn?: string | null
+  bodyEn?: string | null
 }

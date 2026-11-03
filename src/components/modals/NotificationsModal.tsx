@@ -1,9 +1,9 @@
-import { describeNotification, type NotificationIcon, type NotificationTone } from '../../features/notifications/notificationCatalog'
+import { describeNotification, type NotificationAnswer, type NotificationIcon, type NotificationTone } from '../../features/notifications/notificationCatalog'
 import { formatNotificationTime } from '../../features/notifications/notificationSource'
 import { PushControl } from '../../features/push/PushControl'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import type { PazoNotification } from '../../types/pazo'
-import { IconCalendar, IconChat, IconCommunity } from '../icons/PazoIcons'
+import { IconCalendar, IconChat, IconCommunity, IconPaw } from '../icons/PazoIcons'
 
 interface NotificationsModalProps {
   isOpen: boolean
@@ -15,6 +15,10 @@ interface NotificationsModalProps {
   isLoadingMore: boolean
   lang: 'es' | 'en'
   canUsePush: boolean
+  // Names of the owner's own pets, shown inside the app only.
+  petNames?: Record<string, string>
+  // Health alerts: the owner answers from the card itself.
+  onRespondNotification?: (notification: PazoNotification, answer: NotificationAnswer) => void
 }
 
 /** Decorative PAZO artwork. No synthetic pets, user activity or notification data. */
@@ -63,10 +67,22 @@ const TONE_CLASSES: Record<NotificationTone, string> = {
   neutral: 'bg-[#F1F3EB] text-[#204E4A]',
 }
 
+const ANSWER_ICON_PATHS: Record<NotificationAnswer, string> = {
+  has_it: 'M5 12.5l4.2 4.2L19 7',
+  not_yet: 'M7 7l10 10M17 7L7 17',
+  unsure: 'M9.2 9a2.9 2.9 0 1 1 4 2.7c-.8.4-1.2 1-1.2 1.8v.5M12 17.6h.01',
+}
+const AnswerIcon = ({ answer }: { answer: NotificationAnswer }) => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={ANSWER_ICON_PATHS[answer]} />
+  </svg>
+)
+
 const NotificationIconArt = ({ icon }: { icon: NotificationIcon }) => {
   if (icon === 'calendar') return <IconCalendar size={21} />
   if (icon === 'chat') return <IconChat size={21} />
   if (icon === 'community') return <IconCommunity size={21} />
+  if (icon === 'paw') return <IconPaw size={21} />
   return <NotificationBell />
 }
 
@@ -80,6 +96,8 @@ export const NotificationsModal = ({
   isLoadingMore,
   lang,
   canUsePush,
+  petNames,
+  onRespondNotification,
 }: NotificationsModalProps) => {
   const [filter, setFilter] = useState<'todas' | 'comunidad'>('todas')
 
@@ -177,20 +195,19 @@ export const NotificationsModal = ({
           ) : (
             <div className="space-y-2.5" aria-live="polite">
               {filtered.map((item) => {
-                const view = describeNotification(item, lang)
+                const view = describeNotification(item, lang, { petName: (petId) => petNames?.[petId] })
                 const canOpen = view.target !== null
+                const hasAnswers = view.responses.length > 0
+                const surface = item.read ? 'bg-white/70 ' : 'bg-[#E7F0DA]/90 shadow-[0_5px_16px_rgba(32,78,74,0.06)] '
 
-                return (
+                const card = (
                   <button
-                    key={item.id}
                     type="button"
                     onClick={() => canOpen && onOpenNotification(item)}
                     disabled={!canOpen}
                     className={
                       'flex w-full min-w-0 items-start gap-3 rounded-[23px] px-3.5 py-3.5 text-left transition-colors ' +
-                      (item.read
-                        ? 'bg-white/70 '
-                        : 'bg-[#E7F0DA]/90 shadow-[0_5px_16px_rgba(32,78,74,0.06)] ') +
+                      (hasAnswers ? 'pb-1.5 ' : surface) +
                       (canOpen ? 'cursor-pointer hover:bg-[#E1E53F]/20 focus-visible:bg-[#E1E53F]/25' : 'cursor-default')
                     }
                   >
@@ -210,6 +227,27 @@ export const NotificationsModal = ({
                       <span aria-hidden="true" className="mt-1 text-[22px] font-bold leading-none text-[#204E4A]">›</span>
                     )}
                   </button>
+                )
+                if (!hasAnswers) return <Fragment key={item.id}>{card}</Fragment>
+                // Answers live inside the notice as quiet, transparent actions; they are siblings of
+                // the open button, never nested inside it.
+                return (
+                  <div key={item.id} className={'rounded-[23px] ' + surface}>
+                    {card}
+                    <div role="group" aria-label={lang === 'es' ? 'Responder al aviso' : 'Answer the alert'} className="flex flex-wrap gap-x-1 pb-2 pl-[4.25rem] pr-3">
+                      {view.responses.map((response) => (
+                        <button
+                          key={response.answer}
+                          type="button"
+                          onClick={() => onRespondNotification?.(item, response.answer)}
+                          className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-transparent px-2.5 text-[13px] font-bold text-[#204E4A] transition-colors hover:bg-[#204E4A]/[0.07] focus-visible:bg-[#204E4A]/10"
+                        >
+                          <AnswerIcon answer={response.answer} />
+                          {response.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )
               })}
             </div>

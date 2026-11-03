@@ -6,6 +6,9 @@ import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
 import { releasePushForSignOut } from '../../features/push/pushService'
 import { updatePetProfile } from '../../services/petService'
+import { PetHealthFields, PostalCodeField } from '../../features/vigilante/PrivateDetailsFields'
+import { EMPTY_PET_HEALTH, isValidBirthMonth, isValidPostalCode, type PetHealthDetails } from '../../features/vigilante/privateDetails'
+import { fetchHouseholdPostalCode, fetchPetHealthDetails, saveHouseholdPostalCode, savePetHealthDetails } from '../../features/vigilante/privateDetailsService'
 import { ModerationAccess } from '../../features/moderation/ModerationAccess'
 import { LiquidChoiceTabs } from '../ui/LiquidChoiceTabs'
 import { SupporterAccountManagement } from '../../features/supporter/components/SupporterAccountManagement'
@@ -31,6 +34,8 @@ interface PetViewProps {
   currentPet: Pet
   canModerate: boolean
   canManagePet: boolean
+  // Changes when another screen asks to open the edit form.
+  editRequestKey?: number
   isDemo?: boolean
   onExitDemo?: () => void
   onRequireAccount: () => void
@@ -54,6 +59,7 @@ export const PetView = ({
   currentPet,
   canModerate,
   canManagePet,
+  editRequestKey = 0,
   isDemo = false,
   onExitDemo,
   onRequireAccount,
@@ -119,6 +125,13 @@ export const PetView = ({
   })
 
   const [editForm, setEditForm] = useState(buildEditForm)
+  // Private Vigilante details load separately; until they load, saving leaves them untouched.
+  const [healthForm, setHealthForm] = useState<PetHealthDetails>(EMPTY_PET_HEALTH)
+  const [postalCode, setPostalCode] = useState('')
+  const [privateDetailsPetId, setPrivateDetailsPetId] = useState<string | null>(null)
+  const [privateDetailsInvalid, setPrivateDetailsInvalid] = useState(false)
+  const [editingPetId, setEditingPetId] = useState<string | null>(null)
+  const [handledEditRequestKey, setHandledEditRequestKey] = useState(editRequestKey)
 
   const nextPendingCare = careReminderItem
 
@@ -143,13 +156,43 @@ export const PetView = ({
     }
   }, [showSettings])
 
-  const handleEditClick = () => {
-    setShowSettings(false)
-    if (!canManagePet) { onRequireAccount(); return }
+  const openEditForm = () => {
+    setEditingPetId(currentPet.id)
     setEditForm(buildEditForm())
     setEditPhotoFile(null)
     setIsEditing(true)
+    setPrivateDetailsPetId(null)
+    setPrivateDetailsInvalid(false)
   }
+
+  const handleEditClick = () => {
+    setShowSettings(false)
+    if (!canManagePet) { onRequireAccount(); return }
+    openEditForm()
+  }
+
+  // The welcome notice asks to open the edit form; handled while rendering, not in an effect.
+  if (editRequestKey !== handledEditRequestKey) {
+    setHandledEditRequestKey(editRequestKey)
+    if (canManagePet) openEditForm()
+  }
+  // If the shown pet changes while editing, the form must describe the pet it will save.
+  if (isEditing && editingPetId !== null && editingPetId !== currentPet.id) openEditForm()
+
+  useEffect(() => {
+    if (!isEditing || isDemo || !canManagePet) return
+    const petId = currentPet.id
+    let current = true
+    Promise.all([fetchPetHealthDetails(petId), fetchHouseholdPostalCode()])
+      .then(([health, code]) => {
+        if (!current) return
+        setHealthForm(health)
+        setPostalCode(code)
+        setPrivateDetailsPetId(petId)
+      })
+      .catch((error) => console.error('Error loading private pet details:', error))
+    return () => { current = false }
+  }, [isEditing, isDemo, canManagePet, currentPet.id])
 
   const handleCancelEdit = () => {
     if (editForm.photoUrl.startsWith('blob:')) {
@@ -220,6 +263,11 @@ export const PetView = ({
       alert(lang === 'es' ? 'El nombre de la mascota es obligatorio.' : 'Pet name is required.')
       return
     }
+    const savePrivateDetails = privateDetailsPetId === currentPet.id
+    if (savePrivateDetails && ((postalCode !== '' && !isValidPostalCode(postalCode)) || !isValidBirthMonth(healthForm.birthMonth))) {
+      setPrivateDetailsInvalid(true)
+      return
+    }
 
     setIsSaving(true)
 
@@ -241,6 +289,9 @@ export const PetView = ({
         weight: editForm.weight,
         dietPlan: editForm.dietPlan,
       })
+      if (savePrivateDetails) {
+        await Promise.all([savePetHealthDetails(currentPet.id, healthForm), saveHouseholdPostalCode(postalCode)])
+      }
 
       if (editForm.photoUrl.startsWith('blob:')) {
         URL.revokeObjectURL(editForm.photoUrl)
@@ -562,6 +613,15 @@ export const PetView = ({
                     className="w-full bg-[#FAF8F5] border border-[#204E4A]/10 rounded-xl px-3 py-1.5 text-xs text-[#204E4A] focus:outline-none focus:border-[#E1E53F]"
                   />
                 </div>
+
+                {privateDetailsPetId === currentPet.id && (
+                  <>
+                    <PostalCodeField value={postalCode} onChange={setPostalCode} lang={lang}
+                      invalid={privateDetailsInvalid && postalCode !== '' && !isValidPostalCode(postalCode)} />
+                    <PetHealthFields value={healthForm} onChange={setHealthForm} lang={lang}
+                      birthMonthInvalid={privateDetailsInvalid && !isValidBirthMonth(healthForm.birthMonth)} />
+                  </>
+                )}
 
                 <div>
                   <label className="text-[13px] font-bold text-[#5C7470] block mb-1">Intereses · privados</label>

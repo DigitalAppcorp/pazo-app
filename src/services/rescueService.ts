@@ -197,7 +197,7 @@ export const fetchNotifications = async (
 
   const { data, error } = await supabase
     .from('notifications')
-    .select('id,type,title,body,read_at,created_at,pet_id,source_id,supporter_state,supporter_copy_version')
+    .select('id,type,title,body,read_at,created_at,pet_id,source_id,supporter_state,supporter_copy_version,alert_reason,alert_vaccine_type,alert_answer,title_en,body_en')
     .order('created_at', { ascending: false })
     .order('id', { ascending: false })
     .range(safeOffset, safeOffset + safeLimit - 1)
@@ -223,7 +223,7 @@ export const fetchLatestUnreadSightingNotification = async (
 
   const { data, error } = await supabase
     .from('notifications')
-    .select('id,type,title,body,read_at,created_at,pet_id,source_id,supporter_state,supporter_copy_version')
+    .select('id,type,title,body,read_at,created_at,pet_id,source_id,supporter_state,supporter_copy_version,alert_reason,alert_vaccine_type,alert_answer,title_en,body_en')
     .eq('type', 'sighting')
     .is('read_at', null)
     .in('pet_id', petIds)

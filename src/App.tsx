@@ -4,7 +4,9 @@ import { canUseAccountFeatures } from './features/auth/accountAccess'
 import { recordAdminActivity } from './features/admin/adminDashboardService'
 import { PasswordVisibilityButton } from './features/auth/PasswordVisibilityButton'
 import {useBehaviorObservation} from './features/marketing/useBehaviorObservation'
-import { describeNotification } from './features/notifications/notificationCatalog'
+import { describeNotification, type NotificationAnswer } from './features/notifications/notificationCatalog'
+import { fetchFounderPetIds, fetchOfficialFeed, toggleOfficialPostLike } from './features/vigilante/officialPostsService'
+import type { OfficialPost } from './features/vigilante/officialPosts'
 import { syncPush } from './features/push/pushService'
 import { markNotificationsSeen } from './features/notifications/markSeen'
 import { createRequestScope } from './lib/requestScope'
@@ -61,6 +63,7 @@ import type {
   DocumentCategory,
   PetDocument,
   PazoNotification,
+  VaccineType,
 } from './types/pazo'
 import { INITIAL_PETS } from './data/mockData'
 
@@ -258,6 +261,9 @@ function PazoMain() {
   const [petRequests] = useState(createRequestScope)
   const activePetIdRef = useRef(INITIAL_PETS[0].id)
   const [posts, setPosts] = useState<Post[]>([])
+  // Vigilante: official PAZO posts for the active pet, and pets shown with a Founder badge.
+  const [officialPosts, setOfficialPosts] = useState<OfficialPost[]>([])
+  const [founderPetIds, setFounderPetIds] = useState<ReadonlySet<string>>(() => new Set())
   const [profilePosts, setProfilePosts] = useState<Post[]>([])
   const likingPostIdsRef = useRef<Set<string>>(new Set())
   const savingPostIdsRef = useRef<Set<string>>(new Set())
@@ -376,6 +382,10 @@ function PazoMain() {
   const [placeTargetId, setPlaceTargetId] = useState<string | null>(null)
   const [placeTargetKey, setPlaceTargetKey] = useState(0)
   const [isAddPetOpen, setIsAddPetOpen] = useState(false)
+  // Bumped by the welcome notice to open the pet's edit form.
+  const [petEditRequestKey, setPetEditRequestKey] = useState(0)
+  // Set when a health alert is answered "has it": the care form opens with that vaccine.
+  const [vaccineDraft, setVaccineDraft] = useState<{ key: number; vaccineType: VaccineType } | null>(null)
   const [isPassportOpen, setIsPassportOpen] = useState(false)
   const [isCareOpen, setIsCareOpen] = useState(false)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
@@ -1003,6 +1013,57 @@ function PazoMain() {
     setAuthMode('login')
     setForgotPasswordMode(false)
     setLoginMessage('')
+  }
+
+  const officialFeedPetId = !isDemoUser && canUseAccount && activeTab === 'inicio' ? currentPet?.id : undefined
+  useEffect(() => {
+    if (!officialFeedPetId) return
+    let current = true
+    fetchOfficialFeed(officialFeedPetId)
+      .then((items) => { if (current) setOfficialPosts(items) })
+      .catch((error) => { if (current) { setOfficialPosts([]); console.error('Error loading official posts:', error) } })
+    return () => { current = false }
+  }, [officialFeedPetId])
+
+  const founderSignature = isDemoUser ? '' : [...new Set(posts.flatMap((post) =>
+    [post.isAuthorDeleted ? '' : post.petId, ...post.comments.map((comment) => comment.authorPetId || '')]
+  ).filter(Boolean))].sort().join(',')
+  useEffect(() => {
+    if (!founderSignature) return
+    let current = true
+    fetchFounderPetIds(founderSignature.split(','))
+      .then((ids) => { if (current) setFounderPetIds(ids) })
+      .catch((error) => console.error('Error loading founder badges:', error))
+    return () => { current = false }
+  }, [founderSignature])
+
+  const handleRespondNotification = async (notification: PazoNotification, answer: NotificationAnswer) => {
+    if (!canUseAccount) return
+    try {
+      const { data, error } = await supabase.rpc('pazo_answer_health_alert', { p_notification_id: notification.id, p_answer: answer })
+      if (error) throw error
+      if (data !== true) return
+      setNotifications((items) => items.map((item) => item.id === notification.id ? { ...item, alertAnswer: answer, read: true } : item))
+      if (answer === 'has_it' && notification.alertVaccineType) {
+        const pet = pets.find((item) => item.id === notification.petId)
+        if (pet && pet.id !== currentPet?.id) selectActivePet(pet)
+        setIsNotificationsOpen(false)
+        setVaccineDraft((draft) => ({ key: (draft?.key ?? 0) + 1, vaccineType: notification.alertVaccineType! }))
+        setIsCareOpen(true)
+      }
+    } catch (error) {
+      console.error('Error answering health alert:', error)
+    }
+  }
+
+  const handleToggleOfficialLike = async (postId: string) => {
+    if (!canUseAccount) { requireAccount(); return }
+    try {
+      const result = await toggleOfficialPostLike(postId)
+      setOfficialPosts((items) => items.map((item) => item.id === postId ? { ...item, isLiked: result.liked, likes: result.likes } : item))
+    } catch (error) {
+      console.error('Error toggling official like:', error)
+    }
   }
 
   const handleLikePost = async (postId: string) => {
@@ -1908,6 +1969,24 @@ function PazoMain() {
       case 'pet_profile':
         setSelectedPublicProfileId(target.petId)
         break
+      case 'official_post':
+        setActiveTab('inicio')
+        break
+      case 'admin_vigilante':
+        setActiveTab('mascota')
+        window.location.hash = '#/admin/vigilante'
+        break
+      case 'pet_edit': {
+        const pet = pets.find((item) => item.id === target.petId)
+        if (!pet) {
+          setIsAddPetOpen(true)
+          break
+        }
+        if (pet.id !== currentPet?.id) selectActivePet(pet)
+        setActiveTab('mascota')
+        setPetEditRequestKey((value) => value + 1)
+        break
+      }
     }
 
     if (!notification.read) {
@@ -2450,6 +2529,9 @@ function PazoMain() {
                       <HomeView
                         onOpenPetTools={()=>setActiveTab('mascota')}
                         posts={posts}
+                        officialPosts={officialFeedPetId ? officialPosts : []}
+                        onToggleOfficialLike={(postId) => void handleToggleOfficialLike(postId)}
+                        founderPetIds={founderSignature ? founderPetIds : undefined}
                         canReport={Boolean(user?.id) && !isDemoUser}
                         onLikePost={handleLikePost}
                         onSavePost={handleSavePost}
@@ -2514,6 +2596,7 @@ function PazoMain() {
                   {activeTab === 'mascota' && (
                     <PetView
                       currentPet={currentPet}
+                      editRequestKey={petEditRequestKey}
                       canManagePet={canUseAccount}
                       isDemo={isDemoUser}
                       onExitDemo={() => leaveDemo('welcome')}
@@ -2654,6 +2737,8 @@ function PazoMain() {
               isOpen={canUseAccount && isCareOpen}
               onClose={() => setIsCareOpen(false)}
               petName={currentPet.name}
+              petSpecies={currentPet.species}
+              vaccineDraft={vaccineDraft}
               careItems={careItems}
               careHistory={careHistory}
               isLoading={isCareLoading}
@@ -2722,6 +2807,8 @@ function PazoMain() {
               isLoadingMore={isNotificationsLoadingMore}
               lang={lang}
               canUsePush={canUseAccount}
+              petNames={Object.fromEntries(pets.map((pet) => [pet.id, pet.name]))}
+              onRespondNotification={(notification, answer) => void handleRespondNotification(notification, answer)}
             />
 
             <SightingDetailModal

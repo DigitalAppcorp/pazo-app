@@ -509,3 +509,9 @@ entrypoint = "./functions/pazo-meta-worker/index.ts"
 [functions.pazo-push-worker]
 verify_jwt = false
 entrypoint = "./functions/pazo-push-worker/index.ts"
+
+# Vigilante worker: same single-use dispatch token as the push worker, so the
+# gateway cannot check a JWT; workerCore admits only the scheduler token.
+[functions.pazo-vigilante-worker]
+verify_jwt = false
+entrypoint = "./functions/pazo-vigilante-worker/index.ts"

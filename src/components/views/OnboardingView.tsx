@@ -4,6 +4,9 @@ import type { Species, Pet } from '../../types/pazo'
 import { IconCat, IconDog, IconRabbit, IconBird, IconPaw } from '../icons/PazoIcons'
 import { useAuth } from '../../context/AuthContext'
 import { createPetProfile } from '../../services/petService'
+import { PostalCodeField } from '../../features/vigilante/PrivateDetailsFields'
+import { isValidPostalCode } from '../../features/vigilante/privateDetails'
+import { saveHouseholdPostalCode } from '../../features/vigilante/privateDetailsService'
 import { stageMarketingFirstPetCreated } from '../../features/marketing/marketingRuntime'
 import {observePrereg} from '../../features/marketing/preregRuntime'
 import {observeSignupFailure} from '../../features/marketing/experienceDetails'
@@ -93,6 +96,8 @@ export const OnboardingView = ({
   }
 
   const [zone, setZone] = useState('Los Ángeles')
+  const [postalCode, setPostalCode] = useState('')
+  const [postalCodeInvalid, setPostalCodeInvalid] = useState(false)
   const [interests, setInterests] = useState<string[]>([
     'Comunidades de gatos',
     'Lugares aptos para mascotas',
@@ -167,6 +172,10 @@ export const OnboardingView = ({
       alert(lang === 'es' ? 'Escribe el nombre de tu mascota.' : 'Enter your pet\'s name.')
       return
     }
+    if (postalCode !== '' && !isValidPostalCode(postalCode)) {
+      setPostalCodeInvalid(true)
+      return
+    }
 
     setIsSubmittingPet(true)
 
@@ -182,6 +191,11 @@ export const OnboardingView = ({
       },isCurrent)
 
       if (!isCurrent()) return
+      // Optional and private: a failure here must never block entering PAZO.
+      if (postalCode) {
+        await saveHouseholdPostalCode(postalCode).catch((error) => console.error('Error saving postal code:', error))
+        if (!isCurrent()) return
+      }
       stageMarketingFirstPetCreated()
       onComplete(createdPet)
     } catch (error) {
@@ -656,6 +670,15 @@ export const OnboardingView = ({
                 />
                 <span className="text-[13px] text-[#5C7470] mt-0.5 block">{lang === 'es' ? "También puedes buscar sin GPS." : "You can also search without GPS."}</span>
               </div>
+
+              <PostalCodeField
+                value={postalCode}
+                onChange={(value) => { setPostalCode(value); setPostalCodeInvalid(false) }}
+                lang={lang}
+                invalid={postalCodeInvalid}
+                labelClassName="block text-[14px] font-bold text-[#204E4A] mb-1"
+                inputClassName="w-full bg-white rounded-2xl px-3.5 py-2.5 text-xs text-[#204E4A]"
+              />
 
               <div>
                 <label className="block text-[14px] font-bold text-[#204E4A] mb-1.5">{lang === 'es' ? "¿Qué les interesa?" : "What interests you?"}</label>

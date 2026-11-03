@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useModalFocus } from '../../lib/useModalFocus'
 import { PushControl } from '../../features/push/PushControl'
+import { VACCINE_LABELS, vaccineOptionsFor } from '../../features/care/vaccineTypes'
 import type {
   CareCategory,
   CareCompletion,
@@ -8,12 +9,17 @@ import type {
   CareItemInput,
   CareRecurrence,
   CareReminderDays,
+  Species,
+  VaccineType,
 } from '../../types/pazo'
 
 interface CareModalProps {
   isOpen: boolean
   onClose: () => void
   petName: string
+  petSpecies?: Species
+  // A health alert answered "has it" opens a new vaccine item with its type already chosen.
+  vaccineDraft?: { key: number; vaccineType: VaccineType } | null
   careItems: CareItem[]
   careHistory: CareCompletion[]
   isLoading: boolean
@@ -124,12 +130,15 @@ const emptyForm = (): CareItemInput => ({
   recurrence: 'none',
   reminderDaysBefore: 1,
   notes: null,
+  vaccineType: null,
 })
 
 export const CareModal = ({
   isOpen,
   onClose,
   petName,
+  petSpecies,
+  vaccineDraft = null,
   careItems,
   careHistory,
   isLoading,
@@ -166,6 +175,27 @@ export const CareModal = ({
     return latest
   }, [careHistory])
 
+  const vaccineOptions = vaccineOptionsFor(petSpecies)
+
+  const [handledDraftKey, setHandledDraftKey] = useState(vaccineDraft?.key ?? 0)
+  if (vaccineDraft && vaccineDraft.key !== handledDraftKey) {
+    setHandledDraftKey(vaccineDraft.key)
+    setForm({ ...emptyForm(), category: 'vaccine', vaccineType: vaccineDraft.vaccineType, title: VACCINE_LABELS[vaccineDraft.vaccineType][lang] })
+    setEditingId(null)
+    setIsEditing(true)
+    setFormError('')
+  }
+
+  // Picking a vaccine fills the title, unless the owner already wrote one of their own.
+  const chooseVaccine = (type: VaccineType) =>
+    setForm((prev) => {
+      const vaccineType = prev.vaccineType === type ? null : type
+      const previousLabel = prev.vaccineType ? VACCINE_LABELS[prev.vaccineType][lang] : ''
+      const ownTitle = prev.title.trim() !== '' && prev.title.trim() !== previousLabel
+      const title = ownTitle ? prev.title : vaccineType ? VACCINE_LABELS[vaccineType][lang] : ''
+      return { ...prev, vaccineType, title }
+    })
+
   if (!isOpen) return null
 
   const resetForm = () => {
@@ -192,6 +222,7 @@ export const CareModal = ({
       recurrence: item.recurrence,
       reminderDaysBefore: item.reminderDaysBefore,
       notes: item.notes || null,
+      vaccineType: item.vaccineType ?? null,
     })
     setEditingId(item.id)
     setIsEditing(true)
@@ -338,10 +369,10 @@ export const CareModal = ({
                 <select id="pazo-care-category"
                   value={form.category}
                   onChange={(event) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      category: event.target.value as CareCategory,
-                    }))
+                    setForm((prev) => {
+                      const category = event.target.value as CareCategory
+                      return { ...prev, category, vaccineType: category === 'vaccine' ? prev.vaccineType ?? null : null }
+                    })
                   }
                   className="w-full bg-[#FAF8F5] border border-[#204E4A]/15 rounded-xl px-2 py-2.5 text-xs"
                 >
@@ -369,6 +400,33 @@ export const CareModal = ({
                 />
               </div>
             </div>
+
+            {form.category === 'vaccine' && vaccineOptions.length > 0 && (
+              <div>
+                <span id="pazo-care-vaccineType" className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
+                  {lang === 'es' ? '¿Qué vacuna es?' : 'Which vaccine?'}
+                </span>
+                <div role="group" aria-labelledby="pazo-care-vaccineType" className="flex flex-wrap gap-2">
+                  {vaccineOptions.map((type) => {
+                    const selected = form.vaccineType === type
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => chooseVaccine(type)}
+                        className={`text-[12px] font-bold px-3 py-2 rounded-full cursor-pointer transition-colors ${selected
+                          ? 'bg-[#204E4A] text-[#E1E53F]'
+                          : 'bg-[#FAF8F5] text-[#5C7470]'
+                        }`}
+                      >
+                        {VACCINE_LABELS[type][lang]}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-2">
               <div>

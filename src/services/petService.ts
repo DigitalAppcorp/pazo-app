@@ -66,6 +66,12 @@ const normalizeOptional = (value: string | null | undefined) => {
   return trimmed ? trimmed : undefined
 }
 
+// The database reserves names that could pass for PAZO itself.
+const reservedNameError = (error: { message?: string }) =>
+  error.message?.includes('PAZO_RESERVED_NAME')
+    ? new Error('Ese nombre está reservado para PAZO. Elige otro. / That name is reserved for PAZO. Please choose another.')
+    : error
+
 const mapPetRow = (row: any, privateRow?: PetPrivateRow | null): Pet => ({
   id: row.id,
   name: row.name,
@@ -223,7 +229,7 @@ export const createPetProfile = async (input: CreatePetProfileInput, isCurrent?:
     const {data,error}=await(accessToken?request.setHeader('Authorization',`Bearer ${accessToken}`):request)
     assertCurrent()
 
-    if (error) throw error
+    if (error) throw reservedNameError(error)
     if (!data) throw new Error('Supabase no devolvió el ID de la mascota creada.')
 
     const createdPet=await fetchOwnedPet(data as string)
@@ -273,7 +279,7 @@ export const updatePetProfile = async (input: UpdatePetProfileInput): Promise<Pe
       p_diet_plan: input.dietPlan?.trim() || null,
     })
 
-    if (error) throw error
+    if (error) throw reservedNameError(error)
 
     return await fetchOwnedPet(input.petId)
   } catch (error) {

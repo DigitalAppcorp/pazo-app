@@ -3,6 +3,10 @@
 Fecha: 3 de noviembre de 2026.
 Estado: **idea aprobada en conversación por el PO; nada implementado.** Este documento es contexto para cualquier agente que retome el trabajo. No autoriza por sí mismo cambios en producción, envíos de push, migraciones ni gastos.
 
+## Estado (3-nov-2026)
+
+**Pasos 0 a 5 implementados y probados, sin publicar.** Paso 0 en `main` (#202, sin desplegar). Pasos 1 a 5 en PR borrador apilados (#203, #204 y el de pasos 3 a 5). Vigilante instalado APAGADO. Publicación, activación y reversión: `docs/vigilante/VIGILANTE_RELEASE_RUNBOOK.md`. Pruebas de integración: `scripts/vigilante-pg17.mjs` en PostgreSQL 17 aislado (workflow `vigilante.yml`).
+
 ## Qué es
 
 Un módulo que vigila fuentes oficiales (retiros de comida, brotes de enfermedades, calor, humo, cambios de reglas en LA), cruza cada noticia con los datos de cada mascota y prepara avisos personalizados. **Nada sale sin la aprobación del PO.**
@@ -99,12 +103,14 @@ Principio del PO: **no pedir datos por adelantado**. El dueño descubre el valor
 ## Paso 2 — cuenta oficial PAZO (decisiones del PO, 3-nov-2026; solo planeación)
 
 1. **Autor nuevo "Oficial"** (no es una mascota). Las publicaciones salen con la imagen de la cuenta oficial y la insignia Oficial.
-2. **Sin botón normal de publicar.** La cuenta oficial solo publica a través del flujo del Vigilante, con aprobación del PO como administrador. Cuenta separada de la del PO, con correo propio y doble verificación.
-3. **Insignias:** Oficial (solo la cuenta PAZO) y Fundador (cuenta del PO), asignadas solo por el servidor. La de Fundador se mostrará en todo lugar donde el código ya muestra insignias (perfil, feed, comentarios). El estilo de ambas se encarga a ChatGPT: `docs/vigilante/ORDEN_CHATGPT_INSIGNIAS.md`. Observación: las cuentas `is_founder` ya se excluyen de las estadísticas de marketing.
+2. **Sin botón normal de publicar.** La cuenta oficial solo publica a través del flujo del Vigilante, con aprobación del PO como administrador. **Corrección del PO (3-nov-2026): PAZO no es una cuenta.** No tiene correo, contraseña ni usuario de Auth; es una identidad de autor que solo usa el Vigilante. Las publicaciones viven en la tabla `official_posts`, que ningún cliente puede escribir; solo la función de servidor del paso 4 publica tras la aprobación del PO. La única verificación extra es la del administrador al editar un borrador (paso 4).
+3. **Insignias:** Oficial (solo las publicaciones de PAZO) y Fundador (cuenta del PO), asignadas solo por el servidor. La de Fundador se mostrará en todo lugar donde el código ya muestra insignias (perfil, feed, comentarios). El estilo de ambas se encarga a ChatGPT: `docs/vigilante/ORDEN_CHATGPT_INSIGNIAS.md`. Observación: las cuentas `is_founder` ya se excluyen de las estadísticas de marketing.
 4. **Interacciones:** me gusta y compartir, sí (el enlace se abre sin cuenta); comentarios apagados al inicio, con la línea fija "¿Dudas? Consulta a tu veterinario."; no hace falta seguir a PAZO.
 5. **Visibilidad:** cualquiera puede ver todas las publicaciones oficiales en el perfil de PAZO; el feed muestra a cada mascota solo las que le aplican (ver abajo cómo funciona hoy el feed).
 6. **Nombres reservados:** el servidor rechaza nombres de mascota y usuario que imiten a PAZO, tras normalizar (minúsculas, sin espacios ni signos, 0→o, 1→i): PAZO, P.A.Z.O, PAZ0, Pazo Official, PAZO Team, PAZO Soporte, PAZO Admin.
 7. **Pendiente:** imagen de perfil de la cuenta oficial (logo de PAZO u otra); el PO quiere evaluar opciones.
+
+**Implementado en rama (3-nov-2026):** migración `20261103210000_pazo_official_author.sql` (`official_posts`, `official_post_likes`, `get_official_feed`, `toggle_official_post_like`, `pazo_founder_pets_batch`, cuenta del administrador marcada como fundadora, nombres reservados con disparadores en mascotas y nombres de usuario). Insignias provisionales hasta el diseño de ChatGPT. Compartir usa un enlace a la app; la página pública de cada aviso queda pendiente.
 
 ### Cómo funciona hoy el feed (lectura del código, 3-nov-2026)
 
