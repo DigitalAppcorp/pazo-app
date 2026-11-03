@@ -580,7 +580,8 @@ begin
  get diagnostics v_dropped = row_count;
  delete from public.notifications where source_id=d.official_post_id and type='health_alert' and read_at is null;
  get diagnostics v_removed = row_count;
- update public.official_posts set expires_at=greatest(published_at+interval '1 second',now()) where id=d.official_post_id;
+ -- Expires now, even when cancelled within the same second it was published.
+ update public.official_posts set published_at=least(published_at,now()-interval '1 second'),expires_at=now() where id=d.official_post_id;
  update vigilante_private.drafts set status='cancelled' where id=d.id;
  insert into vigilante_private.audit(draft_id,actor,action,snapshot) values(d.id,v_admin,'cancel',jsonb_build_object('dropped_pushes',v_dropped,'removed_notices',v_removed));
  return jsonb_build_object('dropped_pushes',v_dropped,'removed_notices',v_removed);
