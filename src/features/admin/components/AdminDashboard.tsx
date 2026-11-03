@@ -91,9 +91,9 @@ function PageTools({lang,show,showRefresh,loading,overview,onRefresh,children}:{
  </div>
 }
 
-export function AdminDashboard({lang,onClose,onOpenReports,initialSection='summary'}:{lang:'es'|'en';onClose:()=>void;onOpenReports?:()=>void;initialSection?:'summary'|'vigilante'}){
+export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onClose:()=>void;onOpenReports?:()=>void}){
  const visibleSections=sections.filter(item=>item.key!=='reports'||Boolean(onOpenReports))
- const [section,setSection]=useState<Section>(initialSection)
+ const [section,setSection]=useState<Section>('summary')
  const [period,setPeriod]=useState<7|30|90>(30)
  const [overview,setOverview]=useState<AdminOverview|null>(null)
  const [users,setUsers]=useState<AdminUser[]>([])

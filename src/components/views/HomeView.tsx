@@ -350,13 +350,16 @@ export const HomeView = ({
               {onOpenPetTools&&<button type="button" onClick={onOpenPetTools} className="mt-3 min-h-11 rounded-full bg-[#204E4A] px-5 py-2 text-[14px] font-bold text-white hover:bg-[#183D3A] focus-visible:underline">{lang==='es'?'Ver herramientas de mi mascota':'View my pet’s tools'}</button>}
             </div>
           )}
-          {placeOfficialPosts(displayedPosts, officialPosts).map((entry) => entry.kind === 'official' ? (
-            <OfficialPostCard key={'official-' + entry.post.id} post={entry.post} lang={lang} onToggleLike={(id) => onToggleOfficialLike?.(id)} />
-          ) : (
+          {placeOfficialPosts(displayedPosts, officialPosts).map((entry) => {
+            if (entry.kind === 'official') {
+              return <OfficialPostCard key={'official-' + entry.post.id} post={entry.post} lang={lang} onToggleLike={(id) => onToggleOfficialLike?.(id)} />
+            }
+            const post = entry.post
+            return (
             <PostCard
-              key={entry.post.id}
-              post={entry.post}
-              supporterBadge={entry.post.supporterBadge}
+              key={post.id}
+              post={post}
+              supporterBadge={post.supporterBadge}
               founderPetIds={founderPetIds}
               canReport={canReport}
               onReport={(kind,id,label) => setReportTarget({kind,id,label})}
@@ -364,18 +367,19 @@ export const HomeView = ({
               currentPetId={canReport ? currentPetId : ''}
               ownedPetIds={ownedPetIds}
               lang={lang}
-              isCommentsOpen={activeCommentsPostId === entry.post.id}
+              isCommentsOpen={activeCommentsPostId === post.id}
               newCommentText={newCommentText}
               onLikePost={onLikePost}
               onSavePost={onSavePost}
               onSelectPetProfile={onSelectPetProfile}
               onToggleComments={handleToggleComments}
-              isCommentsLoading={loadingCommentsPostId === entry.post.id}
+              isCommentsLoading={loadingCommentsPostId === post.id}
               isSubmittingComment={isSubmittingComment}
               onCommentTextChange={setNewCommentText}
               onSendComment={handleSendComment}
             />
-          ))}
+            )
+          })}
         </div>
       )}
       {reportTarget && <ReportDialog key={reportTarget.kind + reportTarget.id} target={reportTarget} lang={lang} onClose={() => setReportTarget(null)} />}

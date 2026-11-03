@@ -16,6 +16,7 @@ await prepareMarketingLab()
 const careSource=fs.readFileSync('supabase/migrations/20261006054510_care_agenda.sql','utf8')
 const careTable=careSource.match(/CREATE TABLE public\.care_items \([\s\S]*?\r?\n\);/)?.[0]
 assert.ok(careTable);sql(careTable)
+sql("ALTER TABLE public.care_items ADD COLUMN vaccine_type text") // Vigilante: optional typed vaccine (20261103200000).
 sql(`ALTER TABLE public.care_items ENABLE ROW LEVEL SECURITY;ALTER TABLE public.care_items FORCE ROW LEVEL SECURITY;
  GRANT SELECT,INSERT ON public.care_items TO authenticated;GRANT SELECT,INSERT ON public.pets TO authenticated;
  ALTER TABLE public.pets ENABLE ROW LEVEL SECURITY;ALTER TABLE public.pets FORCE ROW LEVEL SECURITY;
@@ -90,7 +91,7 @@ try{
     if(table==='follows'){if(feedPending)await new Promise(r=>releaseFeed.push(r));return respond([])}
     if(table==='care_items'){
      if(req.method()==='POST'){
-      const columns=['pet_id','title','category','due_date','due_time','timezone','recurrence','reminder_days_before','notes']
+      const columns=['pet_id','title','category','due_date','due_time','timezone','recurrence','reminder_days_before','notes','vaccine_type']
       assert.ok(Object.keys(value).every(x=>columns.includes(x)))
       const row=json(`INSERT INTO public.care_items(${columns.join(',')}) VALUES(${columns.map(k=>q(value[k])).join(',')}) RETURNING row_to_json(care_items)`)
       return respond(row)

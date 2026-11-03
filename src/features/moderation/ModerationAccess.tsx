@@ -4,19 +4,19 @@ import { checkAdmin } from '../admin/adminDashboardService'
 import { AdminDashboard } from '../admin/components/AdminDashboard'
 import { ModeratorQueue } from './ModeratorQueue'
 import { ModerationMediaQueue } from './ModerationMediaQueue'
+import { VigilantePanel } from '../vigilante/admin/VigilantePanel'
 
 export function ModerationAccess({enabled,lang}:{enabled:boolean;lang:'es'|'en'}){
  const [allowed,setAllowed]=useState(false)
  const [adminAllowed,setAdminAllowed]=useState(false)
- const [screen,setScreen]=useState<'reports'|'media'|'dashboard'|null>(null)
- const [initialSection,setInitialSection]=useState<'summary'|'vigilante'>('summary')
+ const [screen,setScreen]=useState<'reports'|'media'|'dashboard'|'vigilante'|null>(null)
  // A Vigilante notice opens the panel straight on its inbox.
  useEffect(()=>{
   if(typeof window==='undefined')return
   const open=()=>{
    if(window.location.hash!=='#/admin/vigilante'||!adminAllowed)return
    history.replaceState(null,'',window.location.pathname+window.location.search)
-   setInitialSection('vigilante');setScreen('dashboard')
+   setScreen('vigilante')
   }
   open()
   window.addEventListener('hashchange',open)
@@ -55,6 +55,7 @@ export function ModerationAccess({enabled,lang}:{enabled:boolean;lang:'es'|'en'}
   </div>
   {allowed&&screen==='reports'&&<ModeratorQueue lang={lang} onClose={()=>setScreen(null)}/>}
   {allowed&&screen==='media'&&<ModerationMediaQueue lang={lang} onClose={()=>setScreen(null)}/>}
-  {adminAllowed&&screen==='dashboard'&&<AdminDashboard key={initialSection} lang={lang} initialSection={initialSection} onClose={()=>{setScreen(null);setInitialSection('summary')}} onOpenReports={allowed?()=>setScreen('reports'):undefined}/>}
+  {adminAllowed&&screen==='vigilante'&&<VigilantePanel lang={lang} onClose={()=>setScreen(null)}/>}
+  {adminAllowed&&screen==='dashboard'&&<AdminDashboard lang={lang} onClose={()=>setScreen(null)} onOpenReports={allowed?()=>setScreen('reports'):undefined}/>}
  </section>
 }
