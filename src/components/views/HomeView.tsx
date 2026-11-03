@@ -12,6 +12,8 @@ import type { ReportTarget } from '../../features/moderation/reportingService'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
 import { SupporterBadge } from '../../features/supporter/components/SupporterBadge'
 import {supporterBenefitsUiEnabled} from '../../features/supporter/supporterUiRelease'
+import { FounderBadge, OfficialPostCard } from '../../features/vigilante/OfficialPostCard'
+import { placeOfficialPosts, type OfficialPost } from '../../features/vigilante/officialPosts'
 
 const supporterBadgesEnabled = supporterBenefitsUiEnabled
 interface HomeViewProps {
@@ -26,6 +28,10 @@ interface HomeViewProps {
   ownedPetIds: string[]
   onSelectPetProfile: (petId: string) => void
   onOpenPetTools?: () => void
+  // Vigilante: official PAZO posts for this pet, and pets owned by a founder account.
+  officialPosts?: OfficialPost[]
+  onToggleOfficialLike?: (postId: string) => void
+  founderPetIds?: ReadonlySet<string>
 }
 
 // Hook de observacion de visibilidad por tarjeta de post
@@ -168,6 +174,7 @@ const NearbyNeighborhoodArtwork = () => (
 
 export const HomeView = ({
   posts, canReport, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', ownedPetIds, onSelectPetProfile, onOpenPetTools,
+  officialPosts = [], onToggleOfficialLike, founderPetIds,
 }: HomeViewProps) => {
   const [reportTarget, setReportTarget] = useState<{kind: ReportTarget; id: string; label?: string} | null>(null)
   const [hiddenPostIds, setHiddenPostIds] = useState<Set<string>>(() => new Set())
@@ -343,24 +350,27 @@ export const HomeView = ({
               {onOpenPetTools&&<button type="button" onClick={onOpenPetTools} className="mt-3 min-h-11 rounded-full bg-[#204E4A] px-5 py-2 text-[14px] font-bold text-white hover:bg-[#183D3A] focus-visible:underline">{lang==='es'?'Ver herramientas de mi mascota':'View my pet’s tools'}</button>}
             </div>
           )}
-          {displayedPosts.map((post) => (
+          {placeOfficialPosts(displayedPosts, officialPosts).map((entry) => entry.kind === 'official' ? (
+            <OfficialPostCard key={'official-' + entry.post.id} post={entry.post} lang={lang} onToggleLike={(id) => onToggleOfficialLike?.(id)} />
+          ) : (
             <PostCard
-              key={post.id}
-              post={post}
-              supporterBadge={post.supporterBadge}
+              key={entry.post.id}
+              post={entry.post}
+              supporterBadge={entry.post.supporterBadge}
+              founderPetIds={founderPetIds}
               canReport={canReport}
               onReport={(kind,id,label) => setReportTarget({kind,id,label})}
               onHidePost={handleHidePost}
               currentPetId={canReport ? currentPetId : ''}
               ownedPetIds={ownedPetIds}
               lang={lang}
-              isCommentsOpen={activeCommentsPostId === post.id}
+              isCommentsOpen={activeCommentsPostId === entry.post.id}
               newCommentText={newCommentText}
               onLikePost={onLikePost}
               onSavePost={onSavePost}
               onSelectPetProfile={onSelectPetProfile}
               onToggleComments={handleToggleComments}
-              isCommentsLoading={loadingCommentsPostId === post.id}
+              isCommentsLoading={loadingCommentsPostId === entry.post.id}
               isSubmittingComment={isSubmittingComment}
               onCommentTextChange={setNewCommentText}
               onSendComment={handleSendComment}
@@ -375,6 +385,7 @@ export const HomeView = ({
 
 interface PostCardProps {
   supporterBadge?: SupporterBadgeEvidence
+  founderPetIds?: ReadonlySet<string>
   post: Post
   canReport: boolean
   onReport: (kind: 'feed_post' | 'feed_comment', id: string, label?: string) => void
@@ -394,7 +405,7 @@ interface PostCardProps {
   onSendComment: (postId: string) => void
 }
 
-const PostCard = ({ post, supporterBadge, canReport, onReport, onHidePost, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
+const PostCard = ({ post, supporterBadge, founderPetIds, canReport, onReport, onHidePost, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement | null>(null)
 
@@ -445,7 +456,7 @@ const PostCard = ({ post, supporterBadge, canReport, onReport, onHidePost, curre
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-bold text-[#204E4A]">{comment.authorName}</p>
+            <p className="font-bold text-[#204E4A]">{comment.authorName}{comment.authorPetId && founderPetIds?.has(comment.authorPetId) && <span className="ml-1.5 align-middle"><FounderBadge lang={lang} /></span>}</p>
             <p className="mt-1 text-[#5C7470]">{comment.text}</p>
           </div>
         </div>)}
@@ -472,6 +483,7 @@ const PostCard = ({ post, supporterBadge, canReport, onReport, onHidePost, curre
               <button type="button" onClick={() => onSelectPetProfile(post.petId)} className="max-w-full truncate text-left text-[16px] font-extrabold leading-tight text-[#204E4A] hover:underline">
                 {post.petName}
               </button>
+              {!post.isAuthorDeleted && founderPetIds?.has(post.petId) && <FounderBadge lang={lang} />}
               {post.isRecommended ? (
                 <span className="inline-flex max-w-full shrink-0 items-center gap-1 rounded-lg bg-[#E1E53F]/40 px-1.5 py-0.5 text-[10px] font-black uppercase text-[#204E4A]">
                   <IconPaw size={10} />
@@ -614,7 +626,7 @@ const PostCard = ({ post, supporterBadge, canReport, onReport, onHidePost, curre
                     )}
                   </div>
                   <div className="flex-1 bg-[#FAF8F5] p-2.5 rounded-2xl shadow-xs">
-                    <span className="font-bold text-[#204E4A] mr-1.5">{comment.authorName} ({comment.authorPet}):</span>
+                    <span className="font-bold text-[#204E4A] mr-1.5">{comment.authorName} ({comment.authorPet}){comment.authorPetId && founderPetIds?.has(comment.authorPetId) && <span className="ml-1.5 align-middle"><FounderBadge lang={lang} /></span>}:</span>
                     <span className="text-[#5C7470]">{comment.text}
                       {DEMO_COMMENT_MOTIFS[comment.id] && (
                         <span className="ml-1 inline-flex items-center align-middle" aria-hidden="true">

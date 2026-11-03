@@ -5,6 +5,8 @@ import { recordAdminActivity } from './features/admin/adminDashboardService'
 import { PasswordVisibilityButton } from './features/auth/PasswordVisibilityButton'
 import {useBehaviorObservation} from './features/marketing/useBehaviorObservation'
 import { describeNotification } from './features/notifications/notificationCatalog'
+import { fetchFounderPetIds, fetchOfficialFeed, toggleOfficialPostLike } from './features/vigilante/officialPostsService'
+import type { OfficialPost } from './features/vigilante/officialPosts'
 import { syncPush } from './features/push/pushService'
 import { markNotificationsSeen } from './features/notifications/markSeen'
 import { createRequestScope } from './lib/requestScope'
@@ -258,6 +260,9 @@ function PazoMain() {
   const [petRequests] = useState(createRequestScope)
   const activePetIdRef = useRef(INITIAL_PETS[0].id)
   const [posts, setPosts] = useState<Post[]>([])
+  // Vigilante: official PAZO posts for the active pet, and pets shown with a Founder badge.
+  const [officialPosts, setOfficialPosts] = useState<OfficialPost[]>([])
+  const [founderPetIds, setFounderPetIds] = useState<ReadonlySet<string>>(() => new Set())
   const [profilePosts, setProfilePosts] = useState<Post[]>([])
   const likingPostIdsRef = useRef<Set<string>>(new Set())
   const savingPostIdsRef = useRef<Set<string>>(new Set())
@@ -1005,6 +1010,38 @@ function PazoMain() {
     setAuthMode('login')
     setForgotPasswordMode(false)
     setLoginMessage('')
+  }
+
+  const officialFeedPetId = !isDemoUser && canUseAccount && activeTab === 'inicio' ? currentPet?.id : undefined
+  useEffect(() => {
+    if (!officialFeedPetId) return
+    let current = true
+    fetchOfficialFeed(officialFeedPetId)
+      .then((items) => { if (current) setOfficialPosts(items) })
+      .catch((error) => { if (current) { setOfficialPosts([]); console.error('Error loading official posts:', error) } })
+    return () => { current = false }
+  }, [officialFeedPetId])
+
+  const founderSignature = isDemoUser ? '' : [...new Set(posts.flatMap((post) =>
+    [post.isAuthorDeleted ? '' : post.petId, ...post.comments.map((comment) => comment.authorPetId || '')]
+  ).filter(Boolean))].sort().join(',')
+  useEffect(() => {
+    if (!founderSignature) return
+    let current = true
+    fetchFounderPetIds(founderSignature.split(','))
+      .then((ids) => { if (current) setFounderPetIds(ids) })
+      .catch((error) => console.error('Error loading founder badges:', error))
+    return () => { current = false }
+  }, [founderSignature])
+
+  const handleToggleOfficialLike = async (postId: string) => {
+    if (!canUseAccount) { requireAccount(); return }
+    try {
+      const result = await toggleOfficialPostLike(postId)
+      setOfficialPosts((items) => items.map((item) => item.id === postId ? { ...item, isLiked: result.liked, likes: result.likes } : item))
+    } catch (error) {
+      console.error('Error toggling official like:', error)
+    }
   }
 
   const handleLikePost = async (postId: string) => {
@@ -2463,6 +2500,9 @@ function PazoMain() {
                       <HomeView
                         onOpenPetTools={()=>setActiveTab('mascota')}
                         posts={posts}
+                        officialPosts={officialFeedPetId ? officialPosts : []}
+                        onToggleOfficialLike={(postId) => void handleToggleOfficialLike(postId)}
+                        founderPetIds={founderSignature ? founderPetIds : undefined}
                         canReport={Boolean(user?.id) && !isDemoUser}
                         onLikePost={handleLikePost}
                         onSavePost={handleSavePost}
