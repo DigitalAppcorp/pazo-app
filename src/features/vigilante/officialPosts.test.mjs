@@ -40,3 +40,9 @@ test('names that pass for PAZO are reserved for pets and usernames, only when th
   assert.equal([...translate[1]].length,[...translate[2]].length)
   assert.match(sql,/update public\.profiles set is_founder = true\s+where id in\(select g\.user_id from admin_private\.admin_grants g\)/)
 })
+
+test('the official feed is asked only with a pet of the signed-in account, never the Demo pet',()=>{
+  const app=readFileSync(new URL('../../App.tsx',import.meta.url),'utf8')
+  assert.match(app,/const ownPetsReady = petBootstrap\?\.userId === user\?\.id && petBootstrap\?\.status === 'ready' && !isOnboardingActive/)
+  assert.match(app,/const officialFeedPetId = !isDemoUser && canUseAccount && ownPetsReady && activeTab === 'inicio' \? currentPet\?\.id : undefined/)
+})
