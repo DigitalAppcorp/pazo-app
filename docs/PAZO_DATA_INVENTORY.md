@@ -1,6 +1,12 @@
-## Vigilante pasos 2 a 5 — alertas de salud y fuentes oficiales (3-nov-2026, en rama, NO alojado)
+## Vigilante — aviso de privacidad (3-nov-2026)
 
-Migraciones 20261103210000, 20261103220000 y 20261103230000 preparadas sin aplicar; el Vigilante se instala APAGADO.
+Texto aprobado por el PO el 3-nov-2026 en `src/features/legal/legalCopy.ts`: secciones «Salud, comida y código postal» y «Alertas de salud del Vigilante» (ES/EN), y «alertas de salud» en «Avisos en tu teléfono». Sin revisión jurídica. `legalCopy.test.mjs` contrasta el texto con las migraciones y el worker (lista de condiciones, código postal, 8 a. m., tope semanal, 30/7 días, sin IA, fuentes sin datos de usuarios). Requisito para activar el Vigilante.
+
+---
+
+## Vigilante pasos 2 a 5 — alertas de salud y fuentes oficiales (3-nov-2026)
+
+Migraciones 20261103210000, 20261103220000 y 20261103230000 aplicadas en producción el 3-nov-2026 (mapeo en `docs/vigilante/VIGILANTE_RELEASE_RUNBOOK.md`); el Vigilante sigue APAGADO. Todas las alertas de salud esperan a las 8 a. m. de Los Ángeles para el push.
 - official_posts / official_post_likes: publicaciones oficiales de PAZO (sin cuenta de Auth) y me gusta por persona. Lectura pública de lo publicado; nadie escribe salvo la función de aprobación.
 - notifications health_alert: motivo por mascota (vencida, sin registrar, aplica), tipo de vacuna y respuesta del dueño (has_it, not_yet, unsure). Texto almacenado sin nombre de mascota; la pantalla bloqueada usa texto fijo del worker. Retención 30 días como el resto de avisos.
 - push_private.preferences.health_alerts y admin_vigilante: interruptores por persona.
@@ -10,14 +16,14 @@ Migraciones 20261103210000, 20261103220000 y 20261103230000 preparadas sin aplic
 
 ---
 
-## Vigilante paso 1 — datos privados de la mascota y del hogar (3-nov-2026, en rama, NO alojado)
+## Vigilante paso 1 — datos privados de la mascota y del hogar (3-nov-2026)
 
-Rama feat/vigilante-paso1-datos-20261103; migraciones 20261103200000, 20261103201000 y 20261103202000 preparadas sin aplicar. Todo opcional y visible solo para el dueño (RLS por propietario y guarda de mantenimiento); nunca en el perfil público ni en la ficha del QR, sin proveedor nuevo, analítica ni envío a Meta.
+Migraciones 20261103200000, 20261103201000 y 20261103202000 aplicadas en producción el 3-nov-2026. Todo opcional y visible solo para el dueño (RLS por propietario y guarda de mantenimiento); nunca en el perfil público ni en la ficha del QR, sin proveedor nuevo, analítica ni envío a Meta.
 - care_items.vaccine_type: tipo de vacuna de una lista cerrada en un cuidado de categoría vacuna.
 - household_private_details.postal_code: código postal del hogar (5 dígitos), uno por cuenta, fuera de public.profiles (que es de lectura pública). Uso declarado: avisos de salud por zona del Vigilante.
 - pet_private_details: birth_month (mes aproximado), health_conditions (lista cerrada: alergias, diabetes, cardiaco, respiratorio, convulsiones, otra), food_brand y food_product (texto corto).
 - notifications tipo welcome: aviso en la app, sin push, uno por cuenta; también se crea una vez para las cuentas existentes al aplicar la migración.
-Se eliminan con la cuenta (FK a auth.users con CASCADE en el hogar; filas de mascota existentes). El aviso de privacidad debe reconciliarse antes de publicar: menciona datos de salud de la mascota y código postal.
+Se eliminan con la cuenta (FK a auth.users con CASCADE en el hogar; filas de mascota existentes). Declarado en el aviso de privacidad del Vigilante (ver arriba).
 
 ---
 
