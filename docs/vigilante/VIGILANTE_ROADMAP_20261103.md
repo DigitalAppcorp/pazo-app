@@ -149,7 +149,13 @@ Se apoya en el patrón de avisos push al administrador (`admin_new_pet`, `admin_
    - botones Aprobar, Editar, Solo feed, Rechazar.
 4. **Editar:** textos con límite de caracteres y bloqueo de nombres de mascota en el texto de pantalla bloqueada; cambiar prioridad; **solo reducir** la audiencia, nunca ampliarla; vista previa en vivo.
 5. **Antes de enviar:** botón "Enviarme una prueba" (solo al PO) y confirmación con números ("172 ahora, 140 a las 8 a. m.").
-6. **Sin verificación extra al aprobar** (decisión del PO): basta la sesión de administrador. Riesgo aceptado por el PO: con una sesión robada se podría aprobar una alerta con texto falso; los bloqueos automáticos cubren formato y nombres, no la veracidad. Mitigación sin fricción propuesta: aviso al PO cada vez que se aprueba un envío ("Aprobaste: …") para detectar una aprobación ajena, y el botón Cancelar.
+6. **Seguridad (decisión del PO):**
+   - **Aprobar tal cual, Solo feed y Rechazar:** basta la sesión de administrador, sin verificación extra.
+   - **Editar una alerta exige la huella o el reconocimiento facial del teléfono del PO** (passkey / WebAuthn con el autenticador del dispositivo). Así, con una sesión robada solo se podrían aprobar borradores que el Vigilante tomó de fuentes oficiales, nunca texto inventado.
+   - La regla se aplica **en el servidor**: la función que guarda una edición rechaza el cambio si no hay una verificación biométrica reciente (por ejemplo, de los últimos 5 minutos). Ocultar el botón en la interfaz no basta.
+   - Prever recuperación: una segunda passkey en otro dispositivo o códigos de respaldo, por si el teléfono se pierde o la huella falla.
+   - Verificar antes de programar si Supabase Auth ofrece passkeys/WebAuthn como segundo factor en la versión del proyecto; si no, verificarlo en una función propia del servidor con una librería estándar de WebAuthn.
+   - Se mantiene el aviso al PO cada vez que se aprueba un envío ("Aprobaste: …") y el botón Cancelar.
 7. **Después de aprobar:** estado en vivo (enviando, enviada), botón Cancelar y resultados en gráfico (entregados, tocados, respuestas, desactivaciones de "Alertas de salud").
 8. **Sin respuesta del PO:** alerta urgente insiste a los 30 minutos y a las 2 horas; nunca se envía sola; si caduca se archiva como "caducó sin aprobar".
 9. **Historial:** cada alerta guarda texto aprobado, fecha y autor de la aprobación. Al rechazar se elige motivo (no es relevante, fuente dudosa, repetida, tono), que alimenta al Vigilante del paso 5.
