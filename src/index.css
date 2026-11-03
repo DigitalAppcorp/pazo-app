@@ -43,10 +43,10 @@
     font-family: inherit;
   }
 
-  /* Todos los textos de la app tengan un Outer margin de 2 pixeles */
-  h1, h2, h3, h4, h5, h6, p, label {
-    margin: 2px !important;
-  }
+  /* La composición pertenece a cada pantalla/componente.
+     Tailwind Preflight deja el margen por defecto en cero; utilidades como
+     mt-2, mx-auto, space-y-* y los estilos locales ya no quedan anulados.
+     Nunca imponer márgenes globales !important a títulos, párrafos o labels. */
 
   /* En todos los campos de escritura el Placeholder Color tenga de Opacity un 60% */
   input::placeholder,

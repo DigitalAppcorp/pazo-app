@@ -1,0 +1,96 @@
+name: PAZO R1 visual comparison (before and after)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/index.css'
+      - 'src/components/views/OnboardingView.tsx'
+      - 'src/components/views/HomeView.tsx'
+      - 'src/features/supporter/components/SupporterInvitationPrompt.css'
+      - 'scripts/pazo-r1-visual-compare.mjs'
+      - 'scripts/pazo-ui-composition-foundation.test.mjs'
+      - 'supabase/tests/r1/**'
+      - '.github/workflows/pazo-r1-visual-comparison.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pazo-r1-visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  before-after:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    env:
+      PAZO_R1_BASELINE_SHA: ${{ github.event.pull_request.base.sha }}
+      PAZO_R1_PROPOSAL_SHA: ${{ github.event.pull_request.head.sha }}
+      PAZO_R1_BASELINE: http://127.0.0.1:5188
+      PAZO_R1_PROPOSAL: http://127.0.0.1:5189
+      PAZO_R1_OUTPUT: artifacts/r1-visual-comparison
+      VITE_SUPABASE_URL: https://mrybvqdebbgcayuvgkkr.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_SYNTHETIC_R1_NO_NETWORK
+    steps:
+      - name: Checkout proposal commit and complete baseline history
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install existing dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Check isolated test syntax and R1 composition contracts
+        run: |
+          node --check scripts/pazo-r1-visual-compare.mjs
+          node --test scripts/pazo-ui-composition-foundation.test.mjs
+      - name: Prepare a separate unmodified main tree with identical QA fixture
+        shell: bash
+        run: |
+          BASE="$RUNNER_TEMP/pazo-r1-main"
+          git worktree add --detach "$BASE" "$PAZO_R1_BASELINE_SHA"
+          mkdir -p "$BASE/supabase/tests/r1"
+          cp supabase/tests/r1/visual-comparison.html "$BASE/supabase/tests/r1/visual-comparison.html"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$BASE/node_modules"
+          echo "PAZO_R1_BASE_DIR=$BASE" >> "$GITHUB_ENV"
+      - name: Install pinned Chromium for screenshot testing
+        shell: bash
+        run: |
+          npm install --prefix "$RUNNER_TEMP/pazo-r1-browser" --no-package-lock --no-audit --no-fund --ignore-scripts playwright@1.56.1
+          node "$RUNNER_TEMP/pazo-r1-browser/node_modules/playwright/cli.js" install --with-deps chromium
+          echo "PAZO_PLAYWRIGHT_MODULE=$RUNNER_TEMP/pazo-r1-browser/node_modules/playwright" >> "$GITHUB_ENV"
+      - name: Start both dev servers (localhost only)
+        shell: bash
+        run: |
+          (
+            cd "$PAZO_R1_BASE_DIR"
+            "$GITHUB_WORKSPACE/node_modules/.bin/vite" --host 127.0.0.1 --port 5188 --strictPort >/tmp/r1-baseline.log 2>&1
+          ) &
+          (
+            "$GITHUB_WORKSPACE/node_modules/.bin/vite" --host 127.0.0.1 --port 5189 --strictPort >/tmp/r1-proposal.log 2>&1
+          ) &
+          curl --fail --silent --retry 45 --retry-connrefused --retry-delay 1 http://127.0.0.1:5188/supabase/tests/r1/visual-comparison.html >/dev/null
+          curl --fail --silent --retry 45 --retry-connrefused --retry-delay 1 http://127.0.0.1:5189/supabase/tests/r1/visual-comparison.html >/dev/null
+      - name: Record real baseline vs proposal screenshots and DOM geometry
+        run: node scripts/pazo-r1-visual-compare.mjs
+      - name: Preserve logs on error
+        if: failure()
+        shell: bash
+        run: |
+          mkdir -p artifacts/r1-visual-comparison
+          tail -n 130 /tmp/r1-baseline.log > artifacts/r1-visual-comparison/baseline-vite.log || true
+          tail -n 130 /tmp/r1-proposal.log > artifacts/r1-visual-comparison/proposal-vite.log || true
+      - name: Upload baseline and proposal gallery
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: pazo-r1-before-after-${{ github.run_id }}
+          path: artifacts/r1-visual-comparison/
+          retention-days: 14
+          if-no-files-found: warn
