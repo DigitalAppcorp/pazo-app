@@ -73,6 +73,53 @@ Datos reales en ese momento: 11 mascotas; 0 con zona; 0 con dieta; 0 vacunas reg
 4. **Bandeja de aprobación** en el panel admin, con el conteo de audiencia antes de enviar.
 5. **Vigilante automático:** lectura de fuentes, borradores y propuesta de audiencia, siempre con aprobación del PO.
 
+## Paso 1 — diseño cerrado (solo planeación, 3-nov-2026)
+
+Principio del PO: **no pedir datos por adelantado**. El dueño descubre el valor primero y después registra el dato con gusto.
+
+1. **Código postal en el onboarding.** Campo opcional por hogar (cuenta), con botón de información: "Lo usamos solo para avisos de salud cerca de ti. Nadie más lo ve." Revisar antes cómo encaja con `src/features/onboarding/FirstUsePrompt.tsx` para no alargar el alta.
+2. **Notificación de bienvenida** en la pantalla de notificaciones (no push). Texto corto, sin emojis (regla `test:no-emojis`):
+   - ES: "Te damos la bienvenida a PAZO. Cuéntanos más de Max: su peso, qué come y su salud. Así te avisamos solo de lo que le importa a él. Puedes cambiarlo cuando quieras." Botón: "Completar perfil de Max".
+   - EN: "Welcome to PAZO. Tell us more about Max: weight, food and health. We'll only alert you about what matters to him. Change it anytime."
+   - Lleva al formulario de edición de la mascota; si no hay mascota, a "Agregar mascota"; si hay varias, primero elegir cuál.
+   - También se envía a los usuarios existentes (no verán el onboarding nuevo).
+3. **Vacunas sin pedirlas.** Nunca se le pide al usuario que registre vacunas. El Vigilante decide:
+   - vacuna registrada y vigente: no avisa;
+   - registrada y vencida: avisa que venció;
+   - sin registrar: avisa la noticia y pregunta si la tiene.
+4. **Opciones de vacuna en Cuidados.** Cuando el dueño elige "Vacuna" por su cuenta, el formulario ofrece tipos para tocar según especie (perro: Rabia, Moquillo/Parvo DHPP, Leptospirosis, Bordetella, Influenza canina, Otra; gato: Rabia, Triple felina, Leucemia felina, Otra), en lugar del título libre. Sin esto el Vigilante no puede leer las vacunas.
+5. **Respuestas dentro del aviso del Vigilante:** "Ya la tiene" (registra la vacuna con el tipo marcado, fecha opcional, y deja de avisar), "No la tiene" (muestra qué hacer) y "No sé" (sugiere preguntar al veterinario).
+6. **Datos con opciones, no texto libre**, en el formulario de la mascota:
+   - fecha de nacimiento aproximada (mes y año) en lugar de la edad libre actual;
+   - enfermedades de una lista (alergias, diabetes, cardiaco, respiratorio, convulsiones, Otra), siempre privadas, nunca en la ficha pública del QR;
+   - comida: marca y producto. Los retiros de la FDA suelen anunciarse por marca y lote, así que el aviso dirá "revisa el lote en la bolsa". El escaneo de código de barras requiere librería o foto porque Safari en iPhone no lo lee de forma nativa.
+7. **Alcance inicial:** perros y gatos.
+
+## Riesgo: el panel de notificaciones (revisión 3-nov-2026)
+
+Hoy cada tipo de notificación (`sighting`, `community_join`, `care_reminder`, `new_follower`, `admin_new_pet`, `admin_new_account`, `supporter_campaign`, `supporter_verified`) se maneja repartido en varios lugares:
+
+- `src/features/notifications/notificationSource.ts`: categoría, referencias tipadas y textos;
+- `src/features/notifications/supporterNotification.ts`: textos de Amigo de PAZO;
+- `src/components/modals/NotificationsModal.tsx`: si se puede tocar, qué texto, qué icono y qué botón;
+- `src/App.tsx` `handleOpenNotification`: cadena de if/else con el destino;
+- `supabase/functions/pazo-push-worker/workerCore.mjs`: texto fijo del push;
+- `push_private.outbox.kind`: CHECK con los tipos permitidos.
+
+Lo que está bien: las referencias son tipadas y las escribe el servidor; un tipo desconocido se muestra como tarjeta simple que no se puede tocar (falla segura).
+El riesgo: agregar un tipo obliga a tocar unos seis lugares. Si se olvida uno, la notificación queda sin destino, con el icono o texto equivocado, o el push sale y la tarjeta no reacciona. Las notificaciones con botones (Vigilante: "Ya la tiene / No la tiene / No sé") aumentan ese riesgo.
+
+Propuesta (solo planeación):
+
+1. **Catálogo único de tipos.** Un solo archivo donde cada tipo declara: categoría, icono, textos ES/EN, destino al tocar, botones de acción, cómo validar su referencia, y prioridad de push. El panel y `App.tsx` leen de ahí en lugar de tener cadenas propias.
+2. **Tarjeta con acciones como componente común.** Los botones llaman a una función del servidor que valida la respuesta; la notificación guarda que ya se respondió y los botones se ocultan. Nada de texto libre del usuario.
+3. **Falla segura igual que hoy.** Tipo desconocido o referencia inválida: tarjeta simple, sin destino ni botones.
+4. **Prueba de contrato** (como las que ya usa PAZO): todo tipo permitido en la base de datos y en el worker de push debe existir en el catálogo, y al revés. Si falta uno, la prueba falla antes de publicar.
+5. **Prueba visual** de cada tipo en la biblioteca de pantallas, incluida la tarjeta con botones.
+6. Migrar los tipos actuales al catálogo **sin cambiar su comportamiento** antes de agregar los del Vigilante y la bienvenida.
+
+Nota: el clic en el push hoy abre siempre el panel de notificaciones. Para el Vigilante se puede conservar esa entrada única (push → panel → publicación), que es más simple y segura que abrir pantallas directamente desde el push.
+
 ## Decisiones abiertas
 
 - Fuentes concretas y su formato técnico: FDA (retiros), alertas del Condado de LA, Servicio Meteorológico (calor), AirNow (humo); posible alianza con Pet Disease Alerts.
