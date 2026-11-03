@@ -170,7 +170,10 @@ Se apoya en el patrón de avisos push al administrador (`admin_new_pet`, `admin_
 4. **Deduplicación** entre repeticiones y entre fuentes.
 5. **Relevancia con reglas fijas, no con IA:** zona con usuarios de PAZO, especie presente, tabla enfermedad → vacuna, marca retirada contra comidas registradas. Lo que no afecta a nadie se archiva sin avisar.
 6. **Prioridad propuesta por reglas** (retiro de comida registrada o brote con mascotas sin protección registrada: alta; calor: media; noticia general: baja) y audiencia según el paso 3.
-7. **Redacción con IA solo al final**, únicamente con datos de la fuente y citándola, sin consejo médico, con límites de caracteres y sin nombres de mascota en pantalla bloqueada, en ES y EN. Una revisión automática compara el borrador con la fuente; si no cuadra, llega marcado "revisar con cuidado".
+7. **Redacción con plantillas, sin IA (decisión del PO, costo cero).** Cada tipo de alerta tiene plantillas ES/EN con huecos que el Vigilante rellena con datos de la fuente ({enfermedad}, {zona}, {marca}, {producto}, {motivo}, {fuente}, {fecha}, {mascota}). Una plantilla no puede inventar datos y encaja con los textos fijos que ya usa el push. Las plantillas se escriben una vez y se reutilizan. La parte que redacta queda **intercambiable**: si en el futuro conviene usar IA, se sustituye sin rehacer el resto.
+   - **Nombre de la mascota:** se usa en todo lo que se ve dentro de la app (tarjeta del panel, franja personal del feed, botones): "¿Max ya tiene la vacuna contra la leptospirosis?". En la pantalla bloqueada se mantiene un texto genérico pero cercano ("Tenemos un aviso de salud para tu mascota"), por la regla de seguridad del push y para no exponer información de salud.
+   - Posible mejora futura, a decisión del PO: una preferencia del usuario "Mostrar el nombre de mi mascota en las notificaciones", desactivada por defecto.
+   - Modo manual sin IA: el PO pega el enlace, elige la plantilla y escribe una línea con el dato clave.
 8. **Seguridad:** el Vigilante solo crea borradores (el servidor no le permite enviar); claves de fuentes como secretos de Supabase; interruptor para pausarlo desde el panel admin.
 9. **Tope de 3 borradores por día** (decisión del PO); los parecidos se agrupan.
 10. **Aprendizaje visible por reglas:** "fuente dudosa" baja el peso de la fuente; "repetida" amplía la ventana de duplicados; "no es relevante" baja la prioridad de ese tipo.
@@ -182,6 +185,8 @@ Se apoya en el patrón de avisos push al administrador (`admin_new_pet`, `admin_
     - Fase 3: posible alianza con Pet Disease Alerts y cambios de reglas de la ciudad.
 
 ### Costo de la IA (estimación, 3-nov-2026)
+
+**Decisión del PO: no usar IA por ahora; plantillas a costo cero.** Las fuentes de la fase 1 y 2 son gratuitas (Servicio Meteorológico, FDA, AirNow con clave gratuita) y las tareas programadas entran en el plan actual de Supabase. La estimación siguiente queda como referencia por si en el futuro se decide usar IA.
 
 - **Las suscripciones ChatGPT Plus y Claude Pro no sirven para esto.** Son para usar el chat; un servicio automático en el servidor necesita una clave de API con facturación aparte por uso (consola de Anthropic u OpenAI).
 - Precios de lista de la API de Anthropic por millón de tokens (entrada / salida), según la referencia vigente al 6-oct-2026: Claude Haiku 5.5 USD 0,10 / 0,50; Claude Sonnet 5.5 USD 2 / 10; Claude Opus 5.5 USD 4 / 20. Confirmar en la página de precios antes de contratar.
