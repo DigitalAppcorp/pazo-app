@@ -114,7 +114,7 @@ Principio del PO: **no pedir datos por adelantado**. El dueño descubre el valor
   - Intercala una recomendada cada 2 sociales (si hay 3 o menos) o cada 4.
 - Ambas fuentes exigen que la publicación pertenezca a una mascota (`posts.pet_id` unido a `pets`). **Una publicación oficial sin mascota hoy no aparecería en ninguna.**
 
-Propuesta: una **tercera fuente "Oficial"** que no compite con los intereses. Trae las publicaciones oficiales vigentes cuya audiencia (especie y código postal) coincide con la mascota actual. Las alertas importantes no vistas van arriba del feed hasta verse o caducar; el resto se intercala por fecha como si fueran de una cuenta seguida. Mientras no exista el código postal (paso 1), solo se puede filtrar por especie.
+**Aprobado por el PO (3-nov-2026):** una **tercera fuente "Oficial"** que no compite con los intereses. Trae las publicaciones oficiales vigentes cuya audiencia (especie y código postal) coincide con la mascota actual. Las alertas importantes no vistas van arriba del feed hasta verse o caducar; el resto se intercala por fecha como si fueran de una cuenta seguida. Mientras no exista el código postal (paso 1), solo se puede filtrar por especie.
 
 ## Riesgo: el panel de notificaciones (revisión 3-nov-2026)
 
