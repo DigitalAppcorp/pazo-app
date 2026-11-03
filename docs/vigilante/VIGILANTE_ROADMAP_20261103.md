@@ -56,14 +56,14 @@ Falta o no alcanza:
 
 1. **Tipo de vacuna.** `care_items.title` es texto libre; no hay forma fiable de saber si es leptospirosis, rabia, etc. Bloqueo principal.
 2. **Vencimiento.** Solo existe `due_date` (próxima fecha); hay que definirlo como vencimiento o añadir el dato.
-3. **Zona.** `pets.zone` es texto libre y privado. Se necesita un dato estructurado (código postal o barrio de una lista).
-4. **Comida.** `pets."dietPlan"` es texto libre, sin marca ni producto.
+3. **Zona.** La app guarda la zona en `public.pet_private_details.zone` (texto libre y privado; la columna `public.pets.zone` no es la que usa la app). Se necesita un dato estructurado (código postal).
+4. **Comida.** `public.pet_private_details.diet_plan` es texto libre, sin marca ni producto.
 5. **Texto del push.** El worker usa textos fijos por tipo (decisión de seguridad: nada escrito por usuarios llega a la pantalla bloqueada). El Vigilante necesita un tipo nuevo con texto aprobado por el PO; `outbox.kind` tiene un CHECK que hay que ampliar.
 6. **Destino del clic.** `public/sw.js` abre siempre `/?open=notifications`; falta abrir una publicación concreta.
 7. **Autor oficial.** `posts` exige `pet_id` de una mascota propia (política `posts_owner_insert`); no hay forma de publicar como "PAZO". La insignia de Fundador no aparece en las tarjetas del feed.
 8. **Nombres no reservados.** Los nombres de mascota no son únicos ni reservados; cualquiera puede llamarse "PAZO".
 
-Datos reales en ese momento: 11 mascotas; 0 con zona; 0 con dieta; 0 vacunas registradas; 0 perfiles marcados como fundador; 1 suscripción push. **Hoy el Vigilante no podría segmentar a nadie**, por eso el primer paso es la captura de datos.
+Datos reales en ese momento: 11 mascotas; 10 con zona en texto libre y 10 con intereses (`pet_private_details`); 0 con dieta; 0 vacunas registradas; 0 perfiles marcados como fundador; 1 suscripción push. Corrección: una primera lectura contó 0 zonas porque consultó `public.pets.zone`. Aun así, **hoy el Vigilante no podría segmentar por vacuna ni por zona fiable**, por eso el primer paso es la captura de datos.
 
 ## Hoja de ruta (orden acordado con el PO)
 
@@ -95,6 +95,26 @@ Principio del PO: **no pedir datos por adelantado**. El dueño descubre el valor
    - enfermedades de una lista (alergias, diabetes, cardiaco, respiratorio, convulsiones, Otra), siempre privadas, nunca en la ficha pública del QR;
    - comida: marca y producto. Los retiros de la FDA suelen anunciarse por marca y lote, así que el aviso dirá "revisa el lote en la bolsa". El escaneo de código de barras requiere librería o foto porque Safari en iPhone no lo lee de forma nativa.
 7. **Alcance inicial:** perros y gatos.
+
+## Paso 2 — cuenta oficial PAZO (decisiones del PO, 3-nov-2026; solo planeación)
+
+1. **Autor nuevo "Oficial"** (no es una mascota). Las publicaciones salen con la imagen de la cuenta oficial y la insignia Oficial.
+2. **Sin botón normal de publicar.** La cuenta oficial solo publica a través del flujo del Vigilante, con aprobación del PO como administrador. Cuenta separada de la del PO, con correo propio y doble verificación.
+3. **Insignias:** Oficial (solo la cuenta PAZO) y Fundador (cuenta del PO), asignadas solo por el servidor. La de Fundador se mostrará en todo lugar donde el código ya muestra insignias (perfil, feed, comentarios). El estilo de ambas se encarga a ChatGPT: `docs/vigilante/ORDEN_CHATGPT_INSIGNIAS.md`. Observación: las cuentas `is_founder` ya se excluyen de las estadísticas de marketing.
+4. **Interacciones:** me gusta y compartir, sí (el enlace se abre sin cuenta); comentarios apagados al inicio, con la línea fija "¿Dudas? Consulta a tu veterinario."; no hace falta seguir a PAZO.
+5. **Visibilidad:** cualquiera puede ver todas las publicaciones oficiales en el perfil de PAZO; el feed muestra a cada mascota solo las que le aplican (ver abajo cómo funciona hoy el feed).
+6. **Nombres reservados:** el servidor rechaza nombres de mascota y usuario que imiten a PAZO, tras normalizar (minúsculas, sin espacios ni signos, 0→o, 1→i): PAZO, P.A.Z.O, PAZ0, Pazo Official, PAZO Team, PAZO Soporte, PAZO Admin.
+7. **Pendiente:** imagen de perfil de la cuenta oficial (logo de PAZO u otra); el PO quiere evaluar opciones.
+
+### Cómo funciona hoy el feed (lectura del código, 3-nov-2026)
+
+- `src/App.tsx` mezcla dos fuentes con `src/features/feed/selectFeedPage.ts`:
+  - **Social:** publicaciones de las mascotas propias y de las que sigue, por fecha.
+  - **Recomendadas:** RPC `get_recommended_posts_page`, que excluye al propio dueño y a las seguidas, deja al final lo visto en 48 h, sube las publicaciones cuyas etiquetas (`posts.tags`) coinciden con los intereses de la mascota (los elegidos en `pet_private_details.interests` más los aprendidos en `pet_private_metrics.learned_interests`) y luego ordena por me gusta y antigüedad.
+  - Intercala una recomendada cada 2 sociales (si hay 3 o menos) o cada 4.
+- Ambas fuentes exigen que la publicación pertenezca a una mascota (`posts.pet_id` unido a `pets`). **Una publicación oficial sin mascota hoy no aparecería en ninguna.**
+
+Propuesta: una **tercera fuente "Oficial"** que no compite con los intereses. Trae las publicaciones oficiales vigentes cuya audiencia (especie y código postal) coincide con la mascota actual. Las alertas importantes no vistas van arriba del feed hasta verse o caducar; el resto se intercala por fecha como si fueran de una cuenta seguida. Mientras no exista el código postal (paso 1), solo se puede filtrar por especie.
 
 ## Riesgo: el panel de notificaciones (revisión 3-nov-2026)
 
