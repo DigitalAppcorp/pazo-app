@@ -12,7 +12,7 @@ begin
  if not exists(select 1 from public.notifications n where n.user_id=new.owner_id and n.type='welcome') then
   insert into public.notifications(user_id,pet_id,type,title,body)
   values(new.owner_id,new.id,'welcome','Te damos la bienvenida a PAZO',
-   'Cuéntanos más de tu mascota para avisarte solo de lo que le importa.');
+   'En PAZO trabajamos todos los días por ti y por tu mascota. Cuéntanos más de tu mascota para darte la mejor atención.');
  end if;
  return new;
 exception when others then
@@ -29,7 +29,7 @@ create trigger pazo_welcome_on_first_pet after insert on public.pets
 -- Existing accounts never see the new onboarding, so they get the notice once, on their oldest pet.
 insert into public.notifications(user_id,pet_id,type,title,body)
 select distinct on (p.owner_id) p.owner_id,p.id,'welcome','Te damos la bienvenida a PAZO',
- 'Cuéntanos más de tu mascota para avisarte solo de lo que le importa.'
+ 'En PAZO trabajamos todos los días por ti y por tu mascota. Cuéntanos más de tu mascota para darte la mejor atención.'
 from public.pets p
 where not exists(select 1 from public.notifications n where n.user_id=p.owner_id and n.type='welcome')
 order by p.owner_id,p.created_at,p.id;

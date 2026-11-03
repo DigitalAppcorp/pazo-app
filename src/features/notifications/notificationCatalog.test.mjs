@@ -102,7 +102,8 @@ test('the welcome notice names the pet inside the app and opens its edit form',(
   const petName=id=>id==='pet-1'?'Max':undefined
   const view=describeNotification(row('welcome',{pet_id:'pet-1'}),'es',{petName})
   assert.equal(view.title,'Te damos la bienvenida a PAZO')
-  assert.match(view.subtitle,/Cuéntanos más de Max/)
+  assert.match(view.subtitle,/trabajamos todos los días por ti y por tu mascota/)
+  assert.match(view.subtitle,/Cuéntanos más de Max para darte la mejor atención/)
   assert.equal(view.action,'Completar el perfil de Max')
   assert.deepEqual(view.target,{kind:'pet_edit',petId:'pet-1'})
   assert.equal(view.icon,'paw')

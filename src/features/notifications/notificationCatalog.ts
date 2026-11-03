@@ -133,8 +133,8 @@ export const NOTIFICATION_KINDS = {
     copy: (item, lang, context) => {
       const name = (item.petId && context.petName?.(item.petId)) || (lang === 'es' ? 'tu mascota' : 'your pet')
       return lang === 'es'
-        ? { title: 'Te damos la bienvenida a PAZO', subtitle: `Cuéntanos más de ${name}: su peso, qué come y su salud. Así te avisamos solo de lo que le importa. Puedes cambiarlo cuando quieras.` }
-        : { title: 'Welcome to PAZO', subtitle: `Tell us more about ${name}: weight, food and health. We'll only alert you about what matters to them. Change it anytime.` }
+        ? { title: 'Te damos la bienvenida a PAZO', subtitle: `En PAZO trabajamos todos los días por ti y por tu mascota, y te avisamos de cualquier noticia según la información de ${name}. Cuéntanos más de ${name} para darte la mejor atención.` }
+        : { title: 'Welcome to PAZO', subtitle: `At PAZO we work every day for you and your pet, and we alert you to any news based on ${name}'s information. Tell us more about ${name} so we can give you the best care.` }
     },
     action: (item, lang, context) => {
       const name = item.petId ? context.petName?.(item.petId) : undefined
