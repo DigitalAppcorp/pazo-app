@@ -453,14 +453,18 @@ const PostCard = ({ post, supporterBadge, founderPetIds, canReport, onReport, on
         {post.comments.map(comment => <div key={comment.id} className="flex items-start gap-2 rounded-2xl bg-[#FAF8F5] p-3 text-xs">
           <div className="relative h-8 w-8 shrink-0">
             <img src={comment.authorAvatar} alt="" className="h-full w-full rounded-full object-cover"/>
-            {supporterBadgesEnabled&&comment.supporterBadge?.badge&&(
+            {comment.authorPetId&&founderPetIds?.has(comment.authorPetId)?(
+              <span className="pointer-events-none absolute -bottom-1 -right-1 z-10">
+                <FounderBadge lang={lang}/>
+              </span>
+            ):supporterBadgesEnabled&&comment.supporterBadge?.badge&&(
               <span className="pointer-events-none absolute -bottom-1 -right-1 z-10">
                 <SupporterBadge active milestone={comment.supporterBadge.milestone} lang={lang} size="mini"/>
               </span>
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-bold text-[#204E4A]">{comment.authorName}{comment.authorPetId && founderPetIds?.has(comment.authorPetId) && <span className="ml-1.5 align-middle"><FounderBadge lang={lang} /></span>}</p>
+            <p className="font-bold text-[#204E4A]">{comment.authorName}</p>
             <p className="mt-1 text-[#5C7470]">{comment.text}</p>
           </div>
         </div>)}
@@ -476,7 +480,11 @@ const PostCard = ({ post, supporterBadge, founderPetIds, canReport, onReport, on
             <button type="button" onClick={() => onSelectPetProfile(post.petId)} aria-label={lang === 'es' ? `Ver perfil de ${post.petName}` : `View ${post.petName}'s profile`} className={`h-10 w-10 overflow-hidden rounded-full shadow-xs ${post.isRecommended ? 'bg-gradient-to-tr from-[#E1E53F] to-[#204E4A] p-0.5' : ''}`}>
               <img src={post.petAvatar} alt="" className="h-full w-full rounded-full object-cover" />
             </button>
-            {supporterBadgesEnabled && supporterBadge?.badge && (
+            {!post.isAuthorDeleted && founderPetIds?.has(post.petId) ? (
+              <span className="pointer-events-none absolute -bottom-1 -right-1 z-10 block h-[20px] w-[20px]">
+                <FounderBadge lang={lang} />
+              </span>
+            ) : supporterBadgesEnabled && supporterBadge?.badge && (
               <span className="pointer-events-none absolute -bottom-1 -right-1 z-10 block h-[20px] w-[20px]" aria-label={lang === 'es' ? 'Insignia de Amigo de PAZO verificada' : 'Verified PAZO Friend badge'}>
                 <SupporterBadge active milestone={supporterBadge.milestone} lang={lang} size="mini"/>
               </span>
@@ -487,7 +495,6 @@ const PostCard = ({ post, supporterBadge, founderPetIds, canReport, onReport, on
               <button type="button" onClick={() => onSelectPetProfile(post.petId)} className="max-w-full truncate text-left text-[16px] font-extrabold leading-tight text-[#204E4A] hover:underline">
                 {post.petName}
               </button>
-              {!post.isAuthorDeleted && founderPetIds?.has(post.petId) && <FounderBadge lang={lang} />}
               {post.isRecommended ? (
                 <span className="inline-flex max-w-full shrink-0 items-center gap-1 rounded-lg bg-[#E1E53F]/40 px-1.5 py-0.5 text-[10px] font-black uppercase text-[#204E4A]">
                   <IconPaw size={10} />
@@ -623,14 +630,18 @@ const PostCard = ({ post, supporterBadge, founderPetIds, canReport, onReport, on
                 <div key={comment.id} className="text-xs flex gap-2 items-start">
                   <div className="relative mt-0.5 h-8 w-8 shrink-0">
                     <img src={comment.authorAvatar} alt={comment.authorPet} className="h-full w-full rounded-full object-cover"/>
-                    {supporterBadgesEnabled && comment.supporterBadge?.badge && (
+                    {comment.authorPetId && founderPetIds?.has(comment.authorPetId) ? (
+                      <span className="pointer-events-none absolute -bottom-1 -right-1 z-10">
+                        <FounderBadge lang={lang} />
+                      </span>
+                    ) : supporterBadgesEnabled && comment.supporterBadge?.badge && (
                       <span className="pointer-events-none absolute -bottom-1 -right-1 z-10" aria-label={lang==='es'?'Insignia verificada de Amigo de PAZO':'Verified PAZO Friend badge'}>
                         <SupporterBadge active milestone={comment.supporterBadge.milestone} lang={lang} size="mini"/>
                       </span>
                     )}
                   </div>
                   <div className="flex-1 bg-[#FAF8F5] p-2.5 rounded-2xl shadow-xs">
-                    <span className="font-bold text-[#204E4A] mr-1.5">{comment.authorName} ({comment.authorPet}){comment.authorPetId && founderPetIds?.has(comment.authorPetId) && <span className="ml-1.5 align-middle"><FounderBadge lang={lang} /></span>}:</span>
+                    <span className="font-bold text-[#204E4A] mr-1.5">{comment.authorName} ({comment.authorPet}):</span>
                     <span className="text-[#5C7470]">{comment.text}
                       {DEMO_COMMENT_MOTIFS[comment.id] && (
                         <span className="ml-1 inline-flex items-center align-middle" aria-hidden="true">

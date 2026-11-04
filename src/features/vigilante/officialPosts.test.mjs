@@ -46,3 +46,33 @@ test('the official feed is asked only with a pet of the signed-in account, never
   assert.match(app,/const ownPetsReady = petBootstrap\?\.userId === user\?\.id && petBootstrap\?\.status === 'ready' && !isOnboardingActive/)
   assert.match(app,/const officialFeedPetId = !isDemoUser && canUseAccount && ownPetsReady && activeTab === 'inicio' \? currentPet\?\.id : undefined/)
 })
+
+test('every badge sits in the photo corner Amigo de PAZO uses, one per account', () => {
+  const read = (path) => readFileSync(new URL('../../../' + path, import.meta.url), 'utf8')
+  const card = read('src/features/vigilante/OfficialPostCard.tsx')
+  const feed = read('src/components/views/HomeView.tsx')
+  const profile = read('src/components/views/PublicProfileView.tsx')
+  // Approved art, served like the supporter medals and hidden if it fails to load.
+  assert.match(card, /src=\{'\/vigilante\/insignia-' \+ kind \+ '\.png'\}/)
+  assert.match(card, /onError=\{\(\) => setFailed\(true\)\}/)
+  for (const kind of ['fundador', 'oficial']) {
+    const png = readFileSync(new URL('../../../public/vigilante/insignia-' + kind + '.png', import.meta.url))
+    assert.equal(png.subarray(1, 4).toString(), 'PNG')
+    assert.deepEqual([png.readUInt32BE(16), png.readUInt32BE(20)], [543, 545], kind + ' matches the supporter medal canvas')
+    assert.equal(png[25], 6, kind + ' keeps its transparent background')
+  }
+  // Never beside a name, and the old pill is gone.
+  assert.doesNotMatch(feed, /ml-1\.5 align-middle"><FounderBadge/)
+  assert.doesNotMatch(feed, /\{!post\.isAuthorDeleted && founderPetIds\?\.has\(post\.petId\) && <FounderBadge/)
+  assert.doesNotMatch(card, /PAZO<\/span>\s*<OfficialBadge/)
+  assert.doesNotMatch(profile, /h-\[46px\] items-center gap-1 rounded-full bg-\[#E1E53F\]/)
+  // The corner shows Fundador instead of Amigo de PAZO, never both.
+  assert.match(feed, /founderPetIds\?\.has\(post\.petId\) \? \(\s*<span className="pointer-events-none absolute -bottom-1 -right-1 z-10 block h-\[20px\] w-\[20px\]">\s*<FounderBadge lang=\{lang\} \/>\s*<\/span>\s*\) : supporterBadgesEnabled && supporterBadge\?\.badge/)
+  assert.equal((feed.match(/<FounderBadge lang=\{lang\} ?\/>/g) ?? []).length, 3, 'post header and both comment lists')
+  assert.match(card, /absolute -bottom-1 -right-1 z-10 block h-\[20px\] w-\[20px\]">\s*<OfficialBadge lang=\{lang\} \/>/)
+  // The official account wears the official PAZO logo (dog and cat in a paw), chosen by the PO.
+  assert.match(card, /src="\/vigilante\/pazo-oficial-avatar\.png"/)
+  const logo = readFileSync(new URL('../../../public/vigilante/pazo-oficial-avatar.png', import.meta.url))
+  assert.deepEqual([logo.readUInt32BE(16), logo.readUInt32BE(20)], [192, 192])
+  assert.match(profile, /\{isFounder \? \(\s*<span className="absolute -bottom-3 -left-2 z-20">\s*<FounderBadge lang=\{lang\} size="large" \/>\s*<\/span>\s*\) : supporterVisualsEnabled && supporterPerks\?\.badge/)
+})
