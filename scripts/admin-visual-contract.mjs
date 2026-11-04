@@ -13,7 +13,7 @@ for(const p of ['src/components/modals/CareModal.tsx','src/components/modals/Not
 // #168 authorized campaign contract, covered by ads2.test.mjs and ads2-pg17.mjs.
 for(const p of ['src/features/marketing/attribution.ts', 'src/features/marketing/adminSummary.ts', 'src/features/marketing/landingSignal.ts', 'src/features/marketing/BehaviorFilters.tsx', 'src/features/marketing/FirstUtilityPanel.tsx', 'src/features/marketing/ExecutiveAnalytics.tsx', 'src/features/marketing/visualSummary.ts', 'src/features/admin/components/AdminMarketingPanel.tsx', 'supabase/functions/pazo-marketing-attribution/intakeCore.mjs', 'supabase/functions/pazo-marketing-landing/landingCore.mjs'])allowed.add(p)
 // PO GO 3-nov-2026 (Vigilante), covered by test:vigilante and vigilante-pg17.mjs; see docs/vigilante/VIGILANTE_RELEASE_RUNBOOK.md.
-for(const p of ['src/components/views/HomeView.tsx','src/features/moderation/ModerationAccess.tsx','src/services/careService.ts','src/services/petService.ts','src/services/rescueService.ts','src/types/pazo.ts'])allowed.add(p)
+for(const p of ['src/components/views/HomeView.tsx','src/components/views/PublicProfileView.tsx','src/features/moderation/ModerationAccess.tsx','src/services/careService.ts','src/services/petService.ts','src/services/rescueService.ts','src/types/pazo.ts'])allowed.add(p)
 const paths=execFileSync('git',['ls-tree','-r','--name-only',base],{encoding:'utf8'}).trim().split('\n').filter(p=>p.startsWith('src/')&&!allowed.has(p)||p.startsWith('supabase/migrations/')||p.startsWith('supabase/functions/')&&!allowed.has(p))
 for(const p of paths)assert.equal(hash(read(p)),hash(released(p)),p+' must preserve released behavior')
 // Keep the native controller, effects, auth, operations and focus trap intact.

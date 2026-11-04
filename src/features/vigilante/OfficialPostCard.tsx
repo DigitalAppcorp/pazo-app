@@ -1,20 +1,30 @@
+import { useState } from 'react'
 import { IconPaw } from '../../components/icons/PazoIcons'
 import type { OfficialPost } from './officialPosts'
 
-// Provisional badge art: the final Oficial and Fundador designs come from
-// docs/vigilante/ORDEN_CHATGPT_INSIGNIAS.md. Assigned only by the server.
-export const OfficialBadge = ({ lang }: { lang: 'es' | 'en' }) => (
-  <span className="inline-flex shrink-0 items-center rounded-lg bg-[#204E4A] px-1.5 py-0.5 text-[10px] font-black uppercase text-[#E1E53F]">
-    {lang === 'es' ? 'Oficial' : 'Official'}
-  </span>
-)
+type BadgeSize = 'mini' | 'small' | 'large'
+const BADGE_SIZE: Record<BadgeSize, string> = { mini: 'h-[20px] w-[20px]', small: 'h-8 w-8', large: 'h-[66px] w-[66px]' }
 
-export const FounderBadge = ({ lang }: { lang: 'es' | 'en' }) => (
-  <span className="inline-flex shrink-0 items-center gap-0.5 rounded-lg bg-[#E1E53F] px-1.5 py-0.5 text-[10px] font-black uppercase text-[#204E4A]">
-    <IconPaw size={10} />
-    <span>{lang === 'es' ? 'Fundador' : 'Founder'}</span>
-  </span>
-)
+// Art approved by the PO on 2026-11-04. Like SupporterBadge, the server decides who
+// carries it and a missing image shows nothing rather than a stand-in.
+function VigilanteBadge({ kind, lang, size = 'mini' }: { kind: 'fundador' | 'oficial'; lang: 'es' | 'en'; size?: BadgeSize }) {
+  const [failed, setFailed] = useState(false)
+  if (failed) return null
+  const label = kind === 'fundador' ? (lang === 'es' ? 'Fundador' : 'Founder') : (lang === 'es' ? 'Oficial' : 'Official')
+  return <img
+    src={'/vigilante/insignia-' + kind + '.png'}
+    alt={label}
+    title={label}
+    decoding="sync"
+    loading="eager"
+    onError={() => setFailed(true)}
+    className={BADGE_SIZE[size] + ' shrink-0 object-contain'}
+  />
+}
+
+export const OfficialBadge = ({ lang, size }: { lang: 'es' | 'en'; size?: BadgeSize }) => <VigilanteBadge kind="oficial" lang={lang} size={size} />
+
+export const FounderBadge = ({ lang, size }: { lang: 'es' | 'en'; size?: BadgeSize }) => <VigilanteBadge kind="fundador" lang={lang} size={size} />
 
 const formatSourceDate = (date: string, lang: 'es' | 'en') =>
   new Date(`${date}T12:00:00`).toLocaleDateString(lang === 'es' ? 'es-US' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -42,11 +52,15 @@ export const OfficialPostCard = ({ post, lang, onToggleLike }: OfficialPostCardP
   return (
     <article className="pazo-glass-card relative rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)]">
       <div className="flex min-w-0 items-start gap-2.5 p-3.5 sm:p-4">
-        <img src="/pwa-icon-192.png" alt="" className="h-10 w-10 shrink-0 rounded-full object-cover shadow-xs" />
+        <div className="relative h-10 w-10 shrink-0">
+          <img src="/pwa-icon-192.png" alt="" className="h-10 w-10 rounded-full object-cover shadow-xs" />
+          <span className="pointer-events-none absolute -bottom-1 -right-1 z-10 block h-[20px] w-[20px]">
+            <OfficialBadge lang={lang} />
+          </span>
+        </div>
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
             <span className="text-[16px] font-extrabold leading-tight text-[#204E4A]">PAZO</span>
-            <OfficialBadge lang={lang} />
           </div>
           <p className="mt-0.5 text-[12px] text-[#5C7470]">
             {lang === 'es' ? 'Fuente' : 'Source'}:{' '}

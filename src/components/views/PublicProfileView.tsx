@@ -8,6 +8,7 @@ import { ReportDialog } from '../../features/moderation/ReportDialog'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
 import { SupporterProfileBackdrop, type SupporterProfileThemeId } from '../../features/supporter/components/SupporterProfileThemes'
 import { SupporterBadge } from '../../features/supporter/components/SupporterBadge'
+import { FounderBadge } from '../../features/vigilante/OfficialPostCard'
 import {supporterBenefitsUiEnabled} from '../../features/supporter/supporterUiRelease'
 
 const supporterVisualsEnabled = supporterBenefitsUiEnabled
@@ -332,19 +333,14 @@ export const PublicProfileView = ({
                     <IconPaw size={61} className="text-[#204E4A]/40" />
                   )}
                 </div>
-                {supporterVisualsEnabled && supporterPerks?.badge && (
+                {isFounder ? (
+                  <span className="absolute -bottom-3 -left-2 z-20">
+                    <FounderBadge lang={lang} size="large" />
+                  </span>
+                ) : supporterVisualsEnabled && supporterPerks?.badge && (
                   <span className="absolute -bottom-3 -left-2 z-20" aria-label={lang === 'es' ? 'Insignia de Amigo de PAZO' : 'PAZO Friend badge'}>
                     <SupporterBadge active={true} milestone={supporterPerks.milestone} size="large" lang={lang} />
                   </span>
-                )}
-                {isFounder && (
-                  <div
-                    className="absolute bottom-1 right-0 flex h-[46px] items-center gap-1 rounded-full bg-[#E1E53F] px-3 text-[#204E4A] shadow-[0_5px_12px_rgba(32,78,74,0.14)]"
-                    title={lang === 'es' ? 'Fundador' : 'Founder'}
-                  >
-                    <IconPaw size={23} />
-                    <span className="text-[11px] font-black">{lang === 'es' ? 'Fundador' : 'Founder'}</span>
-                  </div>
                 )}
                 {petProfile.isLost && (
                   <span className="absolute -bottom-2 left-2 rounded-full bg-[#EC7357] px-3 py-1.5 text-[11px] font-extrabold text-white">
