@@ -53,7 +53,7 @@ export const OfficialPostCard = ({ post, lang, onToggleLike }: OfficialPostCardP
     <article className="pazo-glass-card relative rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)]">
       <div className="flex min-w-0 items-start gap-2.5 p-3.5 sm:p-4">
         <div className="relative h-10 w-10 shrink-0">
-          <img src="/pwa-icon-192.png" alt="" className="h-10 w-10 rounded-full object-cover shadow-xs" />
+          <img src="/vigilante/pazo-oficial-avatar.png" alt="" className="h-10 w-10 rounded-full object-cover shadow-xs" />
           <span className="pointer-events-none absolute -bottom-1 -right-1 z-10 block h-[20px] w-[20px]">
             <OfficialBadge lang={lang} />
           </span>

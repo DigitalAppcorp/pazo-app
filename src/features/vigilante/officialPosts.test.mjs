@@ -70,5 +70,9 @@ test('every badge sits in the photo corner Amigo de PAZO uses, one per account',
   assert.match(feed, /founderPetIds\?\.has\(post\.petId\) \? \(\s*<span className="pointer-events-none absolute -bottom-1 -right-1 z-10 block h-\[20px\] w-\[20px\]">\s*<FounderBadge lang=\{lang\} \/>\s*<\/span>\s*\) : supporterBadgesEnabled && supporterBadge\?\.badge/)
   assert.equal((feed.match(/<FounderBadge lang=\{lang\} ?\/>/g) ?? []).length, 3, 'post header and both comment lists')
   assert.match(card, /absolute -bottom-1 -right-1 z-10 block h-\[20px\] w-\[20px\]">\s*<OfficialBadge lang=\{lang\} \/>/)
+  // The official account wears the official PAZO logo (dog and cat in a paw), chosen by the PO.
+  assert.match(card, /src="\/vigilante\/pazo-oficial-avatar\.png"/)
+  const logo = readFileSync(new URL('../../../public/vigilante/pazo-oficial-avatar.png', import.meta.url))
+  assert.deepEqual([logo.readUInt32BE(16), logo.readUInt32BE(20)], [192, 192])
   assert.match(profile, /\{isFounder \? \(\s*<span className="absolute -bottom-3 -left-2 z-20">\s*<FounderBadge lang=\{lang\} size="large" \/>\s*<\/span>\s*\) : supporterVisualsEnabled && supporterPerks\?\.badge/)
 })
