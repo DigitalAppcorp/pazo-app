@@ -39,20 +39,29 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ## Punto 1 — Pedir los avisos justo después de registrar la mascota
 
-**Estado: PENDIENTE (siguiente).**
+**Estado: PROGRAMADO en PR #212, sin publicar.**
 
 - **Objetivo:** que cada persona active el push en el momento en que más le importa, con un motivo concreto y con el nombre de su mascota.
 - **Hoy:** `PushControl` (`src/features/push/PushControl.tsx`) tiene la variante `offer`, que solo se usa en `CareModal` y `ActiveLostAlertPanel`.
-- **Propuesta:** al terminar el registro de la primera mascota, mostrar una oferta de avisos con texto del tipo «Te avisamos si alguien ve a [nombre] o si le toca una vacuna». Que se pueda omitir sin insistir.
+- **Decidido por el PO (6-nov-2026):**
+  - La invitación explica **sin tecnicismos** que PAZO necesita avisar para recordar vacunas y cuidados, y para contar al momento si la mascota se pierde y alguien la ve o la encuentra. Título «Cuidemos juntos a [mascota]», botones «Sí, avísame» y «Ahora no». Aparece después de «Todo listo», que no cambia.
+  - Si la persona dice «Ahora no», **la agenda y la alerta de mascota perdida** lo vuelven a explicar en su momento: «Activa las notificaciones para que podamos avisarte de tu recordatorio» y «…para que te avisemos en cuanto alguien vea a [mascota]». Ese recordatorio aparece mientras los avisos sigan apagados.
+  - No se habla de «la» mascota: puede ser macho o hembra, así que se usa su nombre.
 - **Cuidados:**
   - iOS solo permite pedir el permiso tras un toque y con la PWA instalada; si no está instalada, mostrar cómo instalarla (ya existe `ios-needs-install`).
   - Respetar «Desactivar en este teléfono» (`pazo_push_off_v1`).
   - No volver a mostrarla si la persona la omitió.
 - **Listo cuando:** la oferta aparece tras la primera mascota en ES y EN, a 375 px; activar crea la suscripción; omitir no vuelve a insistir; pruebas y CI en verde; publicado y observado en un teléfono real.
 
+## Punto 1b — Barra de progreso en el registro
+
+**Estado: PROGRAMADO en PR #212, sin publicar.** Pedido por el PO el 6-nov-2026: el registro parecía una lista larga de tareas.
+
+- Cuatro tramos, uno por pantalla: Tu cuenta, Confirma tu correo, Tu mascota y Tu zona (`src/features/onboarding/OnboardingProgress.tsx`). Los tramos cruzados en verde, el actual en lima. Se conserva «Paso X de 3», del que dependen pruebas de navegador.
+
 ## Punto 2 — Recuperar las cuentas que no confirmaron el correo
 
-**Estado: PENDIENTE.**
+**Estado: PENDIENTE, una parte programada.** En PR #212, la pantalla «Revisa tu correo» ya pide mirar spam y la pestaña Promociones de Gmail (el PO sospecha que entraron al correo y no lo vieron).
 
 - **Objetivo:** que quien se registró llegue a entrar.
 - **Antes de programar:** revisar en Supabase Auth la plantilla y el remitente del correo de confirmación, y si llega a spam (Gmail entrega los correos de cuenta según el aviso de privacidad). Sin proveedor de pago nuevo sin autorización (regla 15).
@@ -106,3 +115,4 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 | 2026-11-06 | — | Hoja de ruta creada a pedido del PO. Punto 1 es el siguiente. |
 | 2026-11-06 | 4b | Agregado: el origen se pierde al confirmar el correo en otro navegador; descartado que dependa de la casilla de Meta. |
 | 2026-11-06 | 1 | En curso: rama `feat/push-offer-first-pet-20261106`. |
+| 2026-11-06 | 1, 1b, 2 | El PO pidió invitación sin tecnicismos, recordatorio en agenda y mascota perdida tras «Ahora no», barra de progreso y aviso de spam. Todo en PR #212. |
