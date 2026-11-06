@@ -1,0 +1,63 @@
+name: PAZO confirmation reminder PostgreSQL 17 (isolated)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/*confirmation_reminder*.sql'
+      - 'supabase/tests/confirmation-reminder/**'
+      - 'scripts/confirmation-reminder-pg17.mjs'
+      - 'supabase/functions/pazo-confirmation-reminder-worker/**'
+      - 'src/features/legal/legalCopy.ts'
+      - 'src/features/legal/legalCopy.test.mjs'
+      - 'package.json'
+      - '.github/workflows/confirmation-reminder-pg17.yml'
+  push:
+    branches: ['feat/reatraccion-point2-confirmation-*']
+    paths:
+      - 'supabase/migrations/*confirmation_reminder*.sql'
+      - 'supabase/tests/confirmation-reminder/**'
+      - 'scripts/confirmation-reminder-pg17.mjs'
+      - 'supabase/functions/pazo-confirmation-reminder-worker/**'
+      - 'src/features/legal/legalCopy.ts'
+      - 'src/features/legal/legalCopy.test.mjs'
+      - 'package.json'
+      - '.github/workflows/confirmation-reminder-pg17.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-pg17:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: synthetic-confirmation-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      CI: 'true'
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGDATABASE: postgres
+      PGPASSWORD: synthetic-confirmation-only
+      PAZO_CONFIRMATION_REMINDER_PG_MODE: ci
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Create isolated synthetic database
+        run: createdb --maintenance-db=postgres pazo_confirmation_synthetic
+      - name: Exercise migration using synthetic accounts only
+        run: PGDATABASE=pazo_confirmation_synthetic node scripts/confirmation-reminder-pg17.mjs
+      - name: Verify legal disclosure and worker behavior
+        run: node --experimental-strip-types --test src/features/legal/legalCopy.test.mjs supabase/functions/pazo-confirmation-reminder-worker/workerCore.test.mjs

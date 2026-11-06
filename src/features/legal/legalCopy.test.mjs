@@ -174,3 +174,16 @@ test('released campaign notice is bilingual, accurate and links Cloudflare adden
   assert.match(dialog,/section\.link\.label/)
   assert.doesNotMatch(dialog,/target="_blank"/)
 })
+
+test('email confirmation reminder disclosure is bilingual and matches the one-time 14-day flow',()=>{
+  for(const lang of ['es','en']){
+    const sections=legalPreview.privacy[lang].sections
+    const reminder=sections.find(s=>s.heading===(lang==='es'?'Confirmación del correo':'Email confirmation'))?.text
+    const providers=sections.find(s=>s.heading===(lang==='es'?'Servicios utilizados':'Service providers'))?.text
+    assert.ok(reminder&&providers)
+    assert.match(reminder,lang==='es'?/un solo recordatorio.*24 horas/:/one confirmation reminder.*24 hours/)
+    assert.match(reminder,lang==='es'?/14 días/:/14 days/)
+    assert.match(reminder,lang==='es'?/no garantiza que llegue/:/does not guarantee delivery/)
+    assert.match(providers,lang==='es'?/Google \(Gmail\).*confirmación/:/Google \(Gmail\).*confirmation/)
+  }
+})
