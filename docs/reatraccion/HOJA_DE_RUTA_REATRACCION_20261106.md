@@ -116,3 +116,4 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 | 2026-11-06 | 4b | Agregado: el origen se pierde al confirmar el correo en otro navegador; descartado que dependa de la casilla de Meta. |
 | 2026-11-06 | 1 | En curso: rama `feat/push-offer-first-pet-20261106`. |
 | 2026-11-06 | 1, 1b, 2 | El PO pidió invitación sin tecnicismos, recordatorio en agenda y mascota perdida tras «Ahora no», barra de progreso y aviso de spam. Todo en PR #212. |
+| 2026-11-06 | — | Prueba frágil detectada (no es de esta hoja, pero bloquea su CI): «D7 mature calendar cohort» en `scripts/behavior-pg17.mjs` (jobs `behavior` e `intelligence`). Usa `now()-interval '10 days'` y `now()-interval '1 day'`; cuando esos instantes caen a ambos lados de un cambio de horario de Los Ángeles, entre las 07:00 y las 08:00 UTC quedan en otro día de calendario y falla. **Pendiente:** anclar los datos de la prueba a la medianoche de Los Ángeles. |
