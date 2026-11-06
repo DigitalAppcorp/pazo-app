@@ -418,7 +418,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
           </div>
          </dl>}
          {u.pets.length>0?<details className="group rounded-[12px] bg-[#EAF2E5]">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-[12px] px-3 text-xs font-bold focus-visible:bg-[#E1E53F] focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-[12px] px-3 text-xs font-bold outline-none focus-visible:bg-[#E1E53F] [&::-webkit-details-marker]:hidden">
            <AdminGlyph name="paw" size={16}/>
            <span className="flex-1">{l('Mascotas','Pets')}</span>
            <span>{u.pets.length}</span>
