@@ -31,6 +31,33 @@ test('it waits for the first-use notice, respects a manual turn-off and never sh
   // Every way out (Ahora no, X, Escape, a finished or refused request) closes it for good.
   assert.equal((notice.match(/onClose\(\)|onClick=\{onClose\}|onDismiss=\{onClose\}/g)??[]).length>=4,true)
   assert.match(notice,/if \(result === 'failed'\) setFailed\(true\)\s*else onClose\(\)/)
-  assert.match(notice,/Si alguien reporta haber visto a \$\{petName\}/)
-  assert.match(notice,/If someone reports seeing \$\{petName\}/)
+  // Plain words: reminders, and help when the pet is lost, seen or found. No technical terms.
+  for(const words of [/Cuidemos juntos a \$\{petName\}/,/Sus vacunas y cuidados, justo a tiempo/,/Si se pierde y alguien ve a \$\{petName\}/,/Y si alguien encuentra a \$\{petName\}/,/Let's look after \$\{petName\} together/])
+    assert.match(notice,words)
+  const shown=[...notice.matchAll(/l\((['`])([\s\S]*?)\1,\s*(['"`])([\s\S]*?)\3\)/g)].flatMap(m=>[m[2],m[4]]).join(' | ')
+  assert.ok(shown.length>200,'the visible sentences were read')
+  assert.doesNotMatch(shown,/push|permiso|permission|suscrip|subscri/i)
+  assert.doesNotMatch(notice,/alguien la (ve|encuentra)/,'the pet may be male or female')
+})
+
+test('after "not now", the agenda and a lost-pet alert explain why alerts matter there',()=>{
+  const control=readFileSync(new URL('./PushControl.tsx',import.meta.url),'utf8')
+  assert.match(control,/\{reason && <p className="text-\[13px\] font-bold leading-snug text-\[#204E4A\]">\{reason\}<\/p>\}/)
+  assert.match(control,/reason \? \(es \? 'Activar notificaciones' : 'Turn on notifications'\)/)
+  const care=readFileSync(new URL('../../components/modals/CareModal.tsx',import.meta.url),'utf8')
+  assert.match(care,/Activa las notificaciones para que podamos avisarte de tu recordatorio\./)
+  const lost=readFileSync(new URL('../rescue/components/ActiveLostAlertPanel.tsx',import.meta.url),'utf8')
+  assert.match(lost,/Activa las notificaciones para que te avisemos en cuanto alguien vea a \$\{pet\.name\}\./)
+})
+
+test('sign-up shows its progress across four screens and tells people to check spam',()=>{
+  const progress=readFileSync(new URL('../onboarding/OnboardingProgress.tsx',import.meta.url),'utf8')
+  assert.match(progress,/es: \['Tu cuenta', 'Confirma tu correo', 'Tu mascota', 'Tu zona'\]/)
+  assert.match(progress,/role="progressbar"/)
+  const view=readFileSync(new URL('../../components/views/OnboardingView.tsx',import.meta.url),'utf8')
+  assert.match(view,/<OnboardingProgress stage=\{awaitingEmailConfirmation \? 1 : 0\} lang=\{lang\} \/>/)
+  assert.match(view,/<OnboardingProgress stage=\{2\} lang=\{lang\} \/>/)
+  assert.match(view,/<OnboardingProgress stage=\{3\} lang=\{lang\} \/>/)
+  assert.match(view,/Revisa tu carpeta de spam o correo no deseado\. Si usas Gmail, mira también en Promociones\./)
+  assert.match(view,/Paso 1 de 3/,'the existing step label stays')
 })
