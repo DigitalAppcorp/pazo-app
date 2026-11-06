@@ -5,9 +5,10 @@ export function seedVisualFixture(){
  sql(`
  TRUNCATE marketing_private.behavior_events,marketing_private.behavior_sessions,marketing_private.acquisition,marketing_private.landing_daily CASCADE;
  UPDATE marketing_private.retention_runtime SET last_success_at=now();
- UPDATE marketing_private.collection_gate SET behavior_enabled=true,behavior_started_at=now()-interval '14 days';
  CREATE TEMP TABLE visual_clock AS SELECT (now() AT TIME ZONE 'America/Los_Angeles')::date today,
   least(interval '1 hour',(now()-((now() AT TIME ZONE 'America/Los_Angeles')::date::timestamp AT TIME ZONE 'America/Los_Angeles'))/2) AS clock_offset;
+ UPDATE marketing_private.collection_gate SET behavior_enabled=true,
+  behavior_started_at=((SELECT today FROM visual_clock)-14)::timestamp AT TIME ZONE 'America/Los_Angeles';
  CREATE TEMP TABLE visual_people AS SELECT n,((n-1)%40)+1 AS position,
   ('98000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid id,
   CASE WHEN n<=40 THEN 'qr_es' WHEN n<=80 THEN 'perfil_es' END creative,
@@ -22,7 +23,8 @@ export function seedVisualFixture(){
  INSERT INTO public.pets(id,owner_id,created_at)
   SELECT ('98100000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,id,pet_at FROM visual_people WHERE n>80 OR position>10;
  INSERT INTO marketing_private.acquisition(owner_id,campaign,creative,first_touch_at,signup_verified_at,notice_version,recorded_at)
-  SELECT id,'pazo_beta_local_202610',creative,verified_at,verified_at,'pazo-marketing-attribution-notice-v1',verified_at FROM visual_people WHERE creative IS NOT NULL;
+  -- Record attribution later that morning so it is inside the rolling retention window across DST.
+  SELECT id,'pazo_beta_local_202610',creative,verified_at,verified_at,'pazo-marketing-attribution-notice-v1',verified_at+interval '2 hours' FROM visual_people WHERE creative IS NOT NULL;
  CREATE TEMP TABLE visual_sessions AS SELECT p.*,
   ('98200000-0000-4000-8000-'||lpad((p.n*100+d)::text,12,'0'))::uuid sid,
   ((c.today-d)::timestamp AT TIME ZONE 'America/Los_Angeles')+c.clock_offset AS at
