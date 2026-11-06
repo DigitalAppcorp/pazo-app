@@ -297,6 +297,22 @@ Supabase.
 - mínimo de contraseña reforzado en UX/local baseline;
 - 18+ requiere declaración activa del usuario.
 
+### Recordatorio único de confirmación — candidato, no instalado
+
+Para registros por email que sigan sin confirmar, una tarea de servidor programa
+un único reenvío de la confirmación de Supabase Auth a las 24 horas del envío
+más reciente. Google/Gmail recibe el mismo correo transaccional de confirmación
+que ya entrega Auth. La tabla privada `auth_private.confirmation_reminder`
+conserva solo UUID de Auth, vencimiento, estado y marcas de intento/resultado;
+no duplica la dirección ni el contenido del correo. FORCE RLS y sin grants a
+roles cliente ni `service_role`; el worker accede mediante RPC limitadas y
+credencial de un solo uso. Google sign-in, cuentas anónimas, confirmadas y
+cuentas de QA/admin quedan fuera. Baja Auth borra el estado por FK; confirmar
+borra cualquier fila pendiente; los estados terminales expiran a los 14 días y
+los pendientes que no se procesen dentro de 14 días vencen sin envío. Timeout
+queda `unknown` y no se reintenta, para no duplicar; aceptación Auth no demuestra
+recepción en inbox. Este estado sigue sujeto al release gate; aún no instalado.
+
 ## 2. Perfil social de mascota
 
 **Datos**

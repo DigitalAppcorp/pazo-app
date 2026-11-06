@@ -14,6 +14,8 @@ for(const p of ['src/components/modals/CareModal.tsx','src/components/modals/Not
 for(const p of ['src/features/marketing/attribution.ts', 'src/features/marketing/adminSummary.ts', 'src/features/marketing/landingSignal.ts', 'src/features/marketing/BehaviorFilters.tsx', 'src/features/marketing/FirstUtilityPanel.tsx', 'src/features/marketing/ExecutiveAnalytics.tsx', 'src/features/marketing/visualSummary.ts', 'src/features/admin/components/AdminMarketingPanel.tsx', 'supabase/functions/pazo-marketing-attribution/intakeCore.mjs', 'supabase/functions/pazo-marketing-landing/landingCore.mjs'])allowed.add(p)
 // PO GO 3-nov-2026 (Vigilante), covered by test:vigilante and vigilante-pg17.mjs; see docs/vigilante/VIGILANTE_RELEASE_RUNBOOK.md.
 for(const p of ['src/components/views/HomeView.tsx','src/components/views/PublicProfileView.tsx','src/features/moderation/ModerationAccess.tsx','src/services/careService.ts','src/services/petService.ts','src/services/rescueService.ts','src/types/pazo.ts'])allowed.add(p)
+// PO-authorized privacy notice change for the one-time Auth confirmation reminder.
+allowed.add('src/features/legal/legalCopy.test.mjs')
 const paths=execFileSync('git',['ls-tree','-r','--name-only',base],{encoding:'utf8'}).trim().split('\n').filter(p=>p.startsWith('src/')&&!allowed.has(p)||p.startsWith('supabase/migrations/')||p.startsWith('supabase/functions/')&&!allowed.has(p))
 for(const p of paths)assert.equal(hash(read(p)),hash(released(p)),p+' must preserve released behavior')
 // Keep the native controller, effects, auth, operations and focus trap intact.
@@ -26,6 +28,11 @@ const marketingTest='src/features/admin/testing/adminMarketingDashboard.test.mjs
 assert.equal(hash(read(marketingTest)),hash(released(marketingTest).replace("(section!=='behavior'&&)?loading","(section!=='behavior'&&)?(section!=='summary'&&)?loading").replace("(section!=='behavior'&&)?error","(section!=='behavior'&&)?(section!=='summary'&&)?error")),'Only summary loading independence assertions may change')
 // #161 changes fixture loaders, never removes the assertions they protected.
 const fixtureAssertions=s=>{const f=ts.createSourceFile('fixture.mjs',s,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS),out=[];const visit=n=>{if(ts.isCallExpression(n)&&n.expression.getText(f).startsWith('assert.'))out.push(n.getText(f).replaceAll('\r\n','\n'));ts.forEachChild(n,visit)};visit(f);return out}
+const legalCopyTest='src/features/legal/legalCopy.test.mjs'
+const oldLegalAssertions=fixtureAssertions(released(legalCopyTest)),newLegalAssertions=fixtureAssertions(read(legalCopyTest))
+assert.deepEqual(newLegalAssertions.slice(0,oldLegalAssertions.length),oldLegalAssertions,'All released legal notice assertions must remain intact')
+assert.equal(newLegalAssertions.length,oldLegalAssertions.length+5,'Only the five assertions for the approved bilingual reminder notice may be added')
+assert.match(read(legalCopyTest),/email confirmation reminder disclosure is bilingual and matches the one-time 14-day flow/)
 for(const name of ['src/features/marketing/accountBoundary.test.mjs','src/features/marketing/behavior.test.mjs','src/features/marketing/intelligence.test.mjs','src/features/marketing/firstUtility.test.mjs','src/features/onboarding/verifiedIntent.test.mjs'])assert.deepEqual(fixtureAssertions(read(name)),fixtureAssertions(released(name)),name+' must retain every previous assertion')
 assert.doesNotMatch(read('src/features/marketing/analyticsPreference.ts'),/fetch\(|supabase|randomUUID|Date\.now|cookie|ownerId/)
 assert.match(read('src/features/marketing/analyticsPreference.ts'),/pazo_analytics_excluded_v1/)

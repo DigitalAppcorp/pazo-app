@@ -510,6 +510,11 @@ entrypoint = "./functions/pazo-meta-worker/index.ts"
 verify_jwt = false
 entrypoint = "./functions/pazo-push-worker/index.ts"
 
+# Private scheduler endpoint admitted by a single-use database dispatch token.
+[functions.pazo-confirmation-reminder-worker]
+verify_jwt = false
+entrypoint = "./functions/pazo-confirmation-reminder-worker/index.ts"
+
 # Vigilante worker: same single-use dispatch token as the push worker, so the
 # gateway cannot check a JWT; workerCore admits only the scheduler token.
 [functions.pazo-vigilante-worker]

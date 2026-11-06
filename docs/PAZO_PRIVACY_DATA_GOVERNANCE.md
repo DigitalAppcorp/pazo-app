@@ -68,6 +68,20 @@ GO PO para conciliar antes de L1. Worker interno puede leer únicamente el contr
 
 # PAZO — Privacy & Data Governance
 
+## Recordatorio de confirmación de email (candidato, 6-nov-2026)
+
+Autorización PO para preparar un único reenvío automático de Supabase Auth a
+las 24 horas para cuentas sin confirmar creadas con email; nunca para Google ni
+cuentas anónimas. La tabla privada guarda únicamente UUID Auth, fecha de
+elegibilidad, estado de intento/resultado y fechas; no guarda dirección ni
+contenido del mensaje. Se elimina al confirmar o borrar la cuenta; los estados
+finales se purgan a los 14 días y los pendientes vencen 14 días después de ser
+elegibles. Si un intento queda incierto, no se reintenta. FORCE RLS y RPC solo
+service_role; job de cron→Edge usa nonce single-use. Gmail recibe el mensaje de
+confirmación a través del proveedor Auth existente. Un 2xx indica aceptación
+por Auth, no llegada a la bandeja. Preparación local en rama; sin instalación,
+envío ni despliegue alojado.
+
 Comprobación Live administrativa (20-oct-2026): claves aportadas por el PO solo
 para una petición HTTPS con JWT/admin/MFA reciente; OAuth y GET PayPal, sin
 persistencia de claves en navegador/Vault/Edge y sin logs, analítica o respuesta
