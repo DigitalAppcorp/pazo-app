@@ -387,23 +387,55 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
       </DashboardPanel></div>
       <AdminSignupReadout lang={lang} users={users}>{accounts=><>
       <DashboardPanel title={l('Cuentas','Accounts')} info={l('Solo administradores pueden consultar esta lista. Los días activos no son sesiones: son días diferentes con uso medido en los últimos 30.','Only administrators can view this list. Active days are not sessions: they are distinct days with tracked usage in the last 30.')}>
-       <ul className="ac-rows">{users.map(u=>{
+       <ul className="ac-rows !gap-3">{users.map(u=>{
         const registration=accounts[u.user_id]
-        return <li key={u.user_id} className="ac-row">
-        <span className="ac-avatar" aria-hidden="true">{(u.email||'?').slice(0,1).toUpperCase()}</span>
-        <div className="ac-row-main"><p title={u.email||undefined}>{u.email||l('Sin correo visible','No visible email')}</p><small>{age(u.created_at)}</small></div>
-        <div className="ac-chips">{u.pets.length?u.pets.map(p=><span key={p.id} className="ac-chip" title={p.species}>{p.name}</span>):<span className="ac-chip ac-chip-muted">{l('Sin mascotas','No pets')}</span>}
-         {registration&&<>
-          <span className="ac-chip">{registration.method==='google'?'Google':registration.method==='email'?l('Correo','Email'):l('Otro método','Other method')}</span>
-          <span className={registration.confirmed?'ac-chip ac-chip-good':'ac-chip ac-chip-warn'}>{registration.confirmed?l('Cuenta confirmada','Account verified'):l('Sin confirmar','Unverified')}</span>
-          {registration.method==='email'&&registration.email_sent&&<span className="ac-chip">{l('Envío registrado','Send recorded')}</span>}
-          {registration.signed_in&&<span className="ac-chip">{l('Inició sesión','Signed in')}</span>}
-         </>}
-         {u.has_verified_sandbox_coverage&&<span className="ac-chip ac-chip-good">Sandbox</span>}
-         {u.unverified_checkout_attempts>0&&<span className="ac-chip ac-chip-warn">{u.unverified_checkout_attempts} {l('sin verificar','unverified')}</span>}
-        </div>
-        <div className="ac-days"><span>{u.active_days_30} {u.active_days_30===1?l('día activo','active day'):l('días activos','active days')}</span><i aria-hidden="true"><b style={{width:Math.min(100,100*u.active_days_30/30)+'%'}}/></i></div>
-       </li>})}</ul>
+        return <li key={u.user_id} className="min-w-0 space-y-3 rounded-[16px] bg-[#F6F8F2] p-3 sm:p-4">
+         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <div className="flex min-w-0 flex-1 basis-44 items-center gap-2.5">
+           <span className="ac-avatar shrink-0" aria-hidden="true">{(u.email||'?').slice(0,1).toUpperCase()}</span>
+           <div className="min-w-0">
+            <p className="text-[13px] font-extrabold text-[#253E35] [overflow-wrap:anywhere]">{u.email||l('Sin correo visible','No visible email')}</p>
+            <small className="text-[11px] text-[#536E64]">{age(u.created_at)}
+             <span className="sm:hidden"> · {u.active_days_30} {u.active_days_30===1?l('día activo','active day'):l('días activos','active days')}</span>
+            </small>
+           </div>
+          </div>
+          <div className="hidden min-w-20 sm:block"><div className="ac-days"><span>{u.active_days_30} {u.active_days_30===1?l('día activo','active day'):l('días activos','active days')}</span><i aria-hidden="true"><b style={{width:Math.min(100,100*u.active_days_30/30)+'%'}}/></i></div></div>
+         </div>
+         {registration&&<dl className="grid grid-cols-3 gap-2 rounded-[12px] bg-white px-2.5 py-2 sm:px-3">
+          <div>
+           <dt className="text-[11px] font-semibold text-[#536E64]">{l('Registro','Sign-up')}</dt>
+           <dd className="m-0 text-xs font-bold">{registration.method==='google'?'Google':registration.method==='email'?l('Correo','Email'):l('Otro método','Other method')}</dd>
+          </div>
+          <div>
+           <dt className="text-[11px] font-semibold text-[#536E64]">{l('Confirmación','Confirmation')}</dt>
+           <dd className={'m-0 text-xs font-bold '+(registration.confirmed?'text-[#166D54]':'text-[#805417]')}>{registration.confirmed?l('Confirmada','Verified'):l('Pendiente','Pending')}</dd>
+           {registration.method==='email'&&registration.email_sent&&<dd className="m-0 text-[11px] leading-tight text-[#536E64]">{l('Envío registrado','Send recorded')}</dd>}
+          </div>
+          <div>
+           <dt className="text-[11px] font-semibold text-[#536E64]">{l('Acceso','Sign-in')}</dt>
+           <dd className="m-0 text-xs font-bold">{registration.signed_in?l('Inició sesión','Signed in'):l('Sin registro','No record')}</dd>
+          </div>
+         </dl>}
+         {u.pets.length>0?<details className="group rounded-[12px] bg-[#EAF2E5]">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-[12px] px-3 text-xs font-bold focus-visible:bg-[#E1E53F] focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+           <AdminGlyph name="paw" size={16}/>
+           <span className="flex-1">{l('Mascotas','Pets')}</span>
+           <span>{u.pets.length}</span>
+           <span className="group-open:rotate-90" aria-hidden="true"><AdminGlyph name="chevron" size={15}/></span>
+          </summary>
+          <ul className="m-0 grid grid-cols-2 list-disc gap-x-6 gap-y-1 pb-3 pl-8 pr-3 text-xs text-[#253E35] xl:grid-cols-3">
+           {u.pets.map(p=><li key={p.id} className="min-w-0 [overflow-wrap:anywhere]">{p.name}</li>)}
+          </ul>
+         </details>:<p className="!m-0 flex items-center gap-2 rounded-[12px] bg-[#EAF2E5] px-3 py-2.5 text-xs font-semibold">
+          <AdminGlyph name="paw" size={16}/><span>{l('Mascotas','Pets')}</span><span className="ml-auto text-[#536E64]">{l('Ninguna','None')}</span>
+         </p>}
+         {(u.has_verified_sandbox_coverage||u.unverified_checkout_attempts>0)&&<div className="ac-chips">
+          {u.has_verified_sandbox_coverage&&<span className="ac-chip ac-chip-good">Sandbox</span>}
+          {u.unverified_checkout_attempts>0&&<span className="ac-chip ac-chip-warn">{u.unverified_checkout_attempts} {l('sin verificar','unverified')}</span>}
+         </div>}
+        </li>
+       })}</ul>
        <div className="mt-3 flex items-center justify-between">
         <button type="button" disabled={userOffset===0||loading} onClick={()=>setUserOffset(Math.max(0,userOffset-30))}
          className="min-h-11 rounded-full bg-[#F5F6F1] px-4 text-[12px] font-bold hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F] disabled:opacity-40">{l('Anterior','Previous')}</button>
