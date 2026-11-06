@@ -32,7 +32,7 @@ test('it waits for the first-use notice, respects a manual turn-off and never sh
   assert.equal((notice.match(/onClose\(\)|onClick=\{onClose\}|onDismiss=\{onClose\}/g)??[]).length>=4,true)
   assert.match(notice,/if \(result === 'failed'\) setFailed\(true\)\s*else onClose\(\)/)
   // Plain words: reminders, and help when the pet is lost, seen or found. No technical terms.
-  for(const words of [/Cuidemos juntos a \$\{petName\}/,/Sus vacunas y cuidados, justo a tiempo/,/Si se pierde y alguien ve a \$\{petName\}/,/Y si alguien encuentra a \$\{petName\}/,/Let's look after \$\{petName\} together/])
+  for(const words of [/'Sí, activar notificaciones'/,/Cuidemos juntos a \$\{petName\}/,/Sus vacunas y cuidados, justo a tiempo/,/Si se pierde y alguien ve a \$\{petName\}/,/Y si alguien encuentra a \$\{petName\}/,/Let's look after \$\{petName\} together/])
     assert.match(notice,words)
   const shown=[...notice.matchAll(/l\((['`])([\s\S]*?)\1,\s*(['"`])([\s\S]*?)\3\)/g)].flatMap(m=>[m[2],m[4]]).join(' | ')
   assert.ok(shown.length>200,'the visible sentences were read')

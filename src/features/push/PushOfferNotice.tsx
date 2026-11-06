@@ -58,7 +58,7 @@ export function PushOfferNotice({ kind, petName, lang, onClose }: {
       : l('Déjanos avisarte en tu teléfono, aunque PAZO esté cerrado:', 'Let us notify you on your phone, even with PAZO closed:')}>
     {list}
     <button type="button" data-notice-primary onClick={() => void activate()} disabled={busy} className={noticePrimary + ' disabled:opacity-60'}>
-      {busy ? l('Activando…', 'Turning on…') : l('Sí, avísame', 'Yes, notify me')}
+      {busy ? l('Activando…', 'Turning on…') : l('Sí, activar notificaciones', 'Yes, turn on notifications')}
     </button>
     <button type="button" onClick={onClose} disabled={busy} className={noticeSecondary}>{l('Ahora no', 'Not now')}</button>
   </AppNotice>
