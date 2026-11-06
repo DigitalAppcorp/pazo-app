@@ -44,7 +44,7 @@ jobs:
       - run: npm run test:admin-visual:contract
       - run: npm run test:campaign-experience
       - run: npm run test:admin-visual:pg17
-      - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+      - run: bash .github/scripts/install-isolated-playwright.sh
       - name: Use runner Chromium
         run: |
           browser_path="$(command -v google-chrome || command -v chromium || true)"
