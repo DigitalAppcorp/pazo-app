@@ -11,6 +11,7 @@ const marketing=JSON.parse(readFileSync(new URL('../docs/evidence/marketing-e2e-
 const pendingMarketing=[...new Set([...marketing.records,...(marketing.pendingRecords??[]),...(marketing.installedRecords??[])].map(r=>r.version))]
 const intelligence=JSON.parse(readFileSync(new URL('../docs/product-intelligence/PREPARED_MIGRATIONS.json',import.meta.url),'utf8'))
 const directedAds2Expansion=['20261103130000'] // New one-time additive allowlist migration; tracked separately from historical baseline.
+const pendingConfirmation=['20261106090005'] // Auth reminder candidate; not installed in hosted Supabase.
 // PO GO 3-nov-2026 (Vigilante, installed OFF): six directed additive migrations, see docs/vigilante/VIGILANTE_RELEASE_RUNBOOK.md.
 const directedVigilante=['20261103200000','20261103201000','20261103202000','20261103210000','20261103220000','20261103230000']
 const pendingIntelligence=intelligence.records.map(r=>r.version).concat(['20261103120000','20261103110000','20261103100000','20261103100100','20261101222418','20261101222522','20261101222649','20261102120000','20261102130000','20261029120000','20261029121000','20261031032812','20261101120000','20261101120100','20261101130000','20261101140000','20261106120000']) // Separate prepared admin reporting initiative; no hosted installation.
@@ -59,8 +60,8 @@ test('eight prehistory SQL sources preserved in non-executable archive only (pro
     assert.equal(r.hostedVersion,'20261029005231')
     assert.equal(createHash('sha256').update(readFileSync(new URL('../'+r.path,import.meta.url),'utf8').replaceAll('\r\n','\n')).digest('hex'),r.sha256NormalizedLF)
   }
-  assert.equal(all.filter(n=>n.slice(0,14)!==prepared.installedVersion&&!additional.includes(n.slice(0,14))&&!prepared.versions.includes(n.slice(0,14))&&!pendingMarketing.includes(n.slice(0,14))&&!pendingIntelligence.includes(n.slice(0,14))&&!directedAds2Expansion.includes(n.slice(0,14))&&!directedVigilante.includes(n.slice(0,14))).length,122)
-  assert.equal(all.length,123+additional.length+prepared.versions.length+pendingMarketing.length+pendingIntelligence.length+directedAds2Expansion.length+directedVigilante.length)
+  assert.equal(all.filter(n=>n.slice(0,14)!==prepared.installedVersion&&!additional.includes(n.slice(0,14))&&!prepared.versions.includes(n.slice(0,14))&&!pendingMarketing.includes(n.slice(0,14))&&!pendingIntelligence.includes(n.slice(0,14))&&!directedAds2Expansion.includes(n.slice(0,14))&&!directedVigilante.includes(n.slice(0,14))&&!pendingConfirmation.includes(n.slice(0,14))).length,122)
+  assert.equal(all.length,123+additional.length+prepared.versions.length+pendingMarketing.length+pendingIntelligence.length+directedAds2Expansion.length+directedVigilante.length+pendingConfirmation.length)
   for(const version of unpaired){
     assert.ok(!all.some(n=>n.startsWith(version+'_')),'old SQL remains deployable: '+version)
     assert.ok(readdirSync(archived).some(n=>n.startsWith(version+'_')),'missing preserved historical SQL: '+version)
