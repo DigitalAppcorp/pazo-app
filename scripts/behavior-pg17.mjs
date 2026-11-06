@@ -64,19 +64,21 @@ check(sql(actor(5,`SELECT public.pazo_marketing_record_utility_v1('${id(300)}','
 sql("UPDATE marketing_private.collection_gate SET behavior_enabled=true;UPDATE marketing_private.retention_runtime SET last_success_at=now()-interval '2 days'")
 check(sql(actor(5,event(105,3,'qr')))==='f','unhealthy retention fail closed')
 runMockCron()
-sql(`INSERT INTO auth.users(id,created_at,email_confirmed_at) SELECT ('96000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,now()-interval '10 days',now()-interval '10 days' FROM generate_series(1000,1019)n;
+// D7 uses Los Angeles calendar dates. UTC-relative intervals can shift the cohort across midnight at DST changes.
+const cohortDate=days=>`(((now() AT TIME ZONE 'America/Los_Angeles')::date-${days}+time '12:00') AT TIME ZONE 'America/Los_Angeles')`
+sql(`INSERT INTO auth.users(id,created_at,email_confirmed_at) SELECT ('96000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,${cohortDate(10)},${cohortDate(10)} FROM generate_series(1000,1019)n;
  INSERT INTO public.profiles(id) SELECT id FROM auth.users ON CONFLICT DO NOTHING;
  INSERT INTO marketing_private.acquisition(owner_id,campaign,creative,first_touch_at,signup_verified_at,notice_version,recorded_at)
- SELECT id,'pazo_beta_local_202610','qr_es',email_confirmed_at,email_confirmed_at,'pazo-marketing-attribution-notice-v1',now()-interval '10 days' FROM auth.users WHERE id>='${id(1000)}';
- INSERT INTO public.pets SELECT ('96000000-0000-4000-8000-'||lpad((n+1000)::text,12,'0'))::uuid,('96000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,now()-interval '9 days' FROM generate_series(1000,1019)n;
+ SELECT id,'pazo_beta_local_202610','qr_es',email_confirmed_at,email_confirmed_at,'pazo-marketing-attribution-notice-v1',email_confirmed_at FROM auth.users WHERE id>='${id(1000)}';
+ INSERT INTO public.pets SELECT ('96000000-0000-4000-8000-'||lpad((n+1000)::text,12,'0'))::uuid,('96000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,${cohortDate(9)} FROM generate_series(1000,1019)n;
  INSERT INTO marketing_private.behavior_sessions(id,owner_id,started_at,last_at,last_seq)
- SELECT ('96000000-0000-4000-8000-'||lpad((n+3000)::text,12,'0'))::uuid,('96000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,now()-interval '8 days',now()-interval '8 days',2 FROM generate_series(1000,1019)n;
+ SELECT ('96000000-0000-4000-8000-'||lpad((n+3000)::text,12,'0'))::uuid,('96000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,${cohortDate(8)},${cohortDate(8)},2 FROM generate_series(1000,1019)n;
  INSERT INTO marketing_private.behavior_events(session_id,seq,event,screen,received_at)
  SELECT id,1,'screen_view','pet',started_at FROM marketing_private.behavior_sessions WHERE owner_id>='${id(1000)}';
  INSERT INTO marketing_private.behavior_events(session_id,seq,event,screen,received_at)
  SELECT id,2,'screen_view','qr',started_at FROM marketing_private.behavior_sessions WHERE owner_id>='${id(1000)}';
  INSERT INTO marketing_private.behavior_sessions(id,owner_id,started_at,last_at,last_seq)
- SELECT ('96000000-0000-4000-8000-'||lpad((n+4000)::text,12,'0'))::uuid,('96000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,now()-interval '1 day',now()-interval '1 day',1 FROM generate_series(1000,1019)n;
+ SELECT ('96000000-0000-4000-8000-'||lpad((n+4000)::text,12,'0'))::uuid,('96000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,${cohortDate(1)},${cohortDate(1)},1 FROM generate_series(1000,1019)n;
  INSERT INTO marketing_private.behavior_events(session_id,seq,event,screen,received_at)
  SELECT id,1,'screen_view','agenda',started_at FROM marketing_private.behavior_sessions WHERE id>='${id(5000)}';
  INSERT INTO marketing_private.behavior_events(session_id,seq,event,screen,received_at)
