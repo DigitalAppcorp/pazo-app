@@ -1,3 +1,11 @@
+# PAZO — entrada operativa para agentes (documentación consolidada el 6-nov-2026)
+
+> **Leer primero [docs/PAZO_ACTIVE_HANDOFF.md](docs/PAZO_ACTIVE_HANDOFF.md)** para el corte GitHub verificado, las incertidumbres y la siguiente acción. Está deliberadamente separado del [archivo histórico íntegro](docs/history/PAZO_ACTIVE_HANDOFF_PRE_COMPACTION_20261106.md). Después de leerlo, consultar las reglas y los contratos de este `AGENTS.md` que apliquen a la tarea.
+
+> **Precedencia:** estado vivo de proveedores verificado y Git/CI actuales > handoff fechado > anotaciones históricas de este archivo. Los títulos antiguos «producción vigente», «GO», «sin publicar» o «candidato» describen su momento y pueden estar superados. Verificar main, PR, CI, Supabase y Vercel antes de reutilizarlos. Los límites de seguridad, privacidad y aprobación del PO no se rebajan.
+
+---
+
 ## Producción vigente — avisos push (1-nov-2026 hora local; 2-nov UTC)
 
 GO del PO en chat: «publica y súbelo todo a producción». PR 189, 191, 193 y 195, `main` `eb30e76a`, Vercel `pazo-nlhpew904-digitalapp.vercel.app`. Rollback: `pazo-g4rmzwj2u-digitalapp.vercel.app` (sin marcar leídos al cerrar), `pazo-8bqn98ij5-digitalapp.vercel.app` (sin avisos a administración) o `pazo-n3p7ht7p8-digitalapp.vercel.app` (sin push).
