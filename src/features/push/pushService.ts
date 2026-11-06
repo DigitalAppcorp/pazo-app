@@ -74,6 +74,9 @@ function turnedOffHere() {
   try { return window.localStorage.getItem(PUSH_OFF_KEY) === '1' } catch { return false }
 }
 
+/** The invitation to turn alerts on respects a manual turn-off on this phone. */
+export const pushTurnedOffHere = turnedOffHere
+
 export async function readPushStatus() {
   try {
     if (!browserHasPush()) return { active: false, enabled: false }

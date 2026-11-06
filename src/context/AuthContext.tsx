@@ -10,7 +10,7 @@ import { supabase } from '../services/supabaseClient'
 import { releasePushForSignOut } from '../features/push/pushService'
 import { ensureOwnAccountProfile } from '../features/auth/ensureOwnAccountProfile'
 import { classifySignUpResult, type SignUpOutcome } from '../features/auth/signupFlow'
-import { observeSignupFailureCode } from '../features/marketing/experienceDetails'
+import { observeSignupFailure, observeSignupFailureCode } from '../features/marketing/experienceDetails'
 import {
   cleanGoogleReturnUrl,
   clearAdultAttestationIntent,
@@ -32,11 +32,15 @@ import {
 } from '../services/observability'
 import { stageMarketingSignupRequested, stageMarketingSignupVerified, submitAutomaticMarketingAttribution, clearLocalMarketingAttribution } from '../features/marketing/marketingRuntime'
 
+/** ok: signed in. unconfirmed: the account exists but its email is not confirmed yet. */
+export type SignInOutcome = 'ok' | 'unconfirmed' | 'failed'
+
 interface AuthContextValue {
   user: User | null
   loading: boolean
   signUp: (email: string, password: string) => Promise<SignUpOutcome>
-  signIn: (email: string, password: string) => Promise<boolean>
+  signIn: (email: string, password: string) => Promise<SignInOutcome>
+  resendSignupEmail: (email: string) => Promise<boolean>
   signInWithGoogle: (adultConfirmed: boolean) => Promise<boolean>
   googleAuthFailure: GoogleAuthFailure | null
   clearGoogleAuthFailure: () => void
@@ -246,7 +250,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return outcome
   }
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<SignInOutcome> => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -256,12 +260,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       captureEvent('auth_signin_failed', {
         error_code: error.code || null,
       })
+      // Shown on the login screen with a resend button, never as a raw provider alert.
+      if (error.code === 'email_not_confirmed') {
+        observeSignupFailure('unconfirmed_login')
+        return 'unconfirmed'
+      }
       alert(`Error al iniciar sesión: ${error.message}`)
-      return false
+      return 'failed'
     }
 
     captureEvent('auth_signin_succeeded')
-    return true
+    return 'ok'
+  }
+
+  const resendSignupEmail = async (email: string) => {
+    const { error } = await supabase.auth.resend({ type: 'signup', email })
+    return !error
   }
 
   const signInWithGoogle = async (adultConfirmed: boolean): Promise<boolean> => {
@@ -345,6 +359,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loading,
         signUp,
         signIn,
+        resendSignupEmail,
         signInWithGoogle,
         googleAuthFailure,
         clearGoogleAuthFailure,

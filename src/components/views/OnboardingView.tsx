@@ -19,6 +19,8 @@ import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { GratitudeWallPreview } from '../../features/supporter/components/GratitudeWallPreview'
 import { WelcomeAnimatedCompanion } from '../../features/onboarding/components/WelcomeAnimatedCompanion'
 import { PazoInstallControl } from '../../features/pwa/components/PazoInstallControl'
+import { OnboardingProgress } from '../../features/onboarding/OnboardingProgress'
+import { ResendConfirmationButton } from '../../features/auth/ResendConfirmationButton'
 import type { LegalKind } from '../../features/legal/legalCopy'
 
 interface OnboardingViewProps {
@@ -332,6 +334,7 @@ export const OnboardingView = ({
             </button>
             <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 1 de 3" : "Step 1 of 3"}</span>
           </div>
+          <OnboardingProgress stage={awaitingEmailConfirmation ? 1 : 0} lang={lang} />
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">
@@ -351,6 +354,13 @@ export const OnboardingView = ({
                     ? 'Si tu dirección puede registrarse, recibirás un enlace de confirmación. Confirma tu correo y después inicia sesión para agregar tu mascota.'
                     : 'If your address can be registered, you will receive a confirmation link. Confirm your email, then sign in to add your pet.'}
                 </p>
+                <p className="rounded-2xl bg-[#E1E53F]/35 px-3 py-2.5 text-[13px] leading-snug text-[#204E4A]">
+                  <strong className="font-extrabold">{lang === 'es' ? '¿No lo ves? ' : "Can't find it? "}</strong>
+                  {lang === 'es'
+                    ? 'Revisa tu carpeta de spam o correo no deseado. Si usas Gmail, mira también en Promociones. Puede tardar unos minutos.'
+                    : 'Check your spam or junk folder. On Gmail, also look in Promotions. It can take a few minutes.'}
+                </p>
+                <ResendConfirmationButton email={email} lang={lang} />
                 <button type="button" onClick={onSkipToLogin}
                   className="w-full bg-[#204E4A] text-white rounded-full py-3 text-xs font-extrabold cursor-pointer">
                   {lang === 'es' ? 'Ya confirmé: iniciar sesión' : 'Confirmed: sign in'}
@@ -462,6 +472,9 @@ export const OnboardingView = ({
 
               {isGoogleAuthEnabled(import.meta.env) && (
                 <div className="pt-1 space-y-2">
+                  <p className="text-center text-[12px] font-extrabold text-[#204E4A]">
+                    <span className="inline-block rounded-full bg-[#E1E53F]/50 px-2.5 py-1">{lang === 'es' ? 'Con Google puedes entrar sin esperar un correo de confirmación.' : 'With Google, you can sign in without waiting for a confirmation email.'}</span>
+                  </p>
                   <GoogleSignInButton lang={lang} confirmAdult={() => {
                     setGoogleNeedsAge(!isOver18)
                     if (!isOver18) {
@@ -524,6 +537,7 @@ export const OnboardingView = ({
             )}
             <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 2 de 3" : "Step 2 of 3"}</span>
           </div>
+          <OnboardingProgress stage={2} lang={lang} />
 
           <div className="my-auto min-h-0 space-y-4 overflow-y-auto py-2">
             <div className="space-y-1">
@@ -649,6 +663,7 @@ export const OnboardingView = ({
             </button>
             <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 3 de 3" : "Step 3 of 3"}</span>
           </div>
+          <OnboardingProgress stage={3} lang={lang} />
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">

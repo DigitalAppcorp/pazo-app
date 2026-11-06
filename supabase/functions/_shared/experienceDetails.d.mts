@@ -1,5 +1,5 @@
 export const EXPERIENCE_DETAILS: {
-  signup_failure: readonly ['missing_fields','age_required','password_mismatch','weak_password','email_taken','invalid_email','rate_limited','network','google_age','google_cancelled','google_failed','other']
+  signup_failure: readonly ['missing_fields','age_required','password_mismatch','weak_password','email_taken','invalid_email','rate_limited','network','google_age','google_cancelled','google_failed','unconfirmed_login','other']
   demo_last_screen: readonly ['home','pet','communities','places','explore']
   arrival_source: readonly ['search','social','direct','installed','other']
 }

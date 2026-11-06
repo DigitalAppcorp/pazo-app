@@ -57,7 +57,9 @@ export const ActiveLostAlertPanel = (props: Props) => {
         </div>
       </div>
 
-      <PushControl lang={lang} variant="offer" />
+      <PushControl lang={lang} variant="offer" reason={es
+        ? `Activa las notificaciones para que te avisemos en cuanto alguien vea a ${pet.name}.`
+        : `Turn on notifications so we can tell you as soon as someone spots ${pet.name}.`} />
 
       <section aria-label={es?'Compartir búsqueda':'Share search'} className="rounded-[1.6rem] bg-[#EDF3E6] p-3.5">
         <div className="flex items-center gap-2.5">

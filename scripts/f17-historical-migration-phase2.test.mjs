@@ -13,7 +13,7 @@ const intelligence=JSON.parse(readFileSync(new URL('../docs/product-intelligence
 const directedAds2Expansion=['20261103130000'] // New one-time additive allowlist migration; tracked separately from historical baseline.
 // PO GO 3-nov-2026 (Vigilante, installed OFF): six directed additive migrations, see docs/vigilante/VIGILANTE_RELEASE_RUNBOOK.md.
 const directedVigilante=['20261103200000','20261103201000','20261103202000','20261103210000','20261103220000','20261103230000']
-const pendingIntelligence=intelligence.records.map(r=>r.version).concat(['20261103120000','20261103110000','20261103100000','20261103100100','20261101222418','20261101222522','20261101222649','20261102120000','20261102130000','20261029120000','20261029121000','20261031032812','20261101120000','20261101120100','20261101130000','20261101140000']) // Separate prepared admin reporting initiative; no hosted installation.
+const pendingIntelligence=intelligence.records.map(r=>r.version).concat(['20261103120000','20261103110000','20261103100000','20261103100100','20261101222418','20261101222522','20261101222649','20261102120000','20261102130000','20261029120000','20261029121000','20261031032812','20261101120000','20261101120100','20261101130000','20261101140000','20261106120000']) // Separate prepared admin reporting initiative; no hosted installation.
 test('25 canonical hosted SQL files match SHA-256 snapshot digests',()=>{
   assert.equal(info.records.length,25)
   assert.equal(info.records.filter(r=>r.kind==='hosted_only_reconstructed').length,20)

@@ -8,6 +8,8 @@ import { describeNotification, type NotificationAnswer } from './features/notifi
 import { fetchFounderPetIds, fetchOfficialFeed, toggleOfficialPostLike } from './features/vigilante/officialPostsService'
 import type { OfficialPost } from './features/vigilante/officialPosts'
 import { syncPush } from './features/push/pushService'
+import { usePushOffer } from './features/push/usePushOffer'
+import { PushOfferNotice } from './features/push/PushOfferNotice'
 import { markNotificationsSeen } from './features/notifications/markSeen'
 import { createRequestScope } from './lib/requestScope'
 import { lazy, Suspense, useState, useEffect, useLayoutEffect, useRef } from 'react'
@@ -21,6 +23,7 @@ import { pazoBuildVersion } from './features/release/buildVersion'
 import { applyDocumentLanguage, getInitialLanguage, rememberLanguage, type PazoLanguage } from './features/i18n/languagePreference'
 import { PasswordRecoveryView } from './features/auth/PasswordRecoveryView'
 import { PazoSplash } from './features/splash/PazoSplash'
+import { ResendConfirmationButton } from './features/auth/ResendConfirmationButton'
 import { AppUpdatePrompt } from './features/release/AppUpdatePrompt'
 import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
@@ -949,6 +952,7 @@ function PazoMain() {
   const [passwordInput, setPasswordInput] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loginMessage, setLoginMessage] = useState('')
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string|null>(null)
   const [submittingLogin, setSubmittingLogin] = useState(false)
   const [forgotPasswordMode, setForgotPasswordMode] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
@@ -961,11 +965,15 @@ function PazoMain() {
     e.preventDefault()
     setSubmittingLogin(true)
     setLoginMessage('')
+    setUnconfirmedEmail(null)
 
     try {
-      const success = await signIn(emailInput, passwordInput)
-      if (success) {
+      const result = await signIn(emailInput, passwordInput)
+      if (result === 'ok') {
         setPasswordInput('')
+      } else if (result === 'unconfirmed') {
+        // Re-engagement point 2: say plainly what is missing and offer the link again.
+        setUnconfirmedEmail(emailInput)
       } else {
         observeAnonymous('login_error')
         setLoginMessage(lang === 'es' ? 'Credenciales incorrectas o error de acceso.' : 'Invalid credentials or login error.')
@@ -1019,6 +1027,8 @@ function PazoMain() {
   // Until this account's pets load, currentPet is still the Demo pet; asking with it is rejected by the server.
   const ownPetsReady = petBootstrap?.userId === user?.id && petBootstrap?.status === 'ready' && !isOnboardingActive
   const officialFeedPetId = !isDemoUser && canUseAccount && ownPetsReady && activeTab === 'inicio' ? currentPet?.id : undefined
+  // Re-engagement point 1: invite alerts once a pet exists and the first-use notice is gone.
+  const pushOffer = usePushOffer(Boolean(ownPetsReady && canUseAccount && !isDemoUser && currentPet?.id && !firstUseHint))
   useEffect(() => {
     if (!officialFeedPetId) return
     let current = true
@@ -2214,7 +2224,7 @@ function PazoMain() {
   return (
     <div className="h-[100dvh] min-h-0 bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:h-auto sm:min-h-screen sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
       <div data-pazo-app-shell className="w-full sm:max-w-[430px] h-full min-h-0 sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
-        <SupporterInvitationCoordinator lang={lang} safe={Boolean(user&&canUseAccount&&!isOnboardingActive&&petBootstrap?.status==='ready'&&!firstUseHint&&activeTab==='inicio'&&!isFeedLoading&&!feedError&&!pets.some(p=>p.isLost)&&!selectedPublicProfileId&&!isSearchOpen&&!isCreateMenuOpen&&!isCreatePostOpen&&!isAddPetOpen&&!isPassportOpen&&!isCareOpen&&!isDocumentsOpen&&!isAlertOpen&&!isMessagesOpen&&!isNotificationsOpen&&!selectedSightingId)}/>
+        <SupporterInvitationCoordinator lang={lang} safe={Boolean(user&&canUseAccount&&!isOnboardingActive&&petBootstrap?.status==='ready'&&!firstUseHint&&!pushOffer.kind&&activeTab==='inicio'&&!isFeedLoading&&!feedError&&!pets.some(p=>p.isLost)&&!selectedPublicProfileId&&!isSearchOpen&&!isCreateMenuOpen&&!isCreatePostOpen&&!isAddPetOpen&&!isPassportOpen&&!isCareOpen&&!isDocumentsOpen&&!isAlertOpen&&!isMessagesOpen&&!isNotificationsOpen&&!selectedSightingId)}/>
 
         <AppUpdatePrompt lang={lang} busy={!canShowAppNotice} />
 
@@ -2433,6 +2443,14 @@ function PazoMain() {
                     {loginMessage}
                   </div>
                 )}
+                {!forgotPasswordMode && unconfirmedEmail === emailInput && (
+                  <>
+                    <p role="status" className="text-center text-xs font-semibold text-[#204E4A]">{lang === 'es'
+                      ? 'Te falta confirmar tu correo. Abre el enlace que te enviamos; si no lo ves, revisa spam o Promociones.'
+                      : 'You still need to confirm your email. Open the link we sent you; if you cannot find it, check spam or Promotions.'}</p>
+                    <ResendConfirmationButton email={unconfirmedEmail} lang={lang} />
+                  </>
+                )}
 
                 <div className="pt-2 text-center">
                   <button
@@ -2631,6 +2649,10 @@ function PazoMain() {
                 </>
               )}
             </main>
+
+            {canShowAppNotice && !firstUseHint && pushOffer.kind && (
+              <PushOfferNotice kind={pushOffer.kind} petName={currentPet.name} lang={lang} onClose={pushOffer.close} />
+            )}
 
             {canShowAppNotice && isCurrentFirstUse(firstUseHint,user?.id,currentPet.id)&&firstUseHint && (
               <FirstUsePrompt petName={currentPet.name} intent={firstUseHint.intent} lang={lang}

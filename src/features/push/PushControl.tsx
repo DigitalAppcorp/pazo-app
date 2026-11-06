@@ -14,6 +14,8 @@ interface PushControlProps {
   lang: 'es' | 'en'
   /** panel: lives in the bell and manages everything. offer: only asks, then disappears. */
   variant: 'panel' | 'offer'
+  /** offer only: why this screen needs alerts, said plainly, for someone who said "not now". */
+  reason?: string
 }
 
 const Bell = () => (
@@ -32,7 +34,7 @@ const Notice = ({ title, text }: { title: string; text: string }) => (
   </div>
 )
 
-export const PushControl = ({ lang, variant }: PushControlProps) => {
+export const PushControl = ({ lang, variant, reason }: PushControlProps) => {
   const es = lang === 'es'
   const [environment, setEnvironment] = useState<PushEnvironment>(() => readPushEnvironment())
   const [active, setActive] = useState<boolean | null>(null)
@@ -90,7 +92,8 @@ export const PushControl = ({ lang, variant }: PushControlProps) => {
 
   if (!active) {
     return (
-      <div>
+      <div className={reason ? 'space-y-2.5 rounded-[23px] bg-[#F3F6EA] p-3.5' : undefined}>
+        {reason && <p className="text-[13px] font-bold leading-snug text-[#204E4A]">{reason}</p>}
         <button
           type="button"
           onClick={() => void activate()}
@@ -98,7 +101,7 @@ export const PushControl = ({ lang, variant }: PushControlProps) => {
           className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#204E4A] px-4 text-[14px] font-extrabold text-white transition-colors hover:bg-[#183B38] focus-visible:bg-[#183B38] disabled:opacity-60"
         >
           <Bell />
-          {busy ? (es ? 'Activando…' : 'Turning on…') : (es ? 'Activar avisos' : 'Turn on alerts')}
+          {busy ? (es ? 'Activando…' : 'Turning on…') : reason ? (es ? 'Activar notificaciones' : 'Turn on notifications') : (es ? 'Activar avisos' : 'Turn on alerts')}
         </button>
         {failed && <p role="status" className="mt-2 text-center text-[12px] font-semibold text-[#5C7470]">{es ? 'No se pudo activar. Inténtalo de nuevo.' : 'Could not turn on. Try again.'}</p>}
       </div>

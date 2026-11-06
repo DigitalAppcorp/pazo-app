@@ -303,7 +303,9 @@ export const CareModal = ({
         <p className="text-[14px] leading-relaxed text-[#5C7470]">{lang==='es'
           ?'Te recordamos en la campana y en tu teléfono si activas los avisos.'
           :'We remind you in the bell, and on your phone if you turn on alerts.'}</p>
-        <PushControl lang={lang} variant="offer" />
+        <PushControl lang={lang} variant="offer" reason={lang === 'es'
+          ? 'Activa las notificaciones para que podamos avisarte de tu recordatorio.'
+          : 'Turn on notifications so we can remind you on time.'} />
         {!isEditing && (
           <div className="flex gap-1.5 p-1 bg-[#FAF8F5] rounded-full">
             <button

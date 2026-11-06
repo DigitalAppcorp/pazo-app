@@ -16,7 +16,7 @@ test('notice and Edge are released; build flag and SQL gate stay independent',()
  assert.match(fs.readFileSync('supabase/migrations/20261102130000_pazo_experience_details.sql','utf8'),/experience_details_enabled boolean NOT NULL DEFAULT false/)
 })
 test('browser and database share the same closed vocabulary',()=>{
- const sql=fs.readFileSync('supabase/migrations/20261102130000_pazo_experience_details.sql','utf8')
+ const sql=fs.readFileSync('supabase/migrations/20261106120000_pazo_signup_funnel.sql','utf8')
  for(const [kind,values]of Object.entries(EXPERIENCE_DETAILS))assert.ok(sql.includes(`WHEN '${kind}' THEN p_value=ANY(ARRAY[${values.map(v=>`'${v}'`).join(',')}])`),kind)
 })
 test('referrer is reduced to a category and never leaves as text',()=>{
@@ -49,9 +49,9 @@ test('edge OFF refuses details and contacts nothing',async()=>{
 })
 test('edge ON accepts closed categories, with or without a validated ad',async()=>{
  const {h,calls}=handler()
- assert.equal((await h(request({detail_kind:'signup_failure',detail_value:'age_required'}))).status,202)
+ assert.equal((await h(request({detail_kind:'signup_failure',detail_value:'unconfirmed_login'}))).status,202)
  assert.equal((await h(request({detail_kind:'demo_last_screen',detail_value:'pet',...tag}))).status,202)
- assert.deepEqual(calls,[['signup_failure','age_required',''],['demo_last_screen','pet','qr_v2_en']])
+ assert.deepEqual(calls,[['signup_failure','unconfirmed_login',''],['demo_last_screen','pet','qr_v2_en']])
 })
 for(const [name,body]of Object.entries({
  'free text value':{detail_kind:'signup_failure',detail_value:'mi correo es a@b.c'},
