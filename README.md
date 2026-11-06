@@ -1,75 +1,29 @@
-# React + TypeScript + Vite
+# PAZO
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**PAZO** es una aplicación web progresiva (PWA) para dueños de mascotas. Su código frontend utiliza React, TypeScript y Vite; los servicios y datos se integran con Supabase y las publicaciones se realizan mediante Vercel. La experiencia está diseñada en español e inglés.
 
-Currently, two official plugins are available:
+## Empezar por aquí
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Para humanos y agentes:** [handoff activo breve](docs/PAZO_ACTIVE_HANDOFF.md). Indica qué se verificó, qué es incierto y cuál es la siguiente reconciliación pendiente. No sustituye consultar GitHub y proveedores vivos.
+- **Reglas del proyecto y cautelas:** [AGENTS.md](AGENTS.md). Contiene también registros históricos fechados; no asumir que un encabezado antiguo «vigente» sigue siendo el estado actual.
+- **Arquitectura y límites de dominios:** [contrato](docs/PAZO_ARCHITECTURE_CONTRACT.md).
+- **Datos, privacidad y retención:** [inventario de datos](docs/PAZO_DATA_INVENTORY.md).
+- **Historia del handoff:** [archivo preservado íntegramente](docs/history/PAZO_ACTIVE_HANDOFF_PRE_COMPACTION_20261106.md).
+- **Método compartido de trabajo con agentes:** [Project Brain OS](https://github.com/DigitalAppcorp/project-brain-os), especialmente el [protocolo de continuidad verificable](https://github.com/DigitalAppcorp/project-brain-os/blob/main/patterns/VERIFIABLE_HANDOFF.md).
 
-## React Compiler
+## Desarrollo local
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Tras clonar el repositorio y configurar únicamente las variables necesarias según [.env.example](.env.example):
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm ci
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Comprobaciones disponibles en `package.json`: `npm run build`, `npm run lint` y `npm run test:governance`. Algunas pruebas requieren configuraciones y servicios específicos; revisar sus contratos y no ejecutar operaciones alojadas o destructivas sin autorización.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Publicación y estado real
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+El código de `main`, la CI, las migraciones aplicadas y el despliegue de producción son hechos **diferentes**. `vercel.json` tiene `git.deploymentEnabled=false`: fusionar cambios no autoriza ni garantiza una publicación. Comprobar el despliegue remoto y los proveedores antes de declarar una función activa. Los cambios sensibles de producción necesitan la autorización correspondiente del Product Owner.
 
-```
+**Regla documental:** actualizar el handoff breve en lugar de seguir anexando cronologías. Preservar evidencia e historial con enlaces y fechas, sin convertir notas antiguas en instrucciones nuevas.
