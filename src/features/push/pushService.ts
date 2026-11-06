@@ -57,6 +57,23 @@ const saveSubscription = async (subscription: PushSubscription, lang: 'es' | 'en
 const createSubscription = (worker: ServiceWorkerRegistration, publicKey: string) =>
   worker.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToBytes(publicKey) })
 
+// Only "Turn off on this phone" is remembered, on this device. Signing out releases the
+// device without it, so the next sign-in brings alerts back: the phone already allowed them.
+const PUSH_OFF_KEY = 'pazo_push_off_v1'
+
+function rememberTurnedOff(off: boolean) {
+  try {
+    if (off) window.localStorage.setItem(PUSH_OFF_KEY, '1')
+    else window.localStorage.removeItem(PUSH_OFF_KEY)
+  } catch {
+    // Without storage, a later sign-in may turn alerts back on; the browser permission still rules.
+  }
+}
+
+function turnedOffHere() {
+  try { return window.localStorage.getItem(PUSH_OFF_KEY) === '1' } catch { return false }
+}
+
 export async function readPushStatus() {
   try {
     if (!browserHasPush()) return { active: false, enabled: false }
@@ -79,13 +96,21 @@ export async function enablePush(lang: 'es' | 'en'): Promise<'active' | 'dismiss
     const [config, worker] = await Promise.all([fetchConfig(), registration()])
     if (!config.enabled || !config.publicKey || !worker) return 'failed'
     const subscription = await worker.pushManager.getSubscription() ?? await createSubscription(worker, config.publicKey)
-    return await saveSubscription(subscription, lang) ? 'active' : 'failed'
+    if (!await saveSubscription(subscription, lang)) return 'failed'
+    rememberTurnedOff(false)
+    return 'active'
   } catch {
     return 'failed'
   }
 }
 
+/** The person chose to stop alerts on this phone; signing back in keeps them off. */
 export async function disablePush() {
+  rememberTurnedOff(true)
+  await releaseDevice()
+}
+
+async function releaseDevice() {
   const worker = await registration()
   const subscription = worker ? await worker.pushManager.getSubscription() : null
   if (!subscription) return
@@ -93,16 +118,23 @@ export async function disablePush() {
   await subscription.unsubscribe()
 }
 
-/** Keeps this device tied to the signed-in account, its language and the current server key. */
+/**
+ * Keeps this device tied to the signed-in account, its language and the current server key.
+ * With the permission already granted, a missing subscription (after signing out, or one the
+ * browser dropped) is created again without asking, unless alerts were turned off here.
+ */
 export async function syncPush(lang: 'es' | 'en') {
   try {
     if (!browserHasPush() || Notification.permission !== 'granted') return
     const worker = await registration()
-    let subscription = worker ? await worker.pushManager.getSubscription() : null
-    if (!worker || !subscription) return
+    if (!worker) return
+    let subscription = await worker.pushManager.getSubscription()
+    if (!subscription && turnedOffHere()) return
     const config = await fetchConfig()
     if (!config.enabled || !config.publicKey) return
-    if (bytesToUrlBase64(subscription.options.applicationServerKey) !== config.publicKey) {
+    if (!subscription) {
+      subscription = await createSubscription(worker, config.publicKey)
+    } else if (bytesToUrlBase64(subscription.options.applicationServerKey) !== config.publicKey) {
       await subscription.unsubscribe()
       subscription = await createSubscription(worker, config.publicKey)
     }
@@ -116,7 +148,7 @@ export async function syncPush(lang: 'es' | 'en') {
 export async function releasePushForSignOut() {
   if (typeof navigator === 'undefined' || !browserHasPush()) return
   await Promise.race([
-    disablePush().catch(() => undefined),
+    releaseDevice().catch(() => undefined),
     new Promise((resolve) => { window.setTimeout(resolve, 2500) }),
   ])
 }
