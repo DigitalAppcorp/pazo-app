@@ -1,3 +1,8 @@
+## Hoja de ruta vigente — que vuelvan los usuarios registrados (6-nov-2026)
+
+Antes de tocar registro, avisos push, cuidados o el panel de Usuarios/Mascotas, leer [docs/reatraccion/HOJA_DE_RUTA_REATRACCION_20261106.md](docs/reatraccion/HOJA_DE_RUTA_REATRACCION_20261106.md). El PO pidió resolverla **punto por punto**, en orden; cada punto se publica una sola vez con su GO. Los puntos 4 y 5 tienen decisiones de privacidad pendientes del PO: no mostrar el origen más allá de 14 días ni datos privados de mascotas a Administración sin cambiar antes el aviso.
+
+---
 ## Producción vigente — avisos push (1-nov-2026 hora local; 2-nov UTC)
 
 GO del PO en chat: «publica y súbelo todo a producción». PR 189, 191, 193 y 195, `main` `eb30e76a`, Vercel `pazo-nlhpew904-digitalapp.vercel.app`. Rollback: `pazo-g4rmzwj2u-digitalapp.vercel.app` (sin marcar leídos al cerrar), `pazo-8bqn98ij5-digitalapp.vercel.app` (sin avisos a administración) o `pazo-n3p7ht7p8-digitalapp.vercel.app` (sin push).
