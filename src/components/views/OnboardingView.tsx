@@ -20,6 +20,7 @@ import { GratitudeWallPreview } from '../../features/supporter/components/Gratit
 import { WelcomeAnimatedCompanion } from '../../features/onboarding/components/WelcomeAnimatedCompanion'
 import { PazoInstallControl } from '../../features/pwa/components/PazoInstallControl'
 import { OnboardingProgress } from '../../features/onboarding/OnboardingProgress'
+import { ResendConfirmationButton } from '../../features/auth/ResendConfirmationButton'
 import type { LegalKind } from '../../features/legal/legalCopy'
 
 interface OnboardingViewProps {
@@ -359,6 +360,7 @@ export const OnboardingView = ({
                     ? 'Revisa tu carpeta de spam o correo no deseado. Si usas Gmail, mira también en Promociones. Puede tardar unos minutos.'
                     : 'Check your spam or junk folder. On Gmail, also look in Promotions. It can take a few minutes.'}
                 </p>
+                <ResendConfirmationButton email={email} lang={lang} />
                 <button type="button" onClick={onSkipToLogin}
                   className="w-full bg-[#204E4A] text-white rounded-full py-3 text-xs font-extrabold cursor-pointer">
                   {lang === 'es' ? 'Ya confirmé: iniciar sesión' : 'Confirmed: sign in'}
@@ -470,6 +472,9 @@ export const OnboardingView = ({
 
               {isGoogleAuthEnabled(import.meta.env) && (
                 <div className="pt-1 space-y-2">
+                  <p className="text-center text-[12px] font-extrabold text-[#204E4A]">
+                    <span className="inline-block rounded-full bg-[#E1E53F]/50 px-2.5 py-1">{lang === 'es' ? 'Con Google puedes entrar sin esperar un correo de confirmación.' : 'With Google, you can sign in without waiting for a confirmation email.'}</span>
+                  </p>
                   <GoogleSignInButton lang={lang} confirmAdult={() => {
                     setGoogleNeedsAge(!isOver18)
                     if (!isOver18) {

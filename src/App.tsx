@@ -23,6 +23,7 @@ import { pazoBuildVersion } from './features/release/buildVersion'
 import { applyDocumentLanguage, getInitialLanguage, rememberLanguage, type PazoLanguage } from './features/i18n/languagePreference'
 import { PasswordRecoveryView } from './features/auth/PasswordRecoveryView'
 import { PazoSplash } from './features/splash/PazoSplash'
+import { ResendConfirmationButton } from './features/auth/ResendConfirmationButton'
 import { AppUpdatePrompt } from './features/release/AppUpdatePrompt'
 import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
@@ -951,6 +952,7 @@ function PazoMain() {
   const [passwordInput, setPasswordInput] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loginMessage, setLoginMessage] = useState('')
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string|null>(null)
   const [submittingLogin, setSubmittingLogin] = useState(false)
   const [forgotPasswordMode, setForgotPasswordMode] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
@@ -963,11 +965,15 @@ function PazoMain() {
     e.preventDefault()
     setSubmittingLogin(true)
     setLoginMessage('')
+    setUnconfirmedEmail(null)
 
     try {
-      const success = await signIn(emailInput, passwordInput)
-      if (success) {
+      const result = await signIn(emailInput, passwordInput)
+      if (result === 'ok') {
         setPasswordInput('')
+      } else if (result === 'unconfirmed') {
+        // Re-engagement point 2: say plainly what is missing and offer the link again.
+        setUnconfirmedEmail(emailInput)
       } else {
         observeAnonymous('login_error')
         setLoginMessage(lang === 'es' ? 'Credenciales incorrectas o error de acceso.' : 'Invalid credentials or login error.')
@@ -2436,6 +2442,14 @@ function PazoMain() {
                   <div className="p-3 bg-[#E1E53F]/30 border border-[#204E4A]/20 text-[#204E4A] rounded-2xl text-xs text-center font-semibold">
                     {loginMessage}
                   </div>
+                )}
+                {!forgotPasswordMode && unconfirmedEmail === emailInput && (
+                  <>
+                    <p role="status" className="text-center text-xs font-semibold text-[#204E4A]">{lang === 'es'
+                      ? 'Te falta confirmar tu correo. Abre el enlace que te enviamos; si no lo ves, revisa spam o Promociones.'
+                      : 'You still need to confirm your email. Open the link we sent you; if you cannot find it, check spam or Promotions.'}</p>
+                    <ResendConfirmationButton email={unconfirmedEmail} lang={lang} />
+                  </>
                 )}
 
                 <div className="pt-2 text-center">

@@ -10,6 +10,7 @@ import {AdminLiveFinanceSummary} from './AdminLiveFinanceSummary'
 import {AdminVigilanteInbox} from '../../vigilante/admin/AdminVigilanteInbox'
 import { AdminGlyph,AdminDonut,AdminCohortColumns,AdminModuleRings,type AdminGlyphName } from './AdminVisuals'
 import { InfoTip,PulseTile,RankBars } from './AdminClarity'
+import {AdminSignupReadout} from './AdminSignupReadout'
 import {
  adminOverview,adminUsers,adminExperiments,adminVoters,adminAudience,
  type AdminOverview,type AdminUser,type AdminExperiment,type AdminVoter,type AdminAudience,
@@ -384,16 +385,25 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
          {label:l('Sin mascota','Without pets'),count:overview.people.without_pet,color:'#B8E3BA'}
         ]}/>
       </DashboardPanel></div>
+      <AdminSignupReadout lang={lang} users={users}>{accounts=><>
       <DashboardPanel title={l('Cuentas','Accounts')} info={l('Solo administradores pueden consultar esta lista. Los días activos no son sesiones: son días diferentes con uso medido en los últimos 30.','Only administrators can view this list. Active days are not sessions: they are distinct days with tracked usage in the last 30.')}>
-       <ul className="ac-rows">{users.map(u=><li key={u.user_id} className="ac-row">
+       <ul className="ac-rows">{users.map(u=>{
+        const registration=accounts[u.user_id]
+        return <li key={u.user_id} className="ac-row">
         <span className="ac-avatar" aria-hidden="true">{(u.email||'?').slice(0,1).toUpperCase()}</span>
         <div className="ac-row-main"><p title={u.email||undefined}>{u.email||l('Sin correo visible','No visible email')}</p><small>{age(u.created_at)}</small></div>
         <div className="ac-chips">{u.pets.length?u.pets.map(p=><span key={p.id} className="ac-chip" title={p.species}>{p.name}</span>):<span className="ac-chip ac-chip-muted">{l('Sin mascotas','No pets')}</span>}
+         {registration&&<>
+          <span className="ac-chip">{registration.method==='google'?'Google':registration.method==='email'?l('Correo','Email'):l('Otro método','Other method')}</span>
+          <span className={registration.confirmed?'ac-chip ac-chip-good':'ac-chip ac-chip-warn'}>{registration.confirmed?l('Cuenta confirmada','Account verified'):l('Sin confirmar','Unverified')}</span>
+          {registration.method==='email'&&registration.email_sent&&<span className="ac-chip">{l('Envío registrado','Send recorded')}</span>}
+          {registration.signed_in&&<span className="ac-chip">{l('Inició sesión','Signed in')}</span>}
+         </>}
          {u.has_verified_sandbox_coverage&&<span className="ac-chip ac-chip-good">Sandbox</span>}
          {u.unverified_checkout_attempts>0&&<span className="ac-chip ac-chip-warn">{u.unverified_checkout_attempts} {l('sin verificar','unverified')}</span>}
         </div>
         <div className="ac-days"><span>{u.active_days_30} {u.active_days_30===1?l('día activo','active day'):l('días activos','active days')}</span><i aria-hidden="true"><b style={{width:Math.min(100,100*u.active_days_30/30)+'%'}}/></i></div>
-       </li>)}</ul>
+       </li>})}</ul>
        <div className="mt-3 flex items-center justify-between">
         <button type="button" disabled={userOffset===0||loading} onClick={()=>setUserOffset(Math.max(0,userOffset-30))}
          className="min-h-11 rounded-full bg-[#F5F6F1] px-4 text-[12px] font-bold hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F] disabled:opacity-40">{l('Anterior','Previous')}</button>
@@ -402,6 +412,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
          className="min-h-11 rounded-full bg-[#F5F6F1] px-4 text-[12px] font-bold hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F] disabled:opacity-40">{l('Siguiente','Next')}</button>
        </div>
       </DashboardPanel>
+      </>}</AdminSignupReadout>
      </>}
      {section==='finance'&&<>
       <AdminLiveFinanceSummary lang={lang}/>
