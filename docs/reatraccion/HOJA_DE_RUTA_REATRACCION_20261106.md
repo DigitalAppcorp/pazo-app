@@ -41,6 +41,8 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 **Estado: PUBLICADO en [PR #212](https://github.com/DigitalAppcorp/pazo-app/pull/212), `main` `a854593d`, Vercel `dpl_GRkeRRKXPkLbAJD51J3YTwf939c4`.** Oferta y cierre verificados en navegador; queda observar la activación desde la oferta de primera mascota en un teléfono físico.
 
+**Cambio pedido el 8-nov-2026, candidato [PR #217](https://github.com/DigitalAppcorp/pazo-app/pull/217).** Al guardar la primera mascota, PAZO activa los avisos si el navegador los permite. Si el permiso aún no está decidido, el navegador puede mostrar su solicitud durante ese toque. Se retira la tarjeta de PAZO. Al salir se desvincula la cuenta del dispositivo y al entrar se recupera la suscripción sin repetir la solicitud. Se respeta «Desactivar en este teléfono». Chrome con permisos simulados verificó el alta y el reingreso; pendiente CI final y prueba física tras publicar. Los detalles de la invitación de abajo corresponden al despliegue anterior.
+
 - **Objetivo:** que cada persona active el push en el momento en que más le importa, con un motivo concreto y con el nombre de su mascota.
 - **Hoy:** `PushControl` (`src/features/push/PushControl.tsx`) tiene la variante `offer`, que solo se usa en `CareModal` y `ActiveLostAlertPanel`.
 - **Decidido por el PO (6-nov-2026):**
@@ -119,3 +121,4 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 | 2026-11-06 | — | Prueba frágil detectada (no es de esta hoja, pero bloquea su CI): «D7 mature calendar cohort» en `scripts/behavior-pg17.mjs` (jobs `behavior` e `intelligence`). Usa `now()-interval '10 days'` y `now()-interval '1 day'`; cuando esos instantes caen a ambos lados de un cambio de horario de Los Ángeles, entre las 07:00 y las 08:00 UTC quedan en otro día de calendario y falla. **Pendiente:** anclar los datos de la prueba a la medianoche de Los Ángeles. |
 | 2026-11-08 | 1, 1b, 2 | Publicación reconciliada con #212 y #213; dos confirmaciones reales después del recordatorio. Punto 3 en preparación. |
 | 2026-11-08 | 3 | #216 publicado en producción. Falta observación del push de cuidado en teléfono físico. |
+| 2026-11-08 | 1 | PO pidió activación durante el alta y restauración al volver. Candidato #217 probado en Chrome con datos sintéticos. |
