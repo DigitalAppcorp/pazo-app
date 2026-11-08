@@ -38,7 +38,7 @@ Verificación. Primera mascota en Chrome móvil y iPhone. La instalación, la sa
 
 ## 4. Enviar avisos según el punto donde se quedó la persona
 
-**Candidato integrado [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `7b9de9ed`.** PostgreSQL aislado verificó elegibilidad, horarios, deduplicación y descarte de avisos que ya no aplican. La fase de 14 días sigue apagada. Después de la primera prueba en teléfono, se corrigieron los dos destinos: Chrome verificó el panel de compartir y el formulario de primera mascota al abrir PAZO y con PAZO ya abierto. Pendientes la segunda prueba física y la verificación de CI del candidato corregido.
+**Candidato integrado [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `7b9de9ed`.** PostgreSQL aislado verificó elegibilidad, horarios, deduplicación y descarte de avisos que ya no aplican. La fase de 14 días sigue apagada. Después de la primera prueba en teléfono, se corrigieron los dos destinos: Chrome verificó el panel de compartir y el formulario de primera mascota al abrir PAZO y con PAZO ya abierto. CI del candidato corregido: 15/15, incluida la repetición en Chrome. Pendiente la segunda prueba física.
 
 | Momento propuesto | Quién puede recibirlo | Mensaje | Destino |
 | --- | --- | --- | --- |
