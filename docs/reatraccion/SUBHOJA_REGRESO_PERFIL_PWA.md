@@ -12,10 +12,10 @@ Verificación. Una cuenta confirmada sin mascota se suscribe en un dispositivo q
 
 ## 2. Hacer que el perfil social se pueda abrir y compartir
 
-**Candidato integrado [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `7b9de9ed`.** En **Mi mascota** se conserva el botón junto a Editar. El perfil público queda sin ese botón. El enlace `/mascota/{id}` entrega a los rastreadores la foto pública, el nombre, la descripción y la marca PAZO mediante Open Graph en el HTML. Chrome verificó el HTML, el destino, los enlaces anteriores y que un perfil no disponible no genere tarjeta. Revisar la presentación real en las redes tras publicar.
+**Candidato integrado [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `417e3a93`.** Tocar la tarjeta de **Mi mascota** abre el perfil público. **Editar** y el icono de compartir están juntos y funcionan por separado. El enlace `/mascota/{id}` entrega a los rastreadores la foto pública, el nombre, la descripción y la marca PAZO mediante Open Graph en el HTML. Chrome verificó el HTML, el destino, los enlaces anteriores y que un perfil no disponible no genere tarjeta. Revisar la presentación real en las redes tras publicar.
 
-- En **Mi mascota**, tocar la foto, el nombre o el espacio principal de la tarjeta abre la misma vista social que ve un visitante. **Editar** y **Compartir perfil** tienen acciones propias y funcionan con teclado y lector de pantalla. El área que abre el perfil se implementa sin anidar botones.
-- Ubicar **Compartir perfil** junto a **Editar**. Abrir el menú de compartir del dispositivo cuando esté disponible y ofrecer **Copiar enlace** como alternativa. Distinguir abrir el menú, copiar el enlace y completar el envío según lo que la plataforma permita observar.
+- En **Mi mascota**, tocar la foto, el nombre o el espacio principal de la tarjeta abre la misma vista social que ve un visitante. **Editar** y el icono de compartir tienen acciones propias y funcionan con teclado y lector de pantalla. El área que abre el perfil se implementa sin anidar botones.
+- Ubicar el icono de compartir de tres nodos junto a **Editar**. Abrir el menú de compartir del dispositivo cuando esté disponible y ofrecer **Copiar enlace** como alternativa. Distinguir abrir el menú, copiar el enlace y completar el envío según lo que la plataforma permita observar.
 - El enlace HTTPS debe abrir directamente el perfil social, incluso sin sesión y desde otro navegador. Reutilizar la vista social existente y proyectar solo los campos y publicaciones que ya son públicos. Las reglas de visibilidad también se aplican al abrir el enlace y a la vista previa que generan las redes. Resolver con un estado amable si el perfil ya no está disponible.
 - Al pie del perfil, mostrar «¿Tienes una mascota? Crea su perfil en PAZO y compártelo con quien quieras» con **Conocer PAZO** cuando termine la comprobación de sesión y el visitante sea invitado. Ocultarlo para una cuenta autenticada. Conservar el destino si el visitante elige entrar.
 
@@ -38,7 +38,7 @@ Verificación. Primera mascota en Chrome móvil y iPhone. La instalación, la sa
 
 ## 4. Enviar avisos según el punto donde se quedó la persona
 
-**Candidato integrado [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `7b9de9ed`.** PostgreSQL aislado verificó elegibilidad, horarios, deduplicación y descarte de avisos que ya no aplican. La fase de 14 días sigue apagada. Después de la primera prueba en teléfono, se corrigieron los dos destinos: Chrome verificó el panel de compartir y el formulario de primera mascota al abrir PAZO y con PAZO ya abierto. CI del candidato corregido: 15/15, incluida la repetición en Chrome. Pendiente la segunda prueba física.
+**Candidato integrado [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `7b9de9ed`.** PostgreSQL aislado verificó elegibilidad, horarios, deduplicación y descarte de avisos que ya no aplican. La fase de 14 días sigue apagada. Después de la primera prueba en teléfono, se corrigieron los dos destinos: Chrome verificó el panel de compartir y el formulario de primera mascota al abrir PAZO y con PAZO ya abierto. CI del candidato corregido: 15/15, incluida la repetición en Chrome. El dueño confirmó que los dos avisos abrieron el destino correcto en su teléfono.
 
 | Momento propuesto | Quién puede recibirlo | Mensaje | Destino |
 | --- | --- | --- | --- |
