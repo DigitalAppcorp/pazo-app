@@ -61,6 +61,8 @@ const createSubscription = (worker: ServiceWorkerRegistration, publicKey: string
 // device without it, so the next sign-in brings alerts back: the phone already allowed them.
 const PUSH_OFF_KEY = 'pazo_push_off_v1'
 let deviceVersion = 0
+let signupPermissionRequested = false
+let signupPermissionPending: Promise<void> | undefined
 
 function rememberTurnedOff(off: boolean) {
   try {
@@ -75,11 +77,16 @@ function turnedOffHere() {
   try { return window.localStorage.getItem(PUSH_OFF_KEY) === '1' } catch { return false }
 }
 
-/** Call directly from the first-pet submit gesture, before any network awaits. */
-export async function requestFirstPetPushPermission(): Promise<void> {
+/** Call directly from the account signup gesture, before any network awaits. */
+export function requestSignupPushPermission(): Promise<void> | undefined {
+  if (signupPermissionRequested) return signupPermissionPending
   if (turnedOffHere() || readPushEnvironment() !== 'available' || Notification.permission !== 'default') return
+  signupPermissionRequested = true
   try {
-    await Notification.requestPermission()
+    signupPermissionPending = Notification.requestPermission()
+      .then(() => undefined, () => undefined)
+      .finally(() => { signupPermissionPending = undefined })
+    return signupPermissionPending
   } catch {
     // A failed permission request must not block registration.
   }
@@ -143,7 +150,9 @@ export async function syncPush(lang: 'es' | 'en', isCurrent = () => true) {
   const version = deviceVersion
   const canSync = () => version === deviceVersion && isCurrent() && !turnedOffHere() && Notification.permission === 'granted'
   try {
-    if (!browserHasPush() || !canSync()) return
+    if (!browserHasPush()) return
+    await signupPermissionPending
+    if (!canSync()) return
     const worker = await registration()
     if (!worker || !canSync()) return
     let subscription = await worker.pushManager.getSubscription()

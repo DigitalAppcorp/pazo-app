@@ -260,7 +260,6 @@ function PazoMain() {
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
   const [firstUseHint, setFirstUseHint] = useState<FirstUseHint|null>(null)
   const [firstCareHint, setFirstCareHint] = useState<FirstUseHint|null>(null)
-  const firstPetPushPermission = useRef<{ ownerId: string; decision: Promise<void> } | null>(null)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
   const [accountRequests] = useState(createRequestScope)
   const [petRequests] = useState(createRequestScope)
@@ -2049,20 +2048,13 @@ function PazoMain() {
   refreshNotificationsRef.current = refreshNotifications
 
   useEffect(() => {
-    if (!user?.id || isOnboardingActive || isDemoUser) return
+    if (!user?.id || !user.email_confirmed_at || isPasswordRecovery || isDemoUser) return
     const isCurrentAccount = accountRequests.capture()
     let cancelled = false
     const isCurrent = () => !cancelled && isCurrentAccount()
-    const pending = firstPetPushPermission.current
-    void (async () => {
-      if (pending?.ownerId === user.id) {
-        await pending.decision
-        if (firstPetPushPermission.current === pending) firstPetPushPermission.current = null
-      }
-      if (isCurrent()) await syncPush(lang, isCurrent)
-    })()
+    void syncPush(lang, isCurrent)
     return () => { cancelled = true }
-  }, [user?.id, isOnboardingActive, isDemoUser, lang, accountRequests])
+  }, [user?.id, user?.email_confirmed_at, isPasswordRecovery, isDemoUser, lang, accountRequests])
 
   // The bell catches up when the person comes back or a push arrives while PAZO is open.
   useEffect(() => {
@@ -2308,9 +2300,8 @@ function PazoMain() {
                 setIsOnboardingActive(false)
               }}
               onQuickDemo={enterDemo}
-              onComplete={(newPet, pushPermission) => {
+              onComplete={(newPet) => {
                 if (!isCurrentOnboardingCompletion()) return
-                if (user?.id) firstPetPushPermission.current = { ownerId: user.id, decision: pushPermission }
                 if (shouldOfferFirstUse(ownedPetIdsRef.current,user?.id,newPet.id,isDemoUser)&&user?.id) {
                   const hint = {ownerId:user.id,petId:newPet.id,intent:takeVerifiedFirstUseIntent(user.id)}
                   setFirstUseHint(hint)

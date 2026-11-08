@@ -45,6 +45,7 @@ try{
  for(const lang of ['es','en'])for(const width of [320,390,430]){
   const owner=id(++number),pet=id(number+100),registered=new Date().toISOString()
   const pushPermission=width===390?'default':width===430&&lang==='en'?'denied':'granted'
+  const exerciseAccountSignup=contextual&&pushPermission==='default'
   const pushExpected=contextual&&width!==320&&pushPermission!=='denied'
   const pushEvents=[]
   const scheduleFirstCare=contextual&&width!==320
@@ -72,6 +73,7 @@ try{
     }
     if(url.pathname.startsWith('/auth/v1/user'))return respond(user)
     if(url.pathname.startsWith('/auth/v1/token'))return respond(session)
+    if(url.pathname==='/auth/v1/signup'&&exerciseAccountSignup)return respond({...user,email_confirmed_at:null,identities:[{id:owner}]})
     if(url.pathname==='/auth/v1/logout'&&contextual)return route.fulfill({status:204})
     if(rpc){
      if(rpc==='pazo_public_maintenance_status')return respond({enabled:false,message_es:'',message_en:'',updated_at:now})
@@ -115,9 +117,11 @@ try{
    }catch(error){console.error('Isolated backend:',error.message);return respond({message:'isolated backend rejected request'},403)}
   })
   if(context.routeWebSocket)await context.routeWebSocket('**/*',ws=>ws.close())
-  await context.addInitScript(({session,lang,contextual,width,owner,pushPermission})=>{
+  await context.addInitScript(({session,lang,contextual,width,owner,pushPermission,exerciseAccountSignup})=>{
    if(!sessionStorage.getItem('qa-initialized')){
-    localStorage.clear();localStorage.setItem('sb-mrybvqdebbgcayuvgkkr-auth-token',JSON.stringify(session));localStorage.setItem('pazo_language_preference_v1',lang)
+    localStorage.clear()
+    if(!exerciseAccountSignup)localStorage.setItem('sb-mrybvqdebbgcayuvgkkr-auth-token',JSON.stringify(session))
+    localStorage.setItem('pazo_language_preference_v1',lang)
     sessionStorage.setItem('qa-initialized','1')
    }
    if(contextual){
@@ -151,26 +155,41 @@ try{
     localStorage.setItem('pazo_marketing_firstparty_v1',JSON.stringify({version:1,attribution:{source:'meta',medium:'paid_social',campaign:'pazo_beta_local_202610',creative:lang==='es'?'qr_es':'qr_en',firstTouchAt},steps:['landing','signup_requested','signup_verified'],signupRequestedAt:firstTouchAt,signupOwnerId:owner}))
    }
    Object.defineProperty(navigator,'share',{configurable:true,value:async()=>{if(window.__shareMode==='cancel')throw new DOMException('cancelled','AbortError')}})
-  },{session,lang,contextual,width,owner,pushPermission})
-  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(origin,{waitUntil:'domcontentloaded',timeout:hostedAsset?90000:30000})
+  },{session,lang,contextual,width,owner,pushPermission,exerciseAccountSignup})
+  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message))
+  const waitForPush=pushExpected?page.waitForResponse(res=>res.url().endsWith('/rpc/pazo_push_subscribe')&&res.ok()):null
+  await page.goto(origin,{waitUntil:'domcontentloaded',timeout:hostedAsset?90000:30000})
   const nav=page.getByRole('navigation',{name:'Navegación de PAZO'})
   const firstCare=page.getByRole('region',{name:lang==='es'?'Primer cuidado':'First care reminder'})
   if(contextual){
+   if(exerciseAccountSignup){
+    await page.getByRole('button',{name:lang==='es'?'Comenzar':'Get started',exact:true}).click()
+    await page.locator('#pazo-signup-email').fill(user.email)
+    await page.locator('#pazo-signup-password').fill('SyntheticPass123')
+    await page.locator('#pazo-signup-password-confirm').fill('SyntheticPass123')
+    await page.getByRole('checkbox').check()
+    assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompts')),null)
+    await page.getByRole('button',{name:lang==='es'?'Crear cuenta':'Create account',exact:true}).click()
+    await page.getByText(lang==='es'?'Revisa tu correo':'Check your email',{exact:true}).waitFor()
+    assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompts')),'1')
+    assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompt-gesture')),'true')
+    await page.evaluate(()=>window.__grantPush())
+    assert.equal(pushEvents.length,0,'the unconfirmed account has no push subscription')
+    await page.getByRole('button',{name:lang==='es'?'Ya confirmé: iniciar sesión':'Confirmed: sign in',exact:true}).click()
+    await page.locator('#pazo-login-email').fill(user.email)
+    await page.locator('#pazo-login-password').fill('SyntheticPass123')
+    await page.getByRole('button',{name:lang==='es'?'Iniciar Sesión':'Log in',exact:true}).click()
+   }
+   if(waitForPush){
+    await waitForPush
+    assert.equal(petCreated,false,'the confirmed account subscribes before creating any pet')
+   }else assert.equal(pushEvents.length,0)
    await page.getByPlaceholder(lang==='es'?'Ej: Luna, Bruno, Nube...':'E.g. Luna, Bruno, Cloud...').fill('Luna')
    await page.getByRole('button',{name:lang==='es'?'Continuar':'Continue',exact:true}).click()
-   assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompts')),null)
-   const waitForPush=pushExpected?page.waitForResponse(res=>res.url().endsWith('/rpc/pazo_push_subscribe')&&res.ok()):null
    await page.getByRole('button',{name:lang==='es'?'Crear perfil y entrar':'Create profile and enter',exact:true}).click()
    const hint=page.getByRole('region',{name:lang==='es'?'Para empezar':'To get started'})
    await hint.waitFor();assert.equal(feedPending,true)
-   if(pushPermission==='default'){
-    assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompts')),'1')
-    assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompt-gesture')),'true')
-    assert.equal(pushEvents.length,0,'wait for the system permission')
-    await page.evaluate(()=>window.__grantPush())
-   }else assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompts')),null)
-   if(waitForPush)await waitForPush
-   else assert.equal(pushEvents.length,0)
+   assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompts')),exerciseAccountSignup?'1':null,'saving the pet does not request push permission')
    assert.equal(await firstCare.count(),0,'no first care above the welcome notice')
    assert.equal(await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).getAttribute('aria-current'),'page')
    assert.equal(sql(`SELECT count(*) FROM public.pets WHERE id='${pet}' AND owner_id='${owner}'`),'1')
