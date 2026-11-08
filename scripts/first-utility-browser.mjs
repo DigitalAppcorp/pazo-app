@@ -44,7 +44,9 @@ try{
  let number=0
  for(const lang of ['es','en'])for(const width of [320,390,430]){
   const owner=id(++number),pet=id(number+100),registered=new Date().toISOString()
-  const exercisePushOffer=contextual&&width===390
+  const pushPermission=width===390?'default':width===430&&lang==='en'?'denied':'granted'
+  const pushExpected=contextual&&width!==320&&pushPermission!=='denied'
+  const pushEvents=[]
   const scheduleFirstCare=contextual&&width!==320
   const careTitle=scheduleFirstCare?(lang==='es'?'Rabia':'Rabies'):'QA persisted care'
   let petCreated=!contextual
@@ -70,6 +72,7 @@ try{
     }
     if(url.pathname.startsWith('/auth/v1/user'))return respond(user)
     if(url.pathname.startsWith('/auth/v1/token'))return respond(session)
+    if(url.pathname==='/auth/v1/logout'&&contextual)return route.fulfill({status:204})
     if(rpc){
      if(rpc==='pazo_public_maintenance_status')return respond({enabled:false,message_es:'',message_en:'',updated_at:now})
      if(rpc==='pazo_ensure_my_profile')return respond(null)
@@ -78,7 +81,11 @@ try{
       tx(`INSERT INTO public.pets VALUES('${pet}','${owner}',now())`);petCreated=true;return respond(pet)
      }
      if(['pazo_is_admin','f14_is_moderator'].includes(rpc))return respond(false)
-     if(rpc==='pazo_push_config'&&contextual)return respond({enabled:exercisePushOffer,publicKey:'synthetic-push-key'})
+     if(rpc==='pazo_push_config'&&contextual)return respond({enabled:true,publicKey:'AQ'})
+     if(contextual&&['pazo_push_subscribe','pazo_push_unsubscribe'].includes(rpc)){
+      pushEvents.push({rpc,endpoint:value.p_endpoint})
+      return respond(true)
+     }
      if(rpc==='pazo_marketing_record_utility_v1'){
       metricRequests.push(value.p_event)
       if(failMetric)return respond({message:'synthetic offline metric'},503)
@@ -108,28 +115,62 @@ try{
    }catch(error){console.error('Isolated backend:',error.message);return respond({message:'isolated backend rejected request'},403)}
   })
   if(context.routeWebSocket)await context.routeWebSocket('**/*',ws=>ws.close())
-  await context.addInitScript(({session,lang,contextual,width,owner,exercisePushOffer})=>{
-   localStorage.clear();localStorage.setItem('sb-mrybvqdebbgcayuvgkkr-auth-token',JSON.stringify(session));localStorage.setItem('pazo_language_preference_v1',lang)
-   if(exercisePushOffer){
-    Object.defineProperty(Notification,'permission',{configurable:true,value:'default'})
-    Object.defineProperty(navigator.serviceWorker,'getRegistration',{configurable:true,value:async()=>({pushManager:{getSubscription:async()=>null}})})
-   }else if(contextual)localStorage.setItem('pazo_push_off_v1','1')
+  await context.addInitScript(({session,lang,contextual,width,owner,pushPermission})=>{
+   if(!sessionStorage.getItem('qa-initialized')){
+    localStorage.clear();localStorage.setItem('sb-mrybvqdebbgcayuvgkkr-auth-token',JSON.stringify(session));localStorage.setItem('pazo_language_preference_v1',lang)
+    sessionStorage.setItem('qa-initialized','1')
+   }
+   if(contextual){
+    if(width===320)localStorage.setItem('pazo_push_off_v1','1')
+    Object.defineProperty(Notification,'permission',{configurable:true,get:()=>sessionStorage.getItem('qa-permission')??pushPermission})
+    Notification.requestPermission=()=>new Promise(resolve=>{
+     sessionStorage.setItem('qa-prompts',String(Number(sessionStorage.getItem('qa-prompts')??0)+1))
+     sessionStorage.setItem('qa-prompt-gesture',String(navigator.userActivation.isActive))
+     window.__grantPush=()=>{sessionStorage.setItem('qa-permission','granted');resolve('granted')}
+    })
+    const subscription=endpoint=>({
+     endpoint,options:{applicationServerKey:Uint8Array.of(1).buffer},
+     getKey:()=>Uint8Array.of(1).buffer,
+     unsubscribe:async()=>{sessionStorage.removeItem('qa-endpoint');return true},
+    })
+    const pushManager={
+     getSubscription:async()=>{const endpoint=sessionStorage.getItem('qa-endpoint');return endpoint?subscription(endpoint):null},
+     subscribe:async()=>{
+      const next=Number(sessionStorage.getItem('qa-subscriptions')??0)+1
+      sessionStorage.setItem('qa-subscriptions',String(next))
+      const endpoint='https://push.invalid/qa-'+next
+      sessionStorage.setItem('qa-endpoint',endpoint)
+      return subscription(endpoint)
+     },
+    }
+    Object.defineProperty(navigator.serviceWorker,'getRegistration',{configurable:true,value:async()=>({pushManager})})
+   }
    window.__shareMode='cancel'
    if(contextual&&width!==320){
     const firstTouchAt=Date.now()
     localStorage.setItem('pazo_marketing_firstparty_v1',JSON.stringify({version:1,attribution:{source:'meta',medium:'paid_social',campaign:'pazo_beta_local_202610',creative:lang==='es'?'qr_es':'qr_en',firstTouchAt},steps:['landing','signup_requested','signup_verified'],signupRequestedAt:firstTouchAt,signupOwnerId:owner}))
    }
    Object.defineProperty(navigator,'share',{configurable:true,value:async()=>{if(window.__shareMode==='cancel')throw new DOMException('cancelled','AbortError')}})
-  },{session,lang,contextual,width,owner,exercisePushOffer})
+  },{session,lang,contextual,width,owner,pushPermission})
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(origin,{waitUntil:'domcontentloaded',timeout:hostedAsset?90000:30000})
   const nav=page.getByRole('navigation',{name:'Navegación de PAZO'})
   const firstCare=page.getByRole('region',{name:lang==='es'?'Primer cuidado':'First care reminder'})
   if(contextual){
    await page.getByPlaceholder(lang==='es'?'Ej: Luna, Bruno, Nube...':'E.g. Luna, Bruno, Cloud...').fill('Luna')
    await page.getByRole('button',{name:lang==='es'?'Continuar':'Continue',exact:true}).click()
+   assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompts')),null)
+   const waitForPush=pushExpected?page.waitForResponse(res=>res.url().endsWith('/rpc/pazo_push_subscribe')&&res.ok()):null
    await page.getByRole('button',{name:lang==='es'?'Crear perfil y entrar':'Create profile and enter',exact:true}).click()
    const hint=page.getByRole('region',{name:lang==='es'?'Para empezar':'To get started'})
    await hint.waitFor();assert.equal(feedPending,true)
+   if(pushPermission==='default'){
+    assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompts')),'1')
+    assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompt-gesture')),'true')
+    assert.equal(pushEvents.length,0,'wait for the system permission')
+    await page.evaluate(()=>window.__grantPush())
+   }else assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompts')),null)
+   if(waitForPush)await waitForPush
+   else assert.equal(pushEvents.length,0)
    assert.equal(await firstCare.count(),0,'no first care above the welcome notice')
    assert.equal(await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).getAttribute('aria-current'),'page')
    assert.equal(sql(`SELECT count(*) FROM public.pets WHERE id='${pet}' AND owner_id='${owner}'`),'1')
@@ -145,11 +186,7 @@ try{
   await nav.waitFor()
   await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).click()
   if(contextual){
-   if(exercisePushOffer){
-    const push=page.getByRole('region',{name:lang==='es'?'Avisos de PAZO':'PAZO alerts'})
-    await push.waitFor();assert.equal(await firstCare.count(),0,'the push offer comes first')
-    await push.getByRole('button',{name:lang==='es'?'Ahora no':'Not now',exact:true}).click()
-   }
+   assert.equal(await page.getByRole('region',{name:lang==='es'?'Avisos de PAZO':'PAZO alerts'}).count(),0)
    await firstCare.waitFor()
    for(const button of await firstCare.getByRole('button').all()){
     const box=await button.boundingBox();assert.ok(box.height>=44&&box.x>=0&&box.x+box.width<=width)
@@ -210,14 +247,33 @@ try{
   assert.ok(outcome.care_created_at&&outcome.qr_visible_at&&outcome.qr_share_confirmed_at)
   await page.screenshot({path:path.join(out,`${lang}-${width}-care.png`)})
   assert.deepEqual(errors,[])
-  evidence.push({lang,width,firstUse:contextual?'PASS':'not exercised',firstCare:contextual?(scheduleFirstCare?'saved':'dismissed'):'not exercised',firstCareAfterPush:exercisePushOffer?'PASS':'not exercised',verifiedQrIntention:contextual&&width!==320?'PASS':'neutral',qrVisible:'PASS',shareCancelledNotCounted:'PASS',nativeShareConfirmed:'PASS',downloadWorksWithMetricOffline:'PASS',carePersistedInPg17:'PASS',backendOutcomesConfirmed:true,pageErrors:0,hostedWrites:0})
   feedPending=false;releaseFeed.splice(0).forEach(r=>r())
   if(contextual){
    await page.getByRole('button',{name:lang==='es'?'Cerrar':'Close',exact:true}).click()
    await page.reload();await nav.waitFor()
    assert.equal(await page.getByRole('region',{name:lang==='es'?'Para empezar':'To get started'}).count(),0,'existing-pet bootstrap never repeats the prompt')
    assert.equal(await firstCare.count(),0,'existing pets never get the first-care prompt')
+   if(pushPermission==='default'){
+    await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).click()
+    const removed=page.waitForResponse(res=>res.url().endsWith('/rpc/pazo_push_unsubscribe')&&res.ok())
+    page.once('dialog',dialog=>dialog.accept())
+    await page.getByRole('button',{name:lang==='es'?'Cerrar sesión':'Log out',exact:true}).click()
+    await removed
+    await page.getByRole('button',{name:lang==='es'?'Ya tengo una cuenta':'I already have an account',exact:true}).click()
+    assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-endpoint')),null)
+    assert.ok(pushEvents.some(e=>e.rpc==='pazo_push_unsubscribe'&&e.endpoint==='https://push.invalid/qa-1'))
+    await page.locator('#pazo-login-email').fill(user.email)
+    await page.locator('#pazo-login-password').fill('synthetic-test-password')
+    const restored=page.waitForResponse(res=>res.url().endsWith('/rpc/pazo_push_subscribe')&&res.ok())
+    await page.getByRole('button',{name:lang==='es'?'Iniciar Sesión':'Log in',exact:true}).click()
+    await restored
+    assert.equal(pushEvents.at(-1)?.endpoint,'https://push.invalid/qa-2')
+    assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompts')),'1','the browser permission was not requested again')
+   }
+   if(!pushExpected)assert.equal(pushEvents.length,0,'permission denial or device opt-out must persist')
   }
+  assert.deepEqual(errors,[])
+  evidence.push({lang,width,firstUse:contextual?'PASS':'not exercised',firstCare:contextual?(scheduleFirstCare?'saved':'dismissed'):'not exercised',autoPush:contextual?(pushExpected?'subscribed':'respected device setting'):'not exercised',pushAfterLogin:contextual&&pushPermission==='default'?'restored':'not exercised',verifiedQrIntention:contextual&&width!==320?'PASS':'neutral',qrVisible:'PASS',shareCancelledNotCounted:'PASS',nativeShareConfirmed:'PASS',downloadWorksWithMetricOffline:'PASS',carePersistedInPg17:'PASS',backendOutcomesConfirmed:true,pageErrors:0,hostedWrites:0})
   await context.close()
  }
  fs.writeFileSync(path.join(out,'results.json'),JSON.stringify({environment:hostedAsset?'immutable Vercel frontend, intercepted Auth/data transport, real disposable PostgreSQL/RLS/trigger; no hosted Auth or writes':'local real App, intercepted transport, real disposable PostgreSQL/RLS/trigger; no hosted Auth or writes',origin,evidence},null,2))

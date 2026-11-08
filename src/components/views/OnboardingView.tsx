@@ -4,6 +4,7 @@ import type { Species, Pet } from '../../types/pazo'
 import { IconCat, IconDog, IconRabbit, IconBird, IconPaw } from '../icons/PazoIcons'
 import { useAuth } from '../../context/AuthContext'
 import { createPetProfile } from '../../services/petService'
+import { requestFirstPetPushPermission } from '../../features/push/pushService'
 import { PostalCodeField } from '../../features/vigilante/PrivateDetailsFields'
 import { isValidPostalCode } from '../../features/vigilante/privateDetails'
 import { saveHouseholdPostalCode } from '../../features/vigilante/privateDetailsService'
@@ -25,7 +26,7 @@ import type { LegalKind } from '../../features/legal/legalCopy'
 
 interface OnboardingViewProps {
   initialStep?: 'A01' | 'A02' | 'A03' | 'A04'
-  onComplete: (createdPet: Pet) => void
+  onComplete: (createdPet: Pet, pushPermission: Promise<void>) => void
   onSkipToLogin: () => void
   onQuickDemo: () => void
   lang: 'es' | 'en'
@@ -76,6 +77,7 @@ export const OnboardingView = ({
   const [petPhoto, setPetPhoto] = useState('')
   const [petPhotoFile, setPetPhotoFile] = useState<File | null>(null)
   const [isSubmittingPet, setIsSubmittingPet] = useState(false)
+  const firstPetPushPermission = useRef<Promise<void> | undefined>(undefined)
 
   const handleGalleryPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -180,6 +182,7 @@ export const OnboardingView = ({
     }
 
     setIsSubmittingPet(true)
+    const pushPermission = firstPetPushPermission.current ??= requestFirstPetPushPermission()
 
     try {
       const createdPet = await createPetProfile({
@@ -199,7 +202,7 @@ export const OnboardingView = ({
         if (!isCurrent()) return
       }
       stageMarketingFirstPetCreated()
-      onComplete(createdPet)
+      onComplete(createdPet, pushPermission)
     } catch (error) {
       if (!isCurrent()) return
       if (error instanceof Error&&error.name==='AbortError') {

@@ -60,6 +60,7 @@ const createSubscription = (worker: ServiceWorkerRegistration, publicKey: string
 // Only "Turn off on this phone" is remembered, on this device. Signing out releases the
 // device without it, so the next sign-in brings alerts back: the phone already allowed them.
 const PUSH_OFF_KEY = 'pazo_push_off_v1'
+let deviceVersion = 0
 
 function rememberTurnedOff(off: boolean) {
   try {
@@ -74,8 +75,15 @@ function turnedOffHere() {
   try { return window.localStorage.getItem(PUSH_OFF_KEY) === '1' } catch { return false }
 }
 
-/** The invitation to turn alerts on respects a manual turn-off on this phone. */
-export const pushTurnedOffHere = turnedOffHere
+/** Call directly from the first-pet submit gesture, before any network awaits. */
+export async function requestFirstPetPushPermission(): Promise<void> {
+  if (turnedOffHere() || readPushEnvironment() !== 'available' || Notification.permission !== 'default') return
+  try {
+    await Notification.requestPermission()
+  } catch {
+    // A failed permission request must not block registration.
+  }
+}
 
 export async function readPushStatus() {
   try {
@@ -92,15 +100,17 @@ export async function readPushStatus() {
 }
 
 export async function enablePush(lang: 'es' | 'en'): Promise<'active' | 'dismissed' | 'failed'> {
+  const version = deviceVersion
   try {
     // Asked first, while the tap is still valid; Safari ignores a later request.
     const permission = await Notification.requestPermission()
-    if (permission !== 'granted') return 'dismissed'
+    if (permission !== 'granted' || version !== deviceVersion) return 'dismissed'
     const [config, worker] = await Promise.all([fetchConfig(), registration()])
     if (!config.enabled || !config.publicKey || !worker) return 'failed'
     const subscription = await worker.pushManager.getSubscription() ?? await createSubscription(worker, config.publicKey)
+    if (version !== deviceVersion) return 'dismissed'
     if (!await saveSubscription(subscription, lang)) return 'failed'
-    rememberTurnedOff(false)
+    if (version === deviceVersion) rememberTurnedOff(false)
     return 'active'
   } catch {
     return 'failed'
@@ -110,6 +120,7 @@ export async function enablePush(lang: 'es' | 'en'): Promise<'active' | 'dismiss
 /** The person chose to stop alerts on this phone; signing back in keeps them off. */
 export async function disablePush() {
   rememberTurnedOff(true)
+  deviceVersion++
   await releaseDevice()
 }
 
@@ -117,8 +128,10 @@ async function releaseDevice() {
   const worker = await registration()
   const subscription = worker ? await worker.pushManager.getSubscription() : null
   if (!subscription) return
-  await supabase.rpc('pazo_push_unsubscribe', { p_endpoint: subscription.endpoint })
-  await subscription.unsubscribe()
+  await Promise.all([
+    supabase.rpc('pazo_push_unsubscribe', { p_endpoint: subscription.endpoint }),
+    subscription.unsubscribe(),
+  ])
 }
 
 /**
@@ -126,22 +139,24 @@ async function releaseDevice() {
  * With the permission already granted, a missing subscription (after signing out, or one the
  * browser dropped) is created again without asking, unless alerts were turned off here.
  */
-export async function syncPush(lang: 'es' | 'en') {
+export async function syncPush(lang: 'es' | 'en', isCurrent = () => true) {
+  const version = deviceVersion
+  const canSync = () => version === deviceVersion && isCurrent() && !turnedOffHere() && Notification.permission === 'granted'
   try {
-    if (!browserHasPush() || Notification.permission !== 'granted') return
+    if (!browserHasPush() || !canSync()) return
     const worker = await registration()
-    if (!worker) return
+    if (!worker || !canSync()) return
     let subscription = await worker.pushManager.getSubscription()
-    if (!subscription && turnedOffHere()) return
     const config = await fetchConfig()
-    if (!config.enabled || !config.publicKey) return
+    if (!config.enabled || !config.publicKey || !canSync()) return
     if (!subscription) {
       subscription = await createSubscription(worker, config.publicKey)
     } else if (bytesToUrlBase64(subscription.options.applicationServerKey) !== config.publicKey) {
       await subscription.unsubscribe()
+      if (!canSync()) return
       subscription = await createSubscription(worker, config.publicKey)
     }
-    await saveSubscription(subscription, lang)
+    if (canSync()) await saveSubscription(subscription, lang)
   } catch {
     // Push is optional; the bell keeps working without it.
   }
@@ -149,6 +164,7 @@ export async function syncPush(lang: 'es' | 'en') {
 
 /** A shared phone must stop receiving this account's alerts. Never delays or blocks signing out. */
 export async function releasePushForSignOut() {
+  deviceVersion++
   if (typeof navigator === 'undefined' || !browserHasPush()) return
   await Promise.race([
     releaseDevice().catch(() => undefined),

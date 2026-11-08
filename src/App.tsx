@@ -8,8 +8,6 @@ import { describeNotification, type NotificationAnswer } from './features/notifi
 import { fetchFounderPetIds, fetchOfficialFeed, toggleOfficialPostLike } from './features/vigilante/officialPostsService'
 import type { OfficialPost } from './features/vigilante/officialPosts'
 import { syncPush } from './features/push/pushService'
-import { usePushOffer } from './features/push/usePushOffer'
-import { PushOfferNotice } from './features/push/PushOfferNotice'
 import { markNotificationsSeen } from './features/notifications/markSeen'
 import { createRequestScope } from './lib/requestScope'
 import { lazy, Suspense, useState, useEffect, useLayoutEffect, useRef } from 'react'
@@ -262,6 +260,7 @@ function PazoMain() {
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
   const [firstUseHint, setFirstUseHint] = useState<FirstUseHint|null>(null)
   const [firstCareHint, setFirstCareHint] = useState<FirstUseHint|null>(null)
+  const firstPetPushPermission = useRef<{ ownerId: string; decision: Promise<void> } | null>(null)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
   const [accountRequests] = useState(createRequestScope)
   const [petRequests] = useState(createRequestScope)
@@ -1031,8 +1030,6 @@ function PazoMain() {
   // Until this account's pets load, currentPet is still the Demo pet; asking with it is rejected by the server.
   const ownPetsReady = petBootstrap?.userId === user?.id && petBootstrap?.status === 'ready' && !isOnboardingActive
   const officialFeedPetId = !isDemoUser && canUseAccount && ownPetsReady && activeTab === 'inicio' ? currentPet?.id : undefined
-  // Re-engagement point 1: invite alerts once a pet exists and the first-use notice is gone.
-  const pushOffer = usePushOffer(Boolean(ownPetsReady && canUseAccount && !isDemoUser && currentPet?.id && !firstUseHint))
   useEffect(() => {
     if (!officialFeedPetId) return
     let current = true
@@ -2053,8 +2050,19 @@ function PazoMain() {
 
   useEffect(() => {
     if (!user?.id || isOnboardingActive || isDemoUser) return
-    void syncPush(lang)
-  }, [user?.id, isOnboardingActive, isDemoUser, lang])
+    const isCurrentAccount = accountRequests.capture()
+    let cancelled = false
+    const isCurrent = () => !cancelled && isCurrentAccount()
+    const pending = firstPetPushPermission.current
+    void (async () => {
+      if (pending?.ownerId === user.id) {
+        await pending.decision
+        if (firstPetPushPermission.current === pending) firstPetPushPermission.current = null
+      }
+      if (isCurrent()) await syncPush(lang, isCurrent)
+    })()
+    return () => { cancelled = true }
+  }, [user?.id, isOnboardingActive, isDemoUser, lang, accountRequests])
 
   // The bell catches up when the person comes back or a push arrives while PAZO is open.
   useEffect(() => {
@@ -2226,13 +2234,13 @@ function PazoMain() {
   const isCurrentOnboardingCompletion = accountRequests.capture()
   const canShowAppNotice = !selectedPublicProfileId&&!isSearchOpen&&!isCreateMenuOpen&&!isCreatePostOpen&&!isAddPetOpen&&!isPassportOpen&&!isCareOpen&&!isDocumentsOpen&&!isAlertOpen&&!isMessagesOpen&&!isNotificationsOpen&&!selectedSightingId
   const showFirstCare = canShowAppNotice && activeTab === 'mascota' && ownPetsReady && canUseAccount
-    && isCurrentFirstUse(firstCareHint, user?.id, currentPet.id) && !firstUseHint && pushOffer.ready && !pushOffer.kind
+    && isCurrentFirstUse(firstCareHint, user?.id, currentPet.id) && !firstUseHint
     && !isCareLoading && !careError && careItems.length === 0 && careHistory.length === 0
 
   return (
     <div className="h-[100dvh] min-h-0 bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:h-auto sm:min-h-screen sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
       <div data-pazo-app-shell className="w-full sm:max-w-[430px] h-full min-h-0 sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
-        <SupporterInvitationCoordinator lang={lang} safe={Boolean(user&&canUseAccount&&!isOnboardingActive&&petBootstrap?.status==='ready'&&!firstUseHint&&!pushOffer.kind&&activeTab==='inicio'&&!isFeedLoading&&!feedError&&!pets.some(p=>p.isLost)&&!selectedPublicProfileId&&!isSearchOpen&&!isCreateMenuOpen&&!isCreatePostOpen&&!isAddPetOpen&&!isPassportOpen&&!isCareOpen&&!isDocumentsOpen&&!isAlertOpen&&!isMessagesOpen&&!isNotificationsOpen&&!selectedSightingId)}/>
+        <SupporterInvitationCoordinator lang={lang} safe={Boolean(user&&canUseAccount&&!isOnboardingActive&&petBootstrap?.status==='ready'&&!firstUseHint&&activeTab==='inicio'&&!isFeedLoading&&!feedError&&!pets.some(p=>p.isLost)&&!selectedPublicProfileId&&!isSearchOpen&&!isCreateMenuOpen&&!isCreatePostOpen&&!isAddPetOpen&&!isPassportOpen&&!isCareOpen&&!isDocumentsOpen&&!isAlertOpen&&!isMessagesOpen&&!isNotificationsOpen&&!selectedSightingId)}/>
 
         <AppUpdatePrompt lang={lang} busy={!canShowAppNotice} />
 
@@ -2300,8 +2308,9 @@ function PazoMain() {
                 setIsOnboardingActive(false)
               }}
               onQuickDemo={enterDemo}
-              onComplete={(newPet) => {
+              onComplete={(newPet, pushPermission) => {
                 if (!isCurrentOnboardingCompletion()) return
+                if (user?.id) firstPetPushPermission.current = { ownerId: user.id, decision: pushPermission }
                 if (shouldOfferFirstUse(ownedPetIdsRef.current,user?.id,newPet.id,isDemoUser)&&user?.id) {
                   const hint = {ownerId:user.id,petId:newPet.id,intent:takeVerifiedFirstUseIntent(user.id)}
                   setFirstUseHint(hint)
@@ -2659,10 +2668,6 @@ function PazoMain() {
                 </>
               )}
             </main>
-
-            {canShowAppNotice && !firstUseHint && pushOffer.kind && (
-              <PushOfferNotice kind={pushOffer.kind} petName={currentPet.name} lang={lang} onClose={pushOffer.close} />
-            )}
 
             {canShowAppNotice && isCurrentFirstUse(firstUseHint,user?.id,currentPet.id)&&firstUseHint && (
               <FirstUsePrompt petName={currentPet.name} intent={firstUseHint.intent} lang={lang}
