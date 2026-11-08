@@ -12,6 +12,7 @@ import { AdminGlyph,AdminDonut,AdminCohortColumns,AdminModuleRings,type AdminGly
 import { InfoTip,PulseTile,RankBars } from './AdminClarity'
 import {AdminSignupReadout} from './AdminSignupReadout'
 import {AdminPwaInstallationCounts} from './AdminPwaInstallationCounts'
+import {AdminTestAccountToggle} from './AdminTestAccountToggle'
 import { sharedPetUrl } from '../../profile/sharedPetRoute'
 import {
  adminOverview,adminUsers,adminExperiments,adminVoters,adminAudience,
@@ -428,6 +429,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
          {registration&&'ad_campaign' in registration&&<p className="!m-0 rounded-xl bg-white px-3 py-2 text-xs font-semibold text-[#315B55]">
           {registration.ad_campaign ? `${l('Anuncio','Ad')} · Meta · ${registration.ad_campaign}` : l('Sin anuncio registrado','No ad recorded')}
          </p>}
+         <AdminTestAccountToggle lang={lang} userId={u.user_id} row={u}/>
          {u.pets.length>0?<details className="group rounded-[12px] bg-[#EAF2E5]">
           <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-[12px] px-3 text-xs font-bold outline-none focus-visible:bg-[#E1E53F] [&::-webkit-details-marker]:hidden">
            <AdminGlyph name="paw" size={16}/>

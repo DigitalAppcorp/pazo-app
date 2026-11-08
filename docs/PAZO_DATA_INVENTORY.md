@@ -1,3 +1,12 @@
+## Cuentas de prueba fuera de las cifras — candidato (8-nov-2026)
+
+Orden del PO del 8-nov-2026. No se recoge ningún dato nuevo de las personas; solo se clasifican cuentas internas.
+
+- Al crearse una cuenta, si el correo es un alias del buzón de PAZO (`appdigital.corp+…@gmail.com`) o usa un dominio reservado para pruebas (`example.com/.net/.org`, `.test`, `.invalid`, `.example`, `.localhost`), un disparador `BEFORE INSERT` añade `pazo_marketing_qa=true` y `pazo_qa_reason=reserved_address` a `raw_app_meta_data`. Ocurre antes de los avisos a Administración, el recordatorio de confirmación y la medición. Las cuentas existentes con esas direcciones ya estaban marcadas el 8-nov.
+- Administración → Usuarios puede marcar o desmarcar cualquier otra cuenta (`pazo_admin_set_test_account`, solo administradores; `pazo_qa_reason=admin_panel`). La lista recibe solo el valor `test_account`.
+- Un navegador donde inicia sesión una cuenta de prueba o de Administración activa una vez la exclusión local existente (`pazo_analytics_excluded_v1`) y guarda `pazo_analytics_auto_excluded_v1` para no repetirla. Sustituye, solo para estas cuentas, la decisión anterior de que la exclusión no se activara automáticamente. Desde Administración → Mi actividad se puede volver a incluir el navegador.
+- Las mascotas de cuentas de prueba siguen visibles en búsqueda y feed. Ocultarlas es una decisión pendiente del PO.
+
 ## Tarjeta pública al compartir el perfil (8-nov-2026)
 
 La ruta `/mascota/{id}` muestra a los rastreadores nombre, descripción y foto del perfil que el invitado ya puede ver, junto con la marca PAZO. Lee solo `name`, `bio` y `photo_url` con la clave pública y las reglas de invitado. Las fotos se limitan a los avatares públicos de PAZO y su proveedor de imágenes de referencia. Los perfiles retirados o inexistentes no entregan una tarjeta de mascota. La plataforma donde se comparte puede guardar su propia copia de la tarjeta.

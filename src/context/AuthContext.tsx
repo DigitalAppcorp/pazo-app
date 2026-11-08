@@ -8,6 +8,7 @@ import {
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../services/supabaseClient'
 import { releasePushForSignOut } from '../features/push/pushService'
+import { autoExcludeInternalBrowser } from '../features/marketing/autoAnalyticsExclusion'
 import { ensureOwnAccountProfile } from '../features/auth/ensureOwnAccountProfile'
 import { classifySignUpResult, type SignUpOutcome } from '../features/auth/signupFlow'
 import { observeSignupFailure, observeSignupFailureCode } from '../features/marketing/experienceDetails'
@@ -193,6 +194,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       void saveAdultAttestation().finally(() => setSavingAttestation(false))
     }, 0)
   }, [pendingAttestationUserId])
+
+  // Test and administrator accounts keep this browser out of the usage figures.
+  useEffect(() => {
+    if (!user?.id) return
+    void autoExcludeInternalBrowser(user, async () => {
+      const { data, error } = await supabase.rpc('pazo_is_admin')
+      return !error && data === true
+    })
+  }, [user])
 
   useEffect(() => {
     if (!user?.id || adultAttestationPending) {
