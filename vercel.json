@@ -4,6 +4,10 @@
   },
   "rewrites": [
     {
+      "source": "/mascota/:petId",
+      "destination": "/api/pet-preview?id=:petId"
+    },
+    {
       "source": "/privacy",
       "destination": "/index.html"
     },

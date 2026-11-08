@@ -6,7 +6,7 @@ export function getSharedPetId(hash: string) {
 }
 
 export function sharedPetUrl(origin: string, petId: string) {
-  return new URL(`/#/pet/${encodeURIComponent(petId)}`, origin).href
+  return new URL(`/mascota/${encodeURIComponent(petId)}`, origin).href
 }
 
 // Keep the public destination in this tab across an OAuth redirect.

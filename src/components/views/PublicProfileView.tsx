@@ -10,8 +10,6 @@ import { SupporterProfileBackdrop, type SupporterProfileThemeId } from '../../fe
 import { SupporterBadge } from '../../features/supporter/components/SupporterBadge'
 import { FounderBadge } from '../../features/vigilante/OfficialPostCard'
 import {supporterBenefitsUiEnabled} from '../../features/supporter/supporterUiRelease'
-import { usePetProfileShare } from '../../features/profile/usePetProfileShare'
-import { recordReturnProfileShare } from '../../features/push/pushService'
 
 const supporterVisualsEnabled = supporterBenefitsUiEnabled
 type PublicSupporterPerks = {badge: boolean; theme: SupporterProfileThemeId | null; milestone: 0 | 3 | 6 | 12}
@@ -54,7 +52,6 @@ export const PublicProfileView = ({
   const profileMenuRef = useRef<HTMLDivElement | null>(null)
   const closeButtonRef = useRef<HTMLButtonElement | null>(null)
   const [petProfile, setPetProfile] = useState<Pet | null>(null)
-  const { shareProfile, shareFeedback } = usePetProfileShare()
   const [petPosts, setPetPosts] = useState<SocialPost[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'posts' | 'info'>('posts')
@@ -346,23 +343,6 @@ export const PublicProfileView = ({
                 )}
               </div>
 
-              {ownedPetIds.includes(petProfile.id) && (
-                <div className="mt-5 space-y-2">
-                  <button type="button" onClick={() => { void shareProfile(petProfile) }}
-                    className="min-h-11 rounded-full bg-white px-4 text-[13px] font-bold text-[#204E4A] hover:bg-[#E1E53F]/50 focus-visible:bg-[#E1E53F] focus-visible:outline-none">
-                    {lang === 'es' ? 'Compartir perfil' : 'Share profile'}
-                  </button>
-                  {shareFeedback?.petId === petProfile.id && (shareFeedback.copied ? (
-                    <p role="status" className="text-sm">{lang === 'es' ? 'Enlace copiado.' : 'Link copied.'}</p>
-                  ) : (
-                    <input readOnly value={shareFeedback.url}
-                      aria-label={lang === 'es' ? 'Selecciona y copia el enlace al perfil social' : 'Select and copy the social profile link'}
-                      onFocus={(event) => event.currentTarget.select()}
-                      onCopy={() => recordReturnProfileShare(petProfile.id)}
-                      className="min-h-11 w-full rounded-xl bg-white px-3 text-sm text-[#204E4A] focus:bg-[#F5F4D0] focus:outline-none" />
-                  ))}
-                </div>
-              )}
               {Boolean(currentPetId) && !ownedPetIds.includes(petProfile.id) && (
                 <div className="mt-6">
                   <FollowButton

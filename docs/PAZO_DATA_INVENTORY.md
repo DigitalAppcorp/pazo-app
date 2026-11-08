@@ -1,3 +1,7 @@
+## Tarjeta pública al compartir el perfil (8-nov-2026)
+
+La ruta `/mascota/{id}` muestra a los rastreadores nombre, descripción y foto del perfil que el invitado ya puede ver, junto con la marca PAZO. Lee solo `name`, `bio` y `photo_url` con la clave pública y las reglas de invitado. Las fotos se limitan a los avatares públicos de PAZO y su proveedor de imágenes de referencia. Los perfiles retirados o inexistentes no entregan una tarjeta de mascota. La plataforma donde se comparte puede guardar su propia copia de la tarjeta.
+
 ## Continuidad de campañas y consejos de PAZO — candidatos apagados (8-nov-2026)
 
 - En el alta por correo, el candidato acepta un código de anuncio de lista cerrada y la hora de la primera visita. Retira el dato transitorio de los metadatos de Auth y lo guarda en privado ligado al UUID pendiente. Caduca a las 72 horas desde la visita y se limpia cada cinco minutos. Al confirmar se mueve al sistema de atribución existente, con su plazo vigente de 14 días. Administración ve solo el código de campaña en la página de Usuarios; al vencer deja de mostrarse. No se incorpora correo, URL ni identificadores externos. Ambas puertas de captura comienzan apagadas.

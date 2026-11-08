@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { createServer } from 'vite'
+import { createPetPreviewHandler } from '../api/pet-preview.js'
 
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PAZO_PLAYWRIGHT_MODULE || 'playwright')
@@ -13,9 +14,10 @@ process.env.VITE_PAZO_PENDING_CAMPAIGN_ENABLED = 'true'
 const origin = 'http://127.0.0.1:5357'
 const owner = '11000000-0000-4000-8000-000000000001'
 const other = '11000000-0000-4000-8000-000000000002'
+const noPetOwner = '11000000-0000-4000-8000-000000000003'
 const pet = '22000000-0000-4000-8000-000000000001'
 const hidden = '22000000-0000-4000-8000-000000000002'
-const sharedUrl = `${origin}/#/pet/${pet}`
+const sharedUrl = `${origin}/mascota/${pet}`
 const now = new Date().toISOString()
 const luna = { id: pet, owner_id: owner, name: 'Luna', species: 'gato', age: '3 años', bio: 'Le gusta dormir al sol', is_lost: false, photo_url: `${origin}/pwa-icon-192.png`, created_at: now }
 const adminOverview = {
@@ -26,7 +28,19 @@ const adminOverview = {
 const post = { id: hidden, text: 'Una tarde al sol', photo_url: null, likes: 2 }
 const petColumns = 'id,name,species,age,photo_url,bio,breed,gender,is_lost'
 const postColumns = 'id,text,photo_url,likes'
-const server = await createServer({ server: { host: '127.0.0.1', port: 5357, strictPort: true } })
+const previewPhoto = `${host}/storage/v1/object/public/pet-avatars/test/luna.jpg`
+const previewHandler = createPetPreviewHandler({ loadPet: async id => id === pet ? { ...luna, photo_url: previewPhoto, bio: 'Le gusta dormir al sol <y jugar>' } : null })
+const server = await createServer({
+  server: { host: '127.0.0.1', port: 5357, strictPort: true },
+  plugins: [{ name: 'fixture-pet-preview', configureServer(vite) {
+    vite.middlewares.use((req, res, next) => {
+      const match = new URL(req.url, origin).pathname.match(/^\/mascota\/([^/]+)$/)
+      if (!match) return next()
+      req.query = { id: match[1] }
+      void previewHandler(req, res)
+    })
+  } }],
+})
 const sessionFor = (id) => {
   const exp = Math.floor(Date.now() / 1000) + 3600
   const user = { id, aud: 'authenticated', role: 'authenticated', email: 'qa@invalid.example', created_at: now, email_confirmed_at: now, app_metadata: { provider: 'email' }, user_metadata: {} }
@@ -81,7 +95,7 @@ async function pageFor({ id, lang = 'es', width = 390 } = {}) {
       return reply([post])
     }
     if (table === 'notifications' && authId === owner && url.searchParams.get('type') === 'eq.return_share') {
-      return reply([{ id: hidden, type: 'return_share', title: 'Consejos de PAZO', body: '', read_at: null, created_at: now, pet_id: pet }])
+      return reply([{ id: hidden, type: 'return_share', title: 'Consejos de PAZO', body: '', read_at: now, created_at: now, pet_id: pet }])
     }
     if (!authId && ['pets', 'posts'].includes(table)) errors.push(`Unexpected guest read: ${table} (${columns})`)
     return reply([])
@@ -137,6 +151,15 @@ try {
   console.log('PASS owner: share with gesture, cancellation, copy fallback, manual link, card, keyboard, separate edit')
 
   const guest = await pageFor()
+  const crawler = await guest.request.get(sharedUrl, { headers: { 'user-agent': 'facebookexternalhit/1.1' } })
+  assert.equal(crawler.status(), 200)
+  const html = await crawler.text()
+  assert.ok(html.includes('property="og:title" content="Luna · PAZO"'))
+  assert.ok(html.includes(`property="og:image" content="${previewPhoto}"`))
+  assert.ok(html.includes('property="og:description" content="Le gusta dormir al sol &lt;y jugar&gt;"'))
+  assert.ok(html.includes('property="og:site_name" content="PAZO"'))
+  assert.ok(!html.includes(owner))
+  assert.equal((await guest.request.get(`${origin}/mascota/${hidden}`)).status(), 404)
   await guest.goto(sharedUrl)
   await guest.getByText(post.text, { exact: true }).waitFor()
   await guest.getByRole('button', { name: 'Conocer PAZO' }).waitFor()
@@ -180,10 +203,36 @@ try {
   console.log('PASS Admin: retained campaign label and keyboard link to the public projection')
 
   await author.goto(`${origin}/?open=notifications&tip=return_share`)
-  await author.getByText(post.text, { exact: true }).waitFor()
-  await author.getByRole('button', { name: 'Compartir perfil', exact: true }).waitFor()
+  const shareDialog = author.getByRole('dialog', { name: 'Compartir perfil', exact: true })
+  await shareDialog.waitFor()
+  assert.equal(await shareDialog.getByRole('textbox', { name: 'Enlace al perfil social' }).inputValue(), sharedUrl)
+  assert.equal(await author.getByText(post.text, { exact: true }).count(), 0)
+  await shareDialog.getByRole('button', { name: 'Compartir vínculo', exact: true }).click()
+  assert.deepEqual(await author.evaluate(() => window.qaShare), { title: 'Luna · PAZO', url: sharedUrl, gesture: true })
+  await shareDialog.getByRole('button', { name: 'Copiar enlace', exact: true }).click()
+  await shareDialog.getByText('Enlace copiado.', { exact: true }).waitFor()
   assert.ok(!author.url().includes('tip='))
-  console.log('PASS return-tip destination: a share notice opens the owned social profile')
+  await shareDialog.getByRole('button', { name: 'Cerrar', exact: true }).click()
+  await author.goto(`${origin}/#/pet/${pet}`)
+  await author.getByText(post.text, { exact: true }).waitFor()
+  assert.equal(await author.getByLabel('Identidad de la mascota').getByRole('button', { name: 'Compartir perfil', exact: true }).count(), 0)
+  await author.evaluate(() => navigator.serviceWorker.dispatchEvent(new MessageEvent('message', { data: { type: 'pazo-open-notifications', tip: 'return_share' } })))
+  await shareDialog.waitFor()
+  assert.ok(!author.url().includes('#/pet/'))
+  if (process.env.PAZO_SHARE_DIALOG_SCREENSHOT) await author.screenshot({ path: process.env.PAZO_SHARE_DIALOG_SCREENSHOT })
+  console.log('PASS sharing tip opens share and copy in PAZO; public profile keeps its original actions')
+
+  const firstPet = await pageFor({ id: noPetOwner })
+  await firstPet.goto(`${origin}/?open=notifications&tip=return_no_pet`)
+  await firstPet.getByRole('heading', { name: '¿Quién te acompaña?', exact: true }).waitFor()
+  await firstPet.waitForFunction(() => !location.search.includes('tip='))
+  await firstPet.getByPlaceholder('Ej: Luna, Bruno, Nube...').fill('Luna')
+  await firstPet.getByRole('button', { name: 'Continuar', exact: true }).click()
+  await firstPet.getByRole('button', { name: 'Crear perfil y entrar', exact: true }).waitFor()
+  await firstPet.evaluate(() => navigator.serviceWorker.dispatchEvent(new MessageEvent('message', { data: { type: 'pazo-open-notifications', tip: 'return_no_pet' } })))
+  await firstPet.getByRole('heading', { name: '¿Quién te acompaña?', exact: true }).waitFor()
+  assert.equal(await firstPet.getByPlaceholder('Ej: Luna, Bruno, Nube...').inputValue(), 'Luna')
+  console.log('PASS first-pet tip opens its form from a cold URL and from an already open PAZO tab')
 
   const campaign = await pageFor()
   await campaign.goto(origin)

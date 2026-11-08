@@ -103,6 +103,7 @@ import { NotificationsModal } from './components/modals/NotificationsModal'
 import {SupporterInvitationCoordinator} from './features/supporter/public/SupporterInvitationCoordinator'
 import { SightingDetailModal } from './components/modals/SightingDetailModal'
 import { getSharedPetId, rememberSharedPet, takeSharedPet } from './features/profile/sharedPetRoute'
+import { PetShareDialog } from './features/profile/PetShareDialog'
 const MetaConsentGate=lazy(()=>import('./features/marketing/MetaConsentGate'))
 
 const getPublicRescueRoute = () => {
@@ -260,6 +261,9 @@ function PazoMain() {
   }, [googleAuthFailure])
   const [isOnboardingActive, setIsOnboardingActive] = useState(true)
   const [initialOnboardingStep, setInitialOnboardingStep] = useState<'A01' | 'A02' | 'A03' | 'A04'>('A01')
+  const [firstPetRequest, setFirstPetRequest] = useState<{ ownerId: string; sequence: number } | null>(null)
+  const [shareRequest, setShareRequest] = useState<{ ownerId: string; petId: string } | null>(null)
+  const [pendingTip, setPendingTip] = useState<'return_no_pet' | 'return_share' | 'return_care' | 'return_home' | null>(null)
 
   const [isFeedLoading, setIsFeedLoading] = useState(true)
   const [isFeedLoadingMore, setIsFeedLoadingMore] = useState(false)
@@ -2001,6 +2005,16 @@ function PazoMain() {
       case 'pet_profile':
         setSelectedPublicProfileId(target.petId)
         break
+      case 'pet_share': {
+        const pet = pets.find((item) => item.id === target.petId)
+        setSelectedPublicProfileId(null)
+        if (pet && user) {
+          if (pet.id !== currentPet?.id) selectActivePet(pet)
+          setShareRequest({ ownerId: user.id, petId: pet.id })
+        }
+        setActiveTab('mascota')
+        break
+      }
       case 'pet_create':
         if (!pets.length) setIsAddPetOpen(true)
         else setActiveTab('mascota')
@@ -2087,39 +2101,80 @@ function PazoMain() {
     return () => { cancelled = true }
   }, [user?.id, user?.email_confirmed_at, isPasswordRecovery, isDemoUser, lang, accountRequests])
 
-  // The bell catches up when the person comes back or a push arrives while PAZO is open.
+  // Queue a warm push tap even while Auth or the pet list is still loading.
+  useEffect(() => {
+    const queue = (event: MessageEvent) => {
+      if (event.data?.type !== 'pazo-open-notifications') return
+      const tip = event.data.tip
+      if (tip === 'return_no_pet' || tip === 'return_share' || tip === 'return_care' || tip === 'return_home') setPendingTip(tip)
+    }
+    navigator.serviceWorker?.addEventListener('message', queue)
+    return () => navigator.serviceWorker?.removeEventListener('message', queue)
+  }, [])
+
+  useEffect(() => {
+    if (!user?.id || loading || isDemoUser || isPasswordRecovery || petBootstrap?.userId !== user.id || petBootstrap.status !== 'ready') return
+    const params = new URLSearchParams(window.location.search)
+    const fromUrl = params.get('open') === 'notifications' ? params.get('tip') : null
+    const tip = pendingTip ?? fromUrl
+    if (tip !== 'return_no_pet' && tip !== 'return_share' && tip !== 'return_care' && tip !== 'return_home') return
+    const url = new URL(window.location.href)
+    if (pendingTip) setPendingTip(null)
+    const leavingPublicView = Boolean(getSharedPetId(url.hash) || getPublicRescueRoute().token || isSupporterAccountHash(url.hash))
+    if (leavingPublicView) {
+      url.hash = ''
+      setSharedPetId(null)
+      setPublicRescueRoute({ token: null, fromPreview: false })
+      setSupporterAccountRoute(false)
+    }
+    if (fromUrl) {
+      url.searchParams.delete('open')
+      url.searchParams.delete('tip')
+    }
+    if (fromUrl || leavingPublicView) {
+      window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash)
+    }
+    if (tip === 'return_no_pet' && pets.length === 0) {
+      setAuthMode('onboarding')
+      setInitialOnboardingStep('A03')
+      setIsOnboardingActive(true)
+      setFirstPetRequest((previous) => ({ ownerId: user.id, sequence: (previous?.sequence ?? 0) + 1 }))
+      return
+    }
+    if (!ownPetsReady) return
+    const isCurrent = accountRequests.capture()
+    const fallback = () => {
+      if (!isCurrent()) return
+      if (tip === 'return_share' || tip === 'return_no_pet') setActiveTab('mascota')
+      else setIsNotificationsOpen(true)
+    }
+    void fetchNotifications(0, 1, tip).then(([notice]) => {
+      if (!isCurrent()) return
+      if (notice?.sourceType === tip) void openNotificationRef.current(notice)
+      else fallback()
+    }).catch(fallback)
+  }, [user?.id, loading, isDemoUser, isPasswordRecovery, petBootstrap, pendingTip, pets.length, ownPetsReady, accountRequests])
+
+  // The bell catches up when the person comes back or an ordinary push arrives.
   useEffect(() => {
     if (!user?.id || isOnboardingActive || isDemoUser || !ownPetsReady) return
     const openBell = () => {
       setIsNotificationsOpen(true)
       void refreshNotificationsRef.current()
     }
-    const open = (tip: unknown) => {
-      if (tip !== 'return_no_pet' && tip !== 'return_share' && tip !== 'return_care' && tip !== 'return_home') {
-        openBell()
-        return
-      }
-      const isCurrent = accountRequests.capture()
-      void fetchNotifications(0, 1, tip).then(([notice]) => {
-        if (!isCurrent()) return
-        if (notice && !notice.read) void openNotificationRef.current(notice)
-        else openBell()
-      }).catch(() => { if (isCurrent()) openBell() })
-    }
     const onVisible = () => {
       if (document.visibilityState === 'visible') void refreshNotificationsRef.current()
     }
     const onMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'pazo-open-notifications') open(event.data.tip)
+      if (event.data?.type === 'pazo-open-notifications' && !event.data.tip) openBell()
       else if (event.data?.type === 'pazo-push-received') void refreshNotificationsRef.current()
     }
     if (new URLSearchParams(window.location.search).get('open') === 'notifications') {
       const url = new URL(window.location.href)
-      const tip = url.searchParams.get('tip')
       url.searchParams.delete('open')
       url.searchParams.delete('tip')
       window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash)
-      open(tip)
+      openBell()
     }
     document.addEventListener('visibilitychange', onVisible)
     navigator.serviceWorker?.addEventListener('message', onMessage)
@@ -2127,7 +2182,7 @@ function PazoMain() {
       document.removeEventListener('visibilitychange', onVisible)
       navigator.serviceWorker?.removeEventListener('message', onMessage)
     }
-  }, [user?.id, isOnboardingActive, isDemoUser, ownPetsReady, accountRequests])
+  }, [user?.id, isOnboardingActive, isDemoUser, ownPetsReady])
 
   // Messaging is still in development for everyone: never display fictitious unread counts.
   const unreadMessages = 0
@@ -2294,6 +2349,8 @@ function PazoMain() {
   }
 
   const isAuthenticated = (!!user && !isOnboardingActive) || isDemoUser
+  const sharePet = shareRequest?.ownerId === user?.id && ownPetsReady && canUseAccount
+    ? pets.find((pet) => pet.id === shareRequest?.petId) : undefined
   const isCurrentOnboardingCompletion = accountRequests.capture()
   const canShowAppNotice = !selectedPublicProfileId&&!isSearchOpen&&!isCreateMenuOpen&&!isCreatePostOpen&&!isAddPetOpen&&!isPassportOpen&&!isCareOpen&&!isDocumentsOpen&&!isAlertOpen&&!isMessagesOpen&&!isNotificationsOpen&&!selectedSightingId
   const showFirstCare = canShowAppNotice && activeTab === 'mascota' && ownPetsReady && canUseAccount
@@ -2309,6 +2366,7 @@ function PazoMain() {
         <SupporterInvitationCoordinator lang={lang} safe={Boolean(user&&canUseAccount&&!isOnboardingActive&&petBootstrap?.status==='ready'&&!firstUseHint&&activeTab==='inicio'&&!isFeedLoading&&!feedError&&!pets.some(p=>p.isLost)&&!selectedPublicProfileId&&!isSearchOpen&&!isCreateMenuOpen&&!isCreatePostOpen&&!isAddPetOpen&&!isPassportOpen&&!isCareOpen&&!isDocumentsOpen&&!isAlertOpen&&!isMessagesOpen&&!isNotificationsOpen&&!selectedSightingId)}/>
 
         <AppUpdatePrompt lang={lang} busy={!canShowAppNotice} />
+        {sharePet && <PetShareDialog key={sharePet.id} pet={sharePet} lang={lang} onClose={() => setShareRequest(null)} />}
 
         {/* Pantalla exclusiva de perfil público global (flota sobre todo el contenedor) */}
         {selectedPublicProfileId && (
@@ -2368,6 +2426,7 @@ function PazoMain() {
             <OnboardingView
               isCompletionCurrent={isCurrentOnboardingCompletion}
               initialStep={initialOnboardingStep}
+              openFirstPetRequest={firstPetRequest?.ownerId === user?.id ? firstPetRequest?.sequence : undefined}
               lang={lang}
               onToggleLang={handleToggleLanguage}
               onSkipToLogin={() => {

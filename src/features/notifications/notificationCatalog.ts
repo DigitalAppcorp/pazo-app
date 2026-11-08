@@ -27,6 +27,7 @@ export type NotificationTarget =
   | { kind: 'sighting'; sightingId: string }
   | { kind: 'care'; careId: string }
   | { kind: 'pet_profile'; petId: string }
+  | { kind: 'pet_share'; petId: string }
   | { kind: 'pet_edit'; petId: string }
   | { kind: 'official_post'; postId: string }
   | { kind: 'admin_vigilante' }
@@ -242,8 +243,8 @@ export const NOTIFICATION_KINDS = {
         ? { title: name ? `Presenta a ${name}` : 'Comparte el perfil de tu mascota', subtitle: 'Tus amigos pueden conocer a tu mascota con su enlace de PAZO.' }
         : { title: name ? `Introduce ${name}` : 'Share your pet’s profile', subtitle: 'Friends can get to know your pet through their PAZO link.' }
     },
-    action: (_item, lang) => lang === 'es' ? 'Ver perfil' : 'View profile',
-    target: (item) => petProfile(item.petId ?? null),
+    action: (_item, lang) => lang === 'es' ? 'Compartir perfil' : 'Share profile',
+    target: (item) => item.petId ? { kind: 'pet_share', petId: item.petId } : null,
   },
   return_care: {
     template: 'open', icon: 'calendar', tone: 'care',

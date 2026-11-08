@@ -27,6 +27,7 @@ import type { LegalKind } from '../../features/legal/legalCopy'
 
 interface OnboardingViewProps {
   initialStep?: 'A01' | 'A02' | 'A03' | 'A04'
+  openFirstPetRequest?: number
   onComplete: (createdPet: Pet) => void
   onSkipToLogin: () => void
   onQuickDemo: () => void
@@ -37,6 +38,7 @@ interface OnboardingViewProps {
 
 export const OnboardingView = ({
   initialStep = 'A01',
+  openFirstPetRequest = 0,
   onComplete,
   onSkipToLogin,
   onQuickDemo,
@@ -57,6 +59,9 @@ export const OnboardingView = ({
       setStep(initialStep)
     }
   }, [initialStep])
+  useEffect(() => {
+    if (openFirstPetRequest) setStep('A03')
+  }, [openFirstPetRequest])
 
   // Datos del flujo de onboarding
   const [email, setEmail] = useState('')
