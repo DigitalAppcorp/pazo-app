@@ -18,7 +18,8 @@ permissions:
   contents: read
 jobs:
   google-browser:
-    runs-on: ubuntu-latest
+    # Playwright 1.56.1 does not ship Chromium for Ubuntu 26.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       PAZO_PLAYWRIGHT_MODULE: playwright
