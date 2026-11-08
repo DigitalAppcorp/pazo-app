@@ -6,7 +6,7 @@ Propuesta del 8 de noviembre de 2026. Complementa la [hoja principal](HOJA_DE_RU
 
 El [PR #213](https://github.com/DigitalAppcorp/pazo-app/pull/213) ya envía un único recordatorio con el enlace de Supabase Auth a las 24 horas si la cuenta sigue sin confirmar. El botón «Reenviar correo» continúa disponible. El plan reutiliza ese envío y su deduplicación. El texto puede acompañar a quien todavía tiene el registro pendiente: «Gracias por probar PAZO. Si quieres continuar, confirma tu correo desde este enlace».
 
-El [PR #217](https://github.com/DigitalAppcorp/pazo-app/pull/217) propone registrar el dispositivo al guardar la primera mascota y restaurarlo al volver a iniciar sesión. Para alcanzar a quien abandona antes, añadir una etapa que registre el dispositivo en cuanto la cuenta esté confirmada y en sesión, si el navegador ya permite avisos. Evaluar pedir el permiso nativo en un toque explícito anterior a guardar la mascota, una vez y solo donde sea compatible. Es una ampliación del momento definido en #217. Si la persona no hace ese toque, rechaza el permiso o carece de suscripción activa, verá una invitación discreta cuando regrese por su cuenta. En iPhone, Web Push requiere abrir PAZO desde su icono instalado. [WebKit](https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/)
+El [PR #217](https://github.com/DigitalAppcorp/pazo-app/pull/217) mueve la activación al registro de la cuenta. En **Crear cuenta** o **Continuar con Google** desde el registro, el navegador puede solicitar su permiso si todavía está pendiente. PAZO registra el dispositivo al obtener una sesión confirmada con permiso concedido, incluso si la persona sigue en **Tu mascota** y todavía no guardó un perfil. Si el dispositivo no admite push, la persona bloqueó el permiso o no hay suscripción activa, el aviso queda dentro de PAZO para su próxima visita. En iPhone, Web Push requiere abrir PAZO desde su icono instalado. [WebKit](https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/)
 
 Verificación. Una cuenta confirmada sin mascota se suscribe en un dispositivo que ya dio permiso. Una cuenta no confirmada usa el flujo de correo vigente. Bloquear avisos, desactivarlos en el teléfono o cerrar sesión impide nuevos envíos a ese dispositivo. Al volver a entrar se recupera la suscripción cuando el permiso sigue vigente.
 
@@ -61,7 +61,7 @@ Guardar solo la referencia interna de cuenta, el tipo de señal y la fecha neces
 
 ## Orden de trabajo y decisiones
 
-1. Cerrar el flujo de avisos y el correo ya existentes. Coordinar la activación temprana para cuentas sin mascota con el punto 1 y con la validación en teléfono.
+1. Cerrar el flujo de avisos y el correo ya existentes. Validar en el punto 1 que una cuenta confirmada puede quedar suscrita antes de registrar una mascota.
 2. Entregar primero la tarjeta y el enlace social. La invitación a compartir en un push depende de un destino público que ya funcione.
 3. Entregar juntos la tarjeta de instalación y el conteo agregado. Validar el aviso de privacidad y la ventana de datos antes de recolectar.
 4. Añadir los avisos por etapa en modo de prueba. Revisar los textos ES/EN, los plazos y la frecuencia con el PO antes de activar envíos. Probar primero el caso sin mascota y el de compartir.
