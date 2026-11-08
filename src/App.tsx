@@ -100,6 +100,7 @@ import { MessagesModal } from './components/modals/MessagesModal'
 import { NotificationsModal } from './components/modals/NotificationsModal'
 import {SupporterInvitationCoordinator} from './features/supporter/public/SupporterInvitationCoordinator'
 import { SightingDetailModal } from './components/modals/SightingDetailModal'
+import { getSharedPetId, rememberSharedPet, takeSharedPet } from './features/profile/sharedPetRoute'
 const MetaConsentGate=lazy(()=>import('./features/marketing/MetaConsentGate'))
 
 const getPublicRescueRoute = () => {
@@ -207,6 +208,7 @@ function PazoMain() {
     setLang(next)
   }
   const [publicRescueRoute, setPublicRescueRoute] = useState(getPublicRescueRoute)
+  const [sharedPetId, setSharedPetId] = useState(() => getSharedPetId(window.location.hash))
   const [isSupporterAccountRoute, setSupporterAccountRoute] = useState(() => {
     normalizeSupporterPaypalCallback(window.location,window.history)
     return isSupporterAccountHash(window.location.hash)
@@ -215,11 +217,16 @@ function PazoMain() {
   useEffect(() => {
     const syncPublicRoute = () => {
       setPublicRescueRoute(getPublicRescueRoute())
+      setSharedPetId(getSharedPetId(window.location.hash))
       setSupporterAccountRoute(isSupporterAccountHash(window.location.hash))
     }
 
     window.addEventListener('hashchange', syncPublicRoute)
-    return () => window.removeEventListener('hashchange', syncPublicRoute)
+    window.addEventListener('popstate', syncPublicRoute)
+    return () => {
+      window.removeEventListener('hashchange', syncPublicRoute)
+      window.removeEventListener('popstate', syncPublicRoute)
+    }
   }, [])
 
   const [showSplash, setShowSplash] = useState(true)
@@ -1028,6 +1035,11 @@ function PazoMain() {
 
   // Until this account's pets load, currentPet is still the Demo pet; asking with it is rejected by the server.
   const ownPetsReady = petBootstrap?.userId === user?.id && petBootstrap?.status === 'ready' && !isOnboardingActive
+  useEffect(() => {
+    if (!user || !ownPetsReady || sharedPetId || publicRescueRoute.token || isPasswordRecovery || isSupporterAccountRoute) return
+    const petId = takeSharedPet()
+    if (petId) setSelectedPublicProfileId(petId)
+  }, [user, ownPetsReady, sharedPetId, publicRescueRoute.token, isPasswordRecovery, isSupporterAccountRoute])
   const officialFeedPetId = !isDemoUser && canUseAccount && ownPetsReady && activeTab === 'inicio' ? currentPet?.id : undefined
   useEffect(() => {
     if (!officialFeedPetId) return
@@ -2121,16 +2133,16 @@ function PazoMain() {
       if(isSearchOpen)observeAnonymous('demo_explore')
       const screen=isSearchOpen?'explore':activeTab==='inicio'?'home':activeTab==='mascota'?'pet':activeTab==='comunidades'?'communities':activeTab==='mapa'?'places':null
       if(screen)trackDemoScreen(screen)
-    }else if(!user){
+    }else if(!user && !sharedPetId){
       observeAnonymous(authMode==='login'?'login_open':'welcome')
       observeArrivalSource()
     }
-  },[isDemoUser,activeTab,isSearchOpen,user,authMode])
+  },[isDemoUser,activeTab,isSearchOpen,user,authMode,sharedPetId])
 
   useEffect(()=>{if(selectedPublicProfileId)observeTask('profile_open','exposure')},[selectedPublicProfileId])
 
   useBehaviorObservation(canUseAccount ? user?.id : undefined,
-    publicRescueRoute.token || selectedPublicProfileId || isDocumentsOpen || isAlertOpen || isMessagesOpen || isNotificationsOpen || isCreatePostOpen ? null
+    publicRescueRoute.token || sharedPetId || selectedPublicProfileId || isDocumentsOpen || isAlertOpen || isMessagesOpen || isNotificationsOpen || isCreatePostOpen ? null
       : petBootstrap?.status !== 'ready' ? 'first_pet'
       : isPassportOpen ? 'qr' : isCareOpen ? 'agenda' : isSearchOpen ? 'explore'
       : activeTab === 'inicio' ? 'home' : activeTab === 'mascota' ? 'pet'
@@ -2148,7 +2160,7 @@ function PazoMain() {
     )
   }
 
-  if (showSplash) {
+  if (showSplash && !sharedPetId) {
     return <PazoSplash buildVersion={pazoBuildVersion} lang={lang} />
   }
 
@@ -2173,6 +2185,32 @@ function PazoMain() {
         onUpdatePassword={changePassword}
         onExit={handleExitPasswordRecovery}
       />
+    )
+  }
+
+  if (sharedPetId) {
+    const leaveProfile = () => {
+      window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search)
+      setSharedPetId(null)
+    }
+    return (
+      <div className="relative h-dvh bg-[#F8F5EC]">
+        <PublicProfileView
+          key={sharedPetId}
+          targetPetId={sharedPetId}
+          canReport={canUseAccount && ownPetsReady}
+          currentPetId={canUseAccount && ownPetsReady ? currentPet?.id : undefined}
+          ownedPetIds={ownPetsReady ? pets.map((pet) => pet.id) : []}
+          onClose={leaveProfile}
+          onDiscoverPazo={!user ? () => {
+            rememberSharedPet(sharedPetId)
+            setIsDemoUser(false)
+            setAuthMode('onboarding')
+            leaveProfile()
+          } : undefined}
+          lang={lang}
+        />
+      </div>
     )
   }
 
@@ -2239,6 +2277,7 @@ function PazoMain() {
         {/* Pantalla exclusiva de perfil público global (flota sobre todo el contenedor) */}
         {selectedPublicProfileId && (
           <PublicProfileView
+            key={selectedPublicProfileId}
             targetPetId={selectedPublicProfileId}
             canReport={Boolean(user?.id) && !isDemoUser}
             currentPetId={currentPet?.id}
@@ -2637,6 +2676,7 @@ function PazoMain() {
                       canModerate={Boolean(user?.id) && !isDemoUser}
                       availablePets={pets}
                       onSelectPet={selectActivePet}
+                      onOpenSocialProfile={canUseAccount ? () => setSelectedPublicProfileId(currentPet.id) : undefined}
                       onPetUpdated={(updatedPet) => {
                         setCurrentPet(updatedPet)
                         setPets((prevPets) =>

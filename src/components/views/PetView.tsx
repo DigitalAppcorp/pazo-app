@@ -18,6 +18,7 @@ import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { DeletionRequestDialog } from '../../features/account/DeletionRequestDialog'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
 import { PazoInstallControl } from '../../features/pwa/components/PazoInstallControl'
+import { sharedPetUrl } from '../../features/profile/sharedPetRoute'
 import { SupportRequestDialog } from '../../features/support/components/SupportRequestDialog'
 import type { LegalKind } from '../../features/legal/legalCopy'
 import type { Pet, CareItem, Post } from '../../types/pazo'
@@ -41,6 +42,7 @@ interface PetViewProps {
   onRequireAccount: () => void
   availablePets: Pet[]
   onSelectPet: (pet: Pet) => void
+  onOpenSocialProfile?: () => void
   onPetUpdated: (pet: Pet) => void
   onAddPet: () => void
   careItems: CareItem[]
@@ -65,6 +67,7 @@ export const PetView = ({
   onRequireAccount,
   availablePets,
   onSelectPet,
+  onOpenSocialProfile,
   onPetUpdated,
   onAddPet,
   careItems,
@@ -80,6 +83,34 @@ export const PetView = ({
 }: PetViewProps) => {
   const [showPetPicker, setShowPetPicker] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [shareFeedback, setShareFeedback] = useState<{ petId: string; copied: boolean; url: string } | null>(null)
+  const sharing = useRef(false)
+  const sharePet = async () => {
+    if (!onOpenSocialProfile || sharing.current) return
+    const petId = currentPet.id
+    const url = sharedPetUrl(window.location.origin, petId)
+    const data = { title: `${currentPet.name} · PAZO`, url }
+    sharing.current = true
+    setShareFeedback(null)
+    try {
+      if (typeof navigator.share === 'function') {
+        try {
+          await navigator.share(data)
+          return
+        } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') return
+        }
+      }
+      try {
+        await navigator.clipboard.writeText(url)
+        setShareFeedback({ petId, copied: true, url })
+      } catch {
+        setShareFeedback({ petId, copied: false, url })
+      }
+    } finally {
+      sharing.current = false
+    }
+  }
   const [isSaving, setIsSaving] = useState(false)
   const [showSupporterAccount, setShowSupporterAccount] = useState(false)
   const [dismissedInvitationPreview, setDismissedInvitationPreview] = useState(false)
@@ -483,15 +514,6 @@ export const PetView = ({
       )}
 
       <div className="p-5 pazo-glass-card rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] overflow-hidden relative">
-        {!isEditing && (
-          <button
-            onClick={handleEditClick}
-            className="absolute top-4 right-4 text-[13px] font-bold text-[#204E4A] bg-[#FAF8F5] hover:bg-[#E1E53F] px-3 py-1.5 rounded-full transition-colors cursor-pointer"
-          >
-            {lang === 'es' ? 'Editar' : 'Edit'}
-          </button>
-        )}
-
         <div className="flex gap-4 items-start">
           <div className="relative shrink-0 group">
             <div className="w-20 h-20 rounded-[1.8rem] overflow-hidden shadow-xs relative bg-[#FAF8F5]">
@@ -655,7 +677,7 @@ export const PetView = ({
               </div>
             ) : (
               <>
-                <div className="flex flex-wrap items-center gap-1.5 pr-16">
+                <div className="flex flex-wrap items-center gap-1.5">
                   <h3 className="text-lg font-black text-[#204E4A] truncate">{currentPet.name}</h3>
                   <span className="text-[13px] font-bold px-2 py-0.5 bg-[#E1E53F] text-[#204E4A] rounded-full shrink-0 shadow-xs">
                     {petSpeciesLabel(currentPet.species,lang)}
@@ -682,6 +704,40 @@ export const PetView = ({
             )}
           </div>
         </div>
+        {!isEditing && (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+            {onOpenSocialProfile ? (
+              <button type="button" onClick={onOpenSocialProfile}
+                aria-label={lang === 'es' ? `Ver perfil social de ${currentPet.name}` : `View social profile of ${currentPet.name}`}
+                className="min-h-11 rounded-full px-2 text-left text-[13px] font-bold text-[#204E4A] underline decoration-[#5C7470] underline-offset-4 after:absolute after:inset-0 after:content-[''] hover:bg-white/70 focus-visible:bg-[#E1E53F] focus-visible:outline-none cursor-pointer">
+                {lang === 'es' ? 'Ver perfil social' : 'View social profile'}
+              </button>
+            ) : <span />}
+            <div className="pointer-events-none relative z-10 flex flex-wrap items-center gap-2 [&>button]:pointer-events-auto">
+              <button type="button" onClick={handleEditClick}
+                className="min-h-11 rounded-full bg-[#FAF8F5] px-3 text-[13px] font-bold text-[#204E4A] hover:bg-white focus-visible:bg-[#E1E53F] focus-visible:outline-none cursor-pointer">
+                {lang === 'es' ? 'Editar' : 'Edit'}
+              </button>
+              {onOpenSocialProfile && (
+                <button type="button" onClick={() => { void sharePet() }}
+                  className="min-h-11 rounded-full bg-[#204E4A] px-3 text-[13px] font-bold text-white hover:bg-[#315B55] focus-visible:bg-[#E1E53F] focus-visible:text-[#204E4A] focus-visible:outline-none cursor-pointer">
+                  {lang === 'es' ? 'Compartir perfil' : 'Share profile'}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+        {!isEditing && shareFeedback?.petId === currentPet.id && (
+          <div className="relative z-10 mt-2 space-y-1 px-2 text-[13px] font-medium text-[#315B55]">
+            <p role="status">{shareFeedback.copied
+              ? (lang === 'es' ? 'Enlace copiado.' : 'Link copied.')
+              : (lang === 'es' ? 'Selecciona y copia el enlace.' : 'Select and copy the link.')}</p>
+            {!shareFeedback.copied && <input readOnly value={shareFeedback.url}
+              aria-label={lang === 'es' ? 'Enlace al perfil social' : 'Social profile link'}
+              onFocus={(event) => event.currentTarget.select()}
+              className="min-h-11 w-full rounded-xl bg-white px-3 focus:bg-[#F5F4D0] focus:outline-none" />}
+          </div>
+        )}
       </div>
 
       {!isEditing && (

@@ -1,3 +1,7 @@
+## Perfil social compartible — candidato (8-nov-2026)
+
+El enlace contiene el UUID público de la mascota. Reutiliza la lectura anónima existente de `pets`, `posts` y el conteo de `follows`, con RLS de mantenimiento y moderación. Solo solicita identidad social, biografía, edad, raza, género, indicador de extravío y publicaciones visibles (texto, foto, total de me gusta); no solicita propietario, zona, comentarios, cuidados, documentos ni datos del pasaporte QR. La vista previa del enlace no contiene datos de mascotas. Si un visitante elige «Conocer PAZO», el destino se guarda en `sessionStorage` hasta volver al perfil o cerrar la pestaña. Sin migración ni nuevas métricas, proveedores o envíos. Actualización ES/EN de «Cuenta y contenido» para aprobación de publicación.
+
 ## Vigilante — aviso de privacidad (3-nov-2026)
 
 Texto aprobado por el PO el 3-nov-2026 en `src/features/legal/legalCopy.ts`: secciones «Salud, comida y código postal» y «Alertas de salud del Vigilante» (ES/EN), y «alertas de salud» en «Avisos en tu teléfono». Sin revisión jurídica. `legalCopy.test.mjs` contrasta el texto con las migraciones y el worker (lista de condiciones, código postal, 8 a. m., tope semanal, 30/7 días, sin IA, fuentes sin datos de usuarios). Requisito para activar el Vigilante.
