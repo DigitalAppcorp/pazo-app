@@ -1,6 +1,6 @@
 # Subhoja de regreso, perfil compartido e instalación de PAZO
 
-Propuesta del 8 de noviembre de 2026. Complementa la [hoja principal](HOJA_DE_RUTA_REATRACCION_20261106.md). Los plazos, textos y límites de envío son propuestas para revisión. Cada bloque tendrá su verificación y la autorización de publicación que corresponda.
+Propuesta del 8 de noviembre de 2026. Complementa la [hoja principal](HOJA_DE_RUTA_REATRACCION_20261106.md). Los plazos, textos y límites de envío son propuestas para revisión. Cada bloque tendrá su propia verificación. El PO decidió publicar los cambios pendientes juntos, cuando estén completas la hoja madre y todas las subrutas.
 
 ## 1. Reutilizar el correo de confirmación y preparar la entrega de push
 
@@ -12,7 +12,7 @@ Verificación. Una cuenta confirmada sin mascota se suscribe en un dispositivo q
 
 ## 2. Hacer que el perfil social se pueda abrir y compartir
 
-**Candidato [#218](https://github.com/DigitalAppcorp/pazo-app/pull/218), `2550aad2`.** Chrome con datos ficticios comprobó el acceso desde la tarjeta y con teclado, la edición independiente, compartir/copiar, apertura y recarga sin sesión, regreso al perfil después del acceso en la misma pestaña y ausencia de invitación al entrar con cuenta. Se verificó la consulta de solo lectura con el rol anónimo. La vista previa externa es genérica de PAZO. No hay migración ni envíos. CI 14/14 y verificación visual adicional en Chrome a 320 × 568 aprobadas. Pendiente GO del PO para publicar también la aclaración de privacidad ES/EN.
+**Candidato [#218](https://github.com/DigitalAppcorp/pazo-app/pull/218), `2550aad2`.** Chrome con datos ficticios comprobó el acceso desde la tarjeta y con teclado, la edición independiente, compartir/copiar, apertura y recarga sin sesión, regreso al perfil después del acceso en la misma pestaña y ausencia de invitación al entrar con cuenta. Se verificó la consulta de solo lectura con el rol anónimo. La vista previa externa es genérica de PAZO. No hay migración ni envíos. CI 14/14 y verificación visual adicional en Chrome a 320 × 568 aprobadas. Se conserva en borrador para la publicación conjunta, incluida su aclaración de privacidad ES/EN.
 
 - En **Mi mascota**, tocar la foto, el nombre o el espacio principal de la tarjeta abre la misma vista social que ve un visitante. **Editar** y **Compartir perfil** tienen acciones propias y funcionan con teclado y lector de pantalla. El área que abre el perfil se implementa sin anidar botones.
 - Ubicar **Compartir perfil** junto a **Editar**. Abrir el menú de compartir del dispositivo cuando esté disponible y ofrecer **Copiar enlace** como alternativa. Distinguir abrir el menú, copiar el enlace y completar el envío según lo que la plataforma permita observar.
