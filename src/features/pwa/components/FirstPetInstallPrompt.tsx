@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { PazoStateIllustration } from '../../illustrations/PazoStateIllustration'
-import { NoticeDialog } from '../../notices/AppNotice'
+import { noticeSurface } from '../../notices/AppNotice'
 import { readPazoInstallState, subscribePazoInstall, takePazoInstallPrompt } from '../installPromptBridge'
 
 const dismissedKey = 'pazo_first_pet_install_dismissed'
@@ -30,6 +30,7 @@ export function FirstPetInstallPrompt({ lang, onDismiss }: { lang: 'es' | 'en'; 
   const [dismissed] = useState(wasDismissed)
   const [showSteps, setShowSteps] = useState(false)
   const [opening, setOpening] = useState(false)
+  const primary = useRef<HTMLButtonElement>(null)
   const inFlight = useRef(false)
   const mounted = useRef(false)
 
@@ -43,11 +44,16 @@ export function FirstPetInstallPrompt({ lang, onDismiss }: { lang: 'es' | 'en'; 
     return () => { mounted.current = false; stop(); media?.removeEventListener?.('change', refresh) }
   }, [])
 
+  useEffect(() => {
+    if (!state.installed && !dismissed) primary.current?.focus({ preventScroll: true })
+  }, [state.installed, dismissed])
+
   if (state.installed || dismissed) return null
 
   const dismiss = () => {
     try { window.localStorage.setItem(dismissedKey, '1') } catch { /* local storage unavailable */ }
     onDismiss()
+    document.querySelector<HTMLButtonElement>('nav[data-pazo-floating-nav] button[aria-current="page"]')?.focus({ preventScroll: true })
   }
 
   const install = async () => {
@@ -72,8 +78,9 @@ export function FirstPetInstallPrompt({ lang, onDismiss }: { lang: 'es' | 'en'; 
   }
 
   return (
-    <NoticeDialog kind="first-install" label={es ? 'Instalar PAZO' : 'Install PAZO'}
-      onDismiss={() => { if (!inFlight.current) dismiss() }}>
+    <section aria-label={es ? 'Instalar PAZO' : 'Install PAZO'} data-pazo-app-notice="first-install"
+      onKeyDown={(event) => { if (event.key === 'Escape' && !inFlight.current) { event.stopPropagation(); dismiss() } }}
+      className={noticeSurface}>
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <h2 className="text-xl font-black leading-tight">{es ? 'Ten PAZO a mano' : 'Keep PAZO handy'}</h2>
@@ -85,7 +92,7 @@ export function FirstPetInstallPrompt({ lang, onDismiss }: { lang: 'es' | 'en'; 
       </div>
       {showSteps && <p role="status" className="mt-3 rounded-xl bg-[#F3F6EE] p-3 text-[13px] leading-relaxed text-[#315B55]">{manualSteps(es)}</p>}
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <button type="button" data-notice-primary disabled={opening} onClick={() => { void install() }}
+        <button type="button" ref={primary} disabled={opening} onClick={() => { void install() }}
           aria-expanded={state.pending || opening ? undefined : showSteps}
           className="min-h-12 rounded-2xl bg-[#204E4A] px-3 py-2 text-[13px] font-extrabold text-white hover:bg-[#183D3A] focus-visible:bg-[#E1E53F] focus-visible:text-[#204E4A] focus-visible:outline-none disabled:opacity-60">
           {opening ? (es ? 'Abriendo…' : 'Opening…') : state.pending ? (es ? 'Instalar PAZO' : 'Install PAZO') : (es ? 'Cómo instalar' : 'How to install')}
@@ -95,6 +102,6 @@ export function FirstPetInstallPrompt({ lang, onDismiss }: { lang: 'es' | 'en'; 
           {es ? 'Ahora no' : 'Not now'}
         </button>
       </div>
-    </NoticeDialog>
+    </section>
   )
 }
