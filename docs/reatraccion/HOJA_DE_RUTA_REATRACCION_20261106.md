@@ -3,6 +3,8 @@
 Fecha: 6 de noviembre de 2026. Autoriza: el PO (dueño de PAZO), que pidió resolverla **punto por punto**.
 Quién programa: Claude, por autorización del PO del 3-nov-2026 (registrada en `continuidad/ESTADO.md`). Este documento es la referencia para cualquier agente que retome el trabajo.
 
+[Subhoja de regreso, perfil compartido e instalación de PAZO](SUBHOJA_REGRESO_PERFIL_PWA.md). Incluye avisos según el avance, el enlace al perfil social, la tarjeta para instalar PAZO y la medición en Administración.
+
 ## Cómo retomar
 
 1. Leer esta hoja completa y el registro local `continuidad/ESTADO.md` (fuera del repositorio, en la computadora del PO).
