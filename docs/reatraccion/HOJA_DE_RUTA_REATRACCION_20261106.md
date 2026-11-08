@@ -3,6 +3,8 @@
 Fecha: 6 de noviembre de 2026. Autoriza: el PO (dueño de PAZO), que pidió resolverla **punto por punto**.
 Quién programa: Claude, por autorización del PO del 3-nov-2026 (registrada en `continuidad/ESTADO.md`). Este documento es la referencia para cualquier agente que retome el trabajo.
 
+**Estado al 8-nov-2026: la hoja y la subhoja están publicadas.** La entrega conjunta salió en #219 con el GO del PO («Sí, publícalo»). Lo que queda está en [Cierre de la hoja](#cierre-de-la-hoja): dos ajustes que esperan GO y las pruebas en teléfono físico.
+
 **Decisión vigente del PO (8-nov-2026): publicación conjunta.** Los puntos restantes y todas las subrutas se preparan, prueban y revisan por separado. La publicación pendiente se hace cuando el conjunto esté completo; no se publica ni se activa cada bloque por su cuenta. Los puntos ya publicados conservan su estado.
 
 [Subhoja de regreso, perfil compartido e instalación de PAZO](SUBHOJA_REGRESO_PERFIL_PWA.md). Incluye avisos según el avance, el enlace al perfil social, la tarjeta para instalar PAZO y la medición en Administración.
@@ -84,7 +86,7 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ## Punto 4 — Ver en Administración quién llegó por anuncio
 
-**Estado: IMPLEMENTADO EN CANDIDATO [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** Usuarios muestra «Anuncio · Meta · campaña» o «Sin anuncio registrado». Se conservó el plazo vigente de 14 días. Verificados el permiso de Administración y el ocultamiento tras vencer.
+**Estado: PUBLICADO el 8-nov-2026 en [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `main` `9429560b`, Vercel `dpl_9M9fFRMkqbcGV56fZtPbaV3ZYvES`.** Usuarios muestra «Anuncio · Meta · campaña» o «Sin anuncio registrado». Se conservó el plazo vigente de 14 días. Verificados el permiso de Administración y el ocultamiento tras vencer.
 
 - **Hoy:** Administración → Usuarios muestra correo, antigüedad, mascotas y días activos, pero no el origen. El origen por cuenta existe en `marketing_private.acquisition` (`source`, `medium`, `campaign`, `creative`), solo para cuentas con registro confirmado.
 - **Propuesta:** una etiqueta por cuenta: «Anuncio · Meta · [campaña]» o «Sin anuncio registrado». **No usar la palabra «orgánico»**: sin dato puede ser alguien que vino por un anuncio y se registró después o desde otro teléfono.
@@ -93,7 +95,7 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ## Punto 4b — Que el origen del anuncio sobreviva al cambio de navegador
 
-**Estado: IMPLEMENTADO EN CANDIDATO [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** Un perfil de Chrome registró una cuenta desde el enlace de campaña y otro abrió el enlace de confirmación sin compartir almacenamiento. Auth se simuló y PostgreSQL ejecutó los triggers reales. Administración devolvió la campaña una sola vez, el código salió de los metadatos y la prueba de limpieza retiró los vencidos. Captura apagada y aviso de privacidad preparado para la entrega conjunta. Agregado el 6-nov-2026, a partir de una pregunta del PO.
+**Estado: PUBLICADO el 8-nov-2026 en [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `main` `9429560b`, Vercel `dpl_9M9fFRMkqbcGV56fZtPbaV3ZYvES`; puerta encendida a las 15:16 UTC.** Un perfil de Chrome registró una cuenta desde el enlace de campaña y otro abrió el enlace de confirmación sin compartir almacenamiento. Auth se simuló y PostgreSQL ejecutó los triggers reales. Administración devolvió la campaña una sola vez, el código salió de los metadatos y la prueba de limpieza retiró los vencidos. Captura apagada y aviso de privacidad preparado para la entrega conjunta. Agregado el 6-nov-2026, a partir de una pregunta del PO.
 
 - **Hipótesis del PO, descartada:** que «sin dato» sea gente que rechaza el seguimiento de Meta. El registro propio del origen **no depende** de esa casilla: `marketingRuntime.ts` crea el registrador con `enabled: true` siempre. La casilla de Meta solo decide si se le comunica el registro a Meta.
 - **Causas reales:**
@@ -105,12 +107,36 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ## Punto 5 — Ver la información de la mascota desde Administración
 
-**Estado: IMPLEMENTADO EN CANDIDATO [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** Chrome verificó que se puede abrir con teclado el mismo perfil social público desde Mascotas. Abre en otra pestaña y conserva el contexto de Administración.
+**Estado: PUBLICADO el 8-nov-2026 en [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `main` `9429560b`, Vercel `dpl_9M9fFRMkqbcGV56fZtPbaV3ZYvES`.** En producción, el perfil público abrió sin sesión y sin datos privados. Chrome verificó que se puede abrir con teclado el mismo perfil social público desde Mascotas. Abre en otra pestaña y conserva el contexto de Administración.
 
 - **Hoy:** Administración → Mascotas muestra el nombre, la especie y el correo del dueño, sin detalle.
 - **Propuesta:** tocar una mascota abre su **perfil público** (foto, raza, edad, descripción y publicaciones), lo mismo que ve cualquier usuario.
 - **Límite:** los datos privados (salud, comida, código postal, vacunas, documentos) **no**. El aviso publicado el 3-nov dice que «Administración no ve los datos de cada persona». **Decisión del PO:** si los necesita, primero hay que cambiar el aviso y avisar a los usuarios.
 - **Listo cuando:** desde Mascotas se abre el perfil público, sin ningún dato privado; la prueba lo fija.
+
+---
+
+## Cierre de la hoja
+
+Publicado el 8-nov-2026 con el GO del PO. Merge squash de #219 en `main` `9429560b`, con el árbol idéntico al head aprobado `f642ef3b`. Las tres migraciones se instalaron una vez con `apply_migration`: `20261108130000`→`20261108150852`, `20261108131000`→`20261108150917` y `20261108132000`→`20261108151010`. `pazo-push-worker` v6. Vercel `dpl_9M9fFRMkqbcGV56fZtPbaV3ZYvES` con `VITE_PAZO_PENDING_CAMPAIGN_ENABLED` y `VITE_PAZO_RETURN_TIPS_ENABLED`. Puertas de instalación, continuidad de campaña y consejos encendidas a las 15:16 UTC, con `phase_two=false`. Para apagarlas, poner cada puerta en `false`. Rollback de la app: el despliegue anterior, `pazo-bvbecn6oc`.
+
+Observado en producción: el HTML de `/mascota/{id}` trae nombre, foto, marca y URL canónica, sin datos privados. Un perfil inexistente devuelve 404. El perfil abre sin sesión y muestra la invitación. `/privacy` incluye las tres secciones nuevas. Una cuenta que no es de Administración recibe 42501 en las dos lecturas nuevas. El worker responde 200 cada minuto. La primera pasada de consejos, a las 15:30 UTC, dejó dos consejos dentro de PAZO y ningún push, porque ningún teléfono había registrado aún su zona horaria.
+
+Plazos de los consejos aprobados por el PO el 8-nov-2026: 48 h, 3 días y 7 días; uno cada 7 días; un teléfono; de 9 a. m. a 8 p. m. hora local. La fase de 14 días sigue apagada.
+
+**Esperan GO del PO (preparados, no aplicados):**
+
+1. **Fecha de vigencia del aviso.** `VITE_PAZO_PRIVACY_EFFECTIVE_DATE` sigue en `2026-11-01`, aunque el texto cambió el 8-nov. Propuesta: `2026-11-08` y una publicación más de la app con el mismo `main`. Esa publicación debe pasar `--build-env VITE_APP_RELEASE=<sha>` para que `version.json` muestre el commit. El despliegue del 8-nov se hizo por CLI y quedó con el sello `bmw7z417a`.
+2. **Correo de confirmación en español e inglés.** [Plantilla propuesta](PLANTILLA_CONFIRMACION_CORREO.html) para Supabase Auth → Emails → Confirm sign up. Asunto: «Confirma tu correo en PAZO · Confirm your email». La plantilla aplica al correo de registro y al recordatorio de 24 h. Hoy se envía la predeterminada en inglés.
+
+**Observaciones físicas pendientes** (las hace el PO; no se dan por buenas sin verlas):
+
+- Recibir un consejo de regreso en un teléfono y abrir su destino. Antes, la cuenta debe abrir la versión nueva para registrar su zona horaria.
+- iPhone: instalar, abrir desde el icono y recibir avisos.
+- El aviso de un cuidado en su fecha (punto 3) y la activación desde la oferta tras la primera mascota (punto 1).
+- La vista previa del enlace en el depurador de Facebook o WhatsApp.
+
+Revisar después de siete días: `pazo_admin_return_tip_summary` (consejos dentro de PAZO, aceptados por el proveedor, abiertos y con avance en 7 días) y si aumentan las desactivaciones. Con eso se decide la fase de 14 días.
 
 ---
 
@@ -130,4 +156,5 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 | 2026-11-08 | 1 | #217 publicado. Activación durante el alta de cuenta y recuperación al entrar. Pendiente prueba física. |
 | 2026-11-08 | Subhoja 2 | Candidato [#218](https://github.com/DigitalAppcorp/pazo-app/pull/218): perfil social compartible probado en Chrome. Sin cambios alojados. |
 | 2026-11-08 | 4, 4b, 5 | [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219) integra los puntos pendientes. Verificación local con Chrome y PostgreSQL. Revisar CI y prueba física antes de publicar el paquete. |
+| 2026-11-08 | 4, 4b, 5 y subhoja | PUBLICADO: #219 → `main` `9429560b`, tres migraciones, worker v6, Vercel `dpl_9M9fFRMkqbcGV56fZtPbaV3ZYvES` y puertas encendidas a las 15:16 UTC. Ver «Cierre de la hoja». |
 | 2026-11-08 | 4, 4b, 5 y subhoja | #219 `417e3a93` con 15/15 workflows. El PO aprobó la tarjeta y confirmó ambos destinos de avisos y la instalación desde el teléfono. La cuenta instalada contó una vez tras dos aperturas. Se comprobó continuidad de campaña entre dos perfiles Chrome contra PostgreSQL aislado. Pendiente GO explícito para publicar el paquete y activar sus tres puertas. |

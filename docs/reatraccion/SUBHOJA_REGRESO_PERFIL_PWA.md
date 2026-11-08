@@ -12,7 +12,7 @@ Verificación. Una cuenta confirmada sin mascota se suscribe en un dispositivo q
 
 ## 2. Hacer que el perfil social se pueda abrir y compartir
 
-**Candidato integrado [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `417e3a93`.** Tocar la tarjeta de **Mi mascota** abre el perfil público. **Editar** y el icono de compartir están juntos y funcionan por separado. El enlace `/mascota/{id}` entrega a los rastreadores la foto pública, el nombre, la descripción y la marca PAZO mediante Open Graph en el HTML. Chrome verificó el HTML, el destino, los enlaces anteriores y que un perfil no disponible no genere tarjeta. Revisar la presentación real en las redes tras publicar.
+**PUBLICADO el 8-nov-2026 en [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `main` `9429560b`, Vercel `dpl_9M9fFRMkqbcGV56fZtPbaV3ZYvES`.** Producción sirvió el HTML con foto, nombre y marca sin datos privados, y 404 para un perfil inexistente. Antes, como candidato `417e3a93`: Tocar la tarjeta de **Mi mascota** abre el perfil público. **Editar** y el icono de compartir están juntos y funcionan por separado. El enlace `/mascota/{id}` entrega a los rastreadores la foto pública, el nombre, la descripción y la marca PAZO mediante Open Graph en el HTML. Chrome verificó el HTML, el destino, los enlaces anteriores y que un perfil no disponible no genere tarjeta. Revisar la presentación real en las redes tras publicar.
 
 - En **Mi mascota**, tocar la foto, el nombre o el espacio principal de la tarjeta abre la misma vista social que ve un visitante. **Editar** y el icono de compartir tienen acciones propias y funcionan con teclado y lector de pantalla. El área que abre el perfil se implementa sin anidar botones.
 - Ubicar el icono de compartir de tres nodos junto a **Editar**. Abrir el menú de compartir del dispositivo cuando esté disponible y ofrecer **Copiar enlace** como alternativa. Distinguir abrir el menú, copiar el enlace y completar el envío según lo que la plataforma permita observar.
@@ -23,7 +23,7 @@ Verificación. Abrir desde la tarjeta, compartir y abrir el enlace en un navegad
 
 ## 3. Ofrecer instalar PAZO tras la primera mascota
 
-**Candidato [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `ddb25a07`.** Aviso probado en seis flujos Chrome/PG17 aislados. Verificados el orden con bienvenida/cuidado, aviso nativo simulado, Safari/in-app, «Ahora no» y omisión en modo instalado. El PO instaló la versión de prueba en Chrome desde el teléfono y la abrió dos veces desde el icono. La comprobación en iPhone sigue siendo simulada.
+**PUBLICADO el 8-nov-2026 en [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `main` `9429560b`, Vercel `dpl_9M9fFRMkqbcGV56fZtPbaV3ZYvES`.** Antes, como candidato `ddb25a07`: Aviso probado en seis flujos Chrome/PG17 aislados. Verificados el orden con bienvenida/cuidado, aviso nativo simulado, Safari/in-app, «Ahora no» y omisión en modo instalado. El PO instaló la versión de prueba en Chrome desde el teléfono y la abrió dos veces desde el icono. La comprobación en iPhone sigue siendo simulada.
 
 Mostrar una tarjeta del mismo estilo que **Todo listo** y **Primer cuidado**. Presentarla cuando termine el aviso de bienvenida y después de que la persona complete u omita la sugerencia de cuidado. Mostrar una sola tarjeta a la vez. Si está usando PAZO instalado o ya desestimó esta oferta en el dispositivo, omitirla. Conservar la opción de instalar desde los ajustes.
 
@@ -38,7 +38,7 @@ Verificación. Primera mascota en Chrome móvil y iPhone. La instalación, la sa
 
 ## 4. Enviar avisos según el punto donde se quedó la persona
 
-**Candidato integrado [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `7b9de9ed`.** PostgreSQL aislado verificó elegibilidad, horarios, deduplicación y descarte de avisos que ya no aplican. La fase de 14 días sigue apagada. Después de la primera prueba en teléfono, se corrigieron los dos destinos: Chrome verificó el panel de compartir y el formulario de primera mascota al abrir PAZO y con PAZO ya abierto. CI del candidato corregido: 15/15, incluida la repetición en Chrome. El dueño confirmó que los dos avisos abrieron el destino correcto en su teléfono.
+**PUBLICADO el 8-nov-2026 en [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `main` `9429560b`, Vercel `dpl_9M9fFRMkqbcGV56fZtPbaV3ZYvES`; puerta encendida a las 15:16 UTC.** Plazos aprobados por el PO el 8-nov-2026. Fase de 14 días apagada. La primera pasada, a las 15:30 UTC, dejó dos consejos dentro de PAZO; los push empiezan cuando cada teléfono registre su zona horaria al abrir la versión nueva. Antes, como candidato `7b9de9ed`: PostgreSQL aislado verificó elegibilidad, horarios, deduplicación y descarte de avisos que ya no aplican. La fase de 14 días sigue apagada. Después de la primera prueba en teléfono, se corrigieron los dos destinos: Chrome verificó el panel de compartir y el formulario de primera mascota al abrir PAZO y con PAZO ya abierto. CI del candidato corregido: 15/15, incluida la repetición en Chrome. El dueño confirmó que los dos avisos abrieron el destino correcto en su teléfono.
 
 | Momento propuesto | Quién puede recibirlo | Mensaje | Destino |
 | --- | --- | --- | --- |
@@ -59,7 +59,7 @@ Verificación. Simular cada etapa, cambios antes de enviar, permiso denegado, do
 
 ## 5. Contar cuentas con y sin instalación detectada
 
-**Candidato [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** PostgreSQL aislado comprobó deduplicación, acceso de Administración, exclusiones y borrado con la cuenta. Chrome verificó ambas cifras con datos ficticios y el estado apagado. CI del candidato `417e3a93`: 15/15. La prueba física registró una instalación y dos aperturas independientes desde el icono. El PostgreSQL aislado devolvió 0 detectadas y 2 sin detectar antes, y 1 detectada y 1 sin detectar después de ambas aperturas. Medición pendiente de activación en producción.
+**PUBLICADO el 8-nov-2026 en [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `main` `9429560b`, Vercel `dpl_9M9fFRMkqbcGV56fZtPbaV3ZYvES`; puerta encendida a las 15:16 UTC.** Antes, como candidato: PostgreSQL aislado comprobó deduplicación, acceso de Administración, exclusiones y borrado con la cuenta. Chrome verificó ambas cifras con datos ficticios y el estado apagado. CI del candidato `417e3a93`: 15/15. La prueba física registró una instalación y dos aperturas independientes desde el icono. El PostgreSQL aislado devolvió 0 detectadas y 2 sin detectar antes, y 1 detectada y 1 sin detectar después de ambas aperturas. Medición pendiente de activación en producción.
 
 **Decisión del PO:** mostrar solo dos cifras en Administración: **Con instalación detectada** y **Sin instalación detectada**. Contar una vez cada cuenta confirmada elegible y excluir QA y Administración. No presentar embudo, actividad por periodo, lista de personas ni desgloses por dispositivo.
 
