@@ -38,6 +38,8 @@ Verificación. Primera mascota en Chrome móvil y iPhone. La instalación, la sa
 
 ## 4. Enviar avisos según el punto donde se quedó la persona
 
+**Candidato integrado [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `cb938dc2`.** PostgreSQL aislado verificó que el interruptor general empieza apagado, que los avisos respetan la etapa y el horario, que dos procesos simultáneos no duplican avisos y que un cambio de preferencia o la creación de la mascota impide un envío ya en cola. Chrome comprobó que el consejo de compartir abre el perfil de la mascota. La fase de 14 días sigue apagada aparte. Pendientes CI del paquete y prueba de entrega en un teléfono físico.
+
 | Momento propuesto | Quién puede recibirlo | Mensaje | Destino |
 | --- | --- | --- | --- |
 | 24 h desde el registro | Correo aún sin confirmar | «Gracias por probar PAZO. Si quieres continuar, confirma tu correo desde este enlace». Reutilizar el recordatorio vigente. | Enlace de confirmación de Supabase Auth |
@@ -75,4 +77,4 @@ Verificación: confirmar deduplicación, permisos, eliminación con la cuenta, m
 4. Añadir los avisos por etapa en modo de prueba. Revisar los textos ES/EN, los plazos y la frecuencia con el PO antes de activar envíos. Probar primero el caso sin mascota y el de compartir.
 5. Revisar resultados de registro completado, primera mascota, perfil compartido, apertura en PWA y retorno. Conservar los avisos que produzcan una mejora sin aumentar la desactivación.
 
-La hoja principal mantiene los puntos 4, 4b y 5. El perfil social compartible puede servir al punto 5, que usa la vista pública desde Administración. Registrar cada entrega, su evidencia y la versión de producción en la hoja principal.
+El candidato integrado incluye los puntos 4, 4b y 5 de la hoja principal. Desde Administración se abre la misma vista pública. Registrar cada entrega, su evidencia y la versión de producción en la hoja principal.
