@@ -126,3 +126,4 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 | 2026-11-08 | 1 | PO pidió activación durante el alta y restauración al volver. Candidato #217 probado en Chrome con datos sintéticos. |
 | 2026-11-08 | 1 | PO aclaró que la activación debe empezar en el alta de cuenta, antes de guardar una mascota. #217 y la subhoja se ajustan a ese alcance. |
 | 2026-11-08 | 1 | #217 publicado. Activación durante el alta de cuenta y recuperación al entrar. Pendiente prueba física. |
+| 2026-11-08 | Subhoja 2 | Candidato [#218](https://github.com/DigitalAppcorp/pazo-app/pull/218): perfil social compartible probado en Chrome. Sin cambios alojados. |
