@@ -3,6 +3,8 @@
 Fecha: 6 de noviembre de 2026. Autoriza: el PO (dueño de PAZO), que pidió resolverla **punto por punto**.
 Quién programa: Claude, por autorización del PO del 3-nov-2026 (registrada en `continuidad/ESTADO.md`). Este documento es la referencia para cualquier agente que retome el trabajo.
 
+**Decisión vigente del PO (8-nov-2026): publicación conjunta.** Los puntos restantes y todas las subrutas se preparan, prueban y revisan por separado. La publicación pendiente se hace cuando el conjunto esté completo; no se publica ni se activa cada bloque por su cuenta. Los puntos ya publicados conservan su estado.
+
 [Subhoja de regreso, perfil compartido e instalación de PAZO](SUBHOJA_REGRESO_PERFIL_PWA.md). Incluye avisos según el avance, el enlace al perfil social, la tarjeta para instalar PAZO y la medición en Administración.
 
 ## Cómo retomar
