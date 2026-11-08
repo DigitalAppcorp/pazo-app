@@ -12,6 +12,8 @@ Verificación. Una cuenta confirmada sin mascota se suscribe en un dispositivo q
 
 ## 2. Hacer que el perfil social se pueda abrir y compartir
 
+**Candidato [#218](https://github.com/DigitalAppcorp/pazo-app/pull/218), `be08042f`.** Chrome con datos ficticios comprobó el acceso desde la tarjeta y con teclado, la edición independiente, compartir/copiar, apertura y recarga sin sesión, regreso al perfil después del acceso en la misma pestaña y ausencia de invitación al entrar con cuenta. Se verificó la consulta de solo lectura con el rol anónimo. La vista previa externa es genérica de PAZO. No hay migración ni envíos. Pendiente CI y GO del PO para publicar también la aclaración de privacidad ES/EN.
+
 - En **Mi mascota**, tocar la foto, el nombre o el espacio principal de la tarjeta abre la misma vista social que ve un visitante. **Editar** y **Compartir perfil** tienen acciones propias y funcionan con teclado y lector de pantalla. El área que abre el perfil se implementa sin anidar botones.
 - Ubicar **Compartir perfil** junto a **Editar**. Abrir el menú de compartir del dispositivo cuando esté disponible y ofrecer **Copiar enlace** como alternativa. Distinguir abrir el menú, copiar el enlace y completar el envío según lo que la plataforma permita observar.
 - El enlace HTTPS debe abrir directamente el perfil social, incluso sin sesión y desde otro navegador. Reutilizar la vista social existente y proyectar solo los campos y publicaciones que ya son públicos. Las reglas de visibilidad también se aplican al abrir el enlace y a la vista previa que generan las redes. Resolver con un estado amable si el perfil ya no está disponible.
