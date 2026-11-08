@@ -23,7 +23,7 @@ Verificación. Abrir desde la tarjeta, compartir y abrir el enlace en un navegad
 
 ## 3. Ofrecer instalar PAZO tras la primera mascota
 
-**Candidato [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `ddb25a07`.** Aviso probado en seis flujos Chrome/PG17 aislados. Verificados el orden con bienvenida/cuidado, aviso nativo simulado, Safari/in-app, «Ahora no» y omisión en modo instalado. Reservado para la publicación conjunta.
+**Candidato [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `ddb25a07`.** Aviso probado en seis flujos Chrome/PG17 aislados. Verificados el orden con bienvenida/cuidado, aviso nativo simulado, Safari/in-app, «Ahora no» y omisión en modo instalado. El PO instaló la versión de prueba en Chrome desde el teléfono y la abrió dos veces desde el icono. La comprobación en iPhone sigue siendo simulada.
 
 Mostrar una tarjeta del mismo estilo que **Todo listo** y **Primer cuidado**. Presentarla cuando termine el aviso de bienvenida y después de que la persona complete u omita la sugerencia de cuidado. Mostrar una sola tarjeta a la vez. Si está usando PAZO instalado o ya desestimó esta oferta en el dispositivo, omitirla. Conservar la opción de instalar desde los ajustes.
 
@@ -59,7 +59,7 @@ Verificación. Simular cada etapa, cambios antes de enviar, permiso denegado, do
 
 ## 5. Contar cuentas con y sin instalación detectada
 
-**Candidato [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** PostgreSQL aislado comprobó deduplicación, acceso de Administración, exclusiones y borrado con la cuenta. Chrome verificó ambas cifras con datos ficticios y el estado apagado. CI integrado 15/15. Medición apagada y sin cambios alojados.
+**Candidato [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** PostgreSQL aislado comprobó deduplicación, acceso de Administración, exclusiones y borrado con la cuenta. Chrome verificó ambas cifras con datos ficticios y el estado apagado. CI del candidato `417e3a93`: 15/15. La prueba física registró una instalación y dos aperturas independientes desde el icono. El PostgreSQL aislado devolvió 0 detectadas y 2 sin detectar antes, y 1 detectada y 1 sin detectar después de ambas aperturas. Medición pendiente de activación en producción.
 
 **Decisión del PO:** mostrar solo dos cifras en Administración: **Con instalación detectada** y **Sin instalación detectada**. Contar una vez cada cuenta confirmada elegible y excluir QA y Administración. No presentar embudo, actividad por periodo, lista de personas ni desgloses por dispositivo.
 
