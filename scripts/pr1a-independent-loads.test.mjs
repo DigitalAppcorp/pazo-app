@@ -21,6 +21,7 @@ const {createRequestScope}=await moduleFrom(fs.readFileSync('src/lib/requestScop
 const {selectFeedPage}=await moduleFrom(fs.readFileSync('src/features/feed/selectFeedPage.ts','utf8'),'select')
 const {advanceFeedCursors}=await moduleFrom(fs.readFileSync('src/features/feed/advanceFeedCursors.ts','utf8'),'cursors')
 const {shouldOfferFirstUse,isCurrentFirstUse}=await moduleFrom(fs.readFileSync('src/features/onboarding/firstUse.ts','utf8'),'first-use')
+const {getSharedPetId,rememberSharedPet,takeSharedPet}=await moduleFrom(fs.readFileSync('src/features/profile/sharedPetRoute.ts','utf8'),'shared-pet')
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b});return {promise,resolve,reject}}
 const pets=['A','B'].map(id=>({id,name:id,species:'perro',isLost:false,photoUrl:'',ownerId:'owner',breed:'',age:''}))
 const services={}
@@ -30,6 +31,7 @@ const call=(name,...args)=>{calls.push([name,...args]);const fn=results[name];re
 const child=name=>props=>React.createElement('pazo-'+name,props)
 const base={
  createRequestScope,selectFeedPage,advanceFeedCursors,shouldOfferFirstUse,isCurrentFirstUse,
+ getSharedPetId,rememberSharedPet,takeSharedPet,
  takeVerifiedFirstUseIntent:()=> 'neutral',
  isMetaEnabled:()=>false,isGoogleAuthEnabled:()=>false,
  useAuth:()=>auth,AuthProvider:({children})=>children,
