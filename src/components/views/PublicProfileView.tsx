@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import type { Pet, Post } from '../../types/pazo'
+import type { Pet } from '../../types/pazo'
 import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
 import { PublicProfileTabs } from '../../features/profile/components/PublicProfileTabs'
@@ -13,6 +13,7 @@ import {supporterBenefitsUiEnabled} from '../../features/supporter/supporterUiRe
 
 const supporterVisualsEnabled = supporterBenefitsUiEnabled
 type PublicSupporterPerks = {badge: boolean; theme: SupporterProfileThemeId | null; milestone: 0 | 3 | 6 | 12}
+type SocialPost = { id: string; text: string; photo_url: string | null; likes: number | null }
 const supporterThemes = new Set(['classic', 'nature', 'hearts', 'stars', 'adventure'])
 function acceptPublicSupporterPerks(raw: unknown): PublicSupporterPerks | null {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null
@@ -30,6 +31,7 @@ interface PublicProfileViewProps {
   currentPetId?: string
   ownedPetIds: string[]
   onClose: () => void
+  onDiscoverPazo?: () => void
   lang: 'es' | 'en'
 }
 
@@ -39,6 +41,7 @@ export const PublicProfileView = ({
   currentPetId,
   ownedPetIds,
   onClose,
+  onDiscoverPazo,
   lang,
 }: PublicProfileViewProps) => {
   const [reportOpen, setReportOpen] = useState(false)
@@ -47,8 +50,9 @@ export const PublicProfileView = ({
   const postMenuRef = useRef<HTMLDivElement | null>(null)
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement | null>(null)
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null)
   const [petProfile, setPetProfile] = useState<Pet | null>(null)
-  const [petPosts, setPetPosts] = useState<Post[]>([])
+  const [petPosts, setPetPosts] = useState<SocialPost[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'posts' | 'info'>('posts')
 
@@ -57,6 +61,14 @@ export const PublicProfileView = ({
   const [followingCount, setFollowingCount] = useState<number>(0)
   const [isFounder, setIsFounder] = useState<boolean>(false)
   const [supporterPerks, setSupporterPerks] = useState<PublicSupporterPerks | null>(null)
+
+  useEffect(() => {
+    const previous = document.activeElement
+    closeButtonRef.current?.focus({ preventScroll: true })
+    return () => {
+      if (previous instanceof HTMLElement && previous.isConnected) previous.focus({ preventScroll: true })
+    }
+  }, [])
 
   useEffect(() => {
     let isMounted = true
@@ -71,7 +83,7 @@ export const PublicProfileView = ({
       try {
         const { data: petData, error: petError } = await supabase
           .from('pets')
-          .select('id,name,species,age,photo_url,created_at,bio,breed,gender,is_lost')
+          .select('id,name,species,age,photo_url,bio,breed,gender,is_lost')
           .eq('id', targetPetId)
           .maybeSingle()
 
@@ -82,38 +94,6 @@ export const PublicProfileView = ({
         if (!petData) {
           if (isMounted) setIsLoading(false)
           return
-        }
-
-        // Paso 2: Conexión de Datos Reales (Seguidores, Siguiendo, Fundador)
-        const { count: followers } = await supabase
-          .from('follows')
-          .select('*', { count: 'exact', head: true })
-          .eq('following_id', targetPetId)
-
-        if (followers !== null && isMounted) {
-          setFollowersCount(followers)
-        }
-
-        const { count: following } = await supabase
-          .from('follows')
-          .select('*', { count: 'exact', head: true })
-          .eq('follower_id', targetPetId)
-
-        if (following !== null && isMounted) {
-          setFollowingCount(following)
-        }
-
-        const { data: founderStatus, error: founderError } = await supabase.rpc(
-          'get_pet_founder_status',
-          { p_pet_id: targetPetId }
-        )
-
-        if (founderError) {
-          console.error('Error fetching founder status:', founderError)
-        }
-
-        if (isMounted) {
-          setIsFounder(Boolean(founderStatus))
         }
 
         const mappedPet: Pet = {
@@ -131,38 +111,26 @@ export const PublicProfileView = ({
           isLost: petData.is_lost || false,
         }
 
-        if (isMounted) setPetProfile(mappedPet)
+        if (!isMounted) return
+        setPetProfile(mappedPet)
 
-        const { data: postsData, error: postsError } = await supabase
-          .from('posts')
-          .select('*')
-          .eq('pet_id', targetPetId)
-          .order('created_at', { ascending: false })
+        const [{ count: followers }, { count: following }, { data: founderStatus, error: founderError }, { data: postsData, error: postsError }] = await Promise.all([
+          supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', targetPetId),
+          supabase.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', targetPetId),
+          supabase.rpc('get_pet_founder_status', { p_pet_id: targetPetId }),
+          supabase.from('posts').select('id,text,photo_url,likes').eq('pet_id', targetPetId).order('created_at', { ascending: false }),
+        ])
 
         if (postsError) {
           console.error('Error fetching public pet posts:', postsError)
         }
 
-        if (postsData && isMounted) {
-          const formattedPosts: Post[] = postsData.map((p: any) => ({
-            id: p.id,
-            petId: p.pet_id,
-            petName: p.pet_name,
-            petSpecies: p.pet_species,
-            petAvatar: p.pet_avatar,
-            location: p.location || '',
-            timeAgo: 'Reciente',
-            createdAt: p.created_at,
-            isRecommended: false,
-            tags: p.tags || [],
-            text: p.text,
-            photoUrl: p.photo_url,
-            likes: p.likes || 0,
-            isLiked: false,
-            isSaved: false,
-            comments: p.comments || [],
-          }))
-          setPetPosts(formattedPosts)
+        if (founderError) console.error('Error fetching founder status:', founderError)
+        if (isMounted) {
+          setFollowersCount(followers ?? 0)
+          setFollowingCount(following ?? 0)
+          setIsFounder(Boolean(founderStatus))
+          if (postsData) setPetPosts(postsData)
         }
       } catch (err) {
         console.error('Unexpected error loading public profile:', err)
@@ -253,6 +221,7 @@ export const PublicProfileView = ({
         <div className="mx-auto grid h-[70px] w-full max-w-xl grid-cols-[48px_minmax(0,1fr)_48px] items-center gap-3 px-4">
           <button
             type="button"
+            ref={closeButtonRef}
             onClick={onClose}
             aria-label={lang === 'es' ? 'Regresar' : 'Back'}
             className="flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-[#204E4A] shadow-[0_5px_18px_rgba(32,78,74,0.10)] transition-colors hover:bg-[#E1E53F]/30"
@@ -445,7 +414,7 @@ export const PublicProfileView = ({
                             <div className="flex min-w-0 items-center gap-2">
                               <h3 className="truncate text-[17px] font-black leading-tight text-[#204E4A]">{petProfile.name}</h3>
                             </div>
-                            <p className="mt-0.5 text-[12px] text-[#71847F]">{post.timeAgo}</p>
+                            <p className="mt-0.5 text-[12px] text-[#71847F]">{lang === 'es' ? 'Reciente' : 'Recent'}</p>
                           </div>
                           {canReport && !ownedPetIds.includes(targetPetId) && (
                             <div ref={postMenuId === post.id ? postMenuRef : null} className="relative shrink-0">
@@ -477,15 +446,15 @@ export const PublicProfileView = ({
                             </div>
                           )}
                         </div>
-                        {post.photoUrl && (
+                        {post.photo_url && (
                           <div className="max-h-[490px] w-full overflow-hidden bg-[#EDF1EC]">
-                            <img src={post.photoUrl} alt={post.text || petProfile.name} className="max-h-[490px] w-full object-cover" />
+                            <img src={post.photo_url} alt={post.text || petProfile.name} className="max-h-[490px] w-full object-cover" loading="lazy" />
                           </div>
                         )}
                         <div className="space-y-2 px-4 pb-4 pt-3">
                           <div className="flex items-center gap-2 text-[13px] font-extrabold text-[#5C7470]">
                             <IconPaw size={17} className="text-[#204E4A]" />
-                            <span>{post.likes} {lang === 'es' ? 'me gusta' : 'likes'}</span>
+                            <span>{post.likes ?? 0} {lang === 'es' ? 'me gusta' : 'likes'}</span>
                           </div>
                           {post.text && <p className="whitespace-pre-wrap break-words text-[15px] font-medium leading-relaxed text-[#204E4A]">{post.text}</p>}
                         </div>
@@ -508,6 +477,21 @@ export const PublicProfileView = ({
                 </div>
               )}
             </section>
+            {onDiscoverPazo && (
+              <section aria-labelledby="discover-pazo-title" className="mt-8 rounded-[30px] bg-[#E9EED9] p-6 text-[#204E4A]">
+                <IconPaw size={24} />
+                <h2 id="discover-pazo-title" className="mt-2 text-xl font-black">
+                  {lang === 'es' ? '¿Tienes una mascota?' : 'Have a pet of your own?'}
+                </h2>
+                <p className="mt-2 text-[15px] leading-relaxed text-[#315B55]">
+                  {lang === 'es' ? 'Crea su perfil en PAZO y compártelo con quien quieras.' : 'Create their profile in PAZO and share it with anyone you like.'}
+                </p>
+                <button type="button" onClick={onDiscoverPazo}
+                  className="mt-4 min-h-11 rounded-full bg-[#204E4A] px-5 text-sm font-bold text-white hover:bg-[#315B55] focus-visible:bg-[#E1E53F] focus-visible:text-[#204E4A] focus-visible:outline-none cursor-pointer">
+                  {lang === 'es' ? 'Conocer PAZO' : 'Explore PAZO'}
+                </button>
+              </section>
+            )}
           </div>
         )}
       </main>

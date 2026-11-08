@@ -32,6 +32,7 @@ process.env.VITE_SUPABASE_URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
 process.env.VITE_SUPABASE_PUBLISHABLE_KEY='sb_publishable_synthetic'
 const origin=process.env.PAZO_HOSTED_ORIGIN||'http://127.0.0.1:5352'
 const hostedAsset=process.env.PAZO_HOSTED_ORIGIN?hostedAssetTransport(origin):null
+const pwaFirstPet=contextual&&!hostedAsset
 const server=hostedAsset?null:await createServer({server:{host:'127.0.0.1',port:5352,strictPort:true}})
 const id=n=>'98000000-0000-4000-8000-'+String(n).padStart(12,'0')
 const q=v=>v===null||v===undefined?'NULL':"'"+String(v).replaceAll("'","''")+"'"
@@ -48,6 +49,7 @@ try{
   const exerciseAccountSignup=contextual&&pushPermission==='default'
   const pushExpected=contextual&&width!==320&&pushPermission!=='denied'
   const pushEvents=[]
+  const detectedInstallations=[]
   const scheduleFirstCare=contextual&&width!==320
   const careTitle=scheduleFirstCare?(lang==='es'?'Rabia':'Rabies'):'QA persisted care'
   let petCreated=!contextual
@@ -78,6 +80,11 @@ try{
     if(rpc){
      if(rpc==='pazo_public_maintenance_status')return respond({enabled:false,message_es:'',message_en:'',updated_at:now})
      if(rpc==='pazo_ensure_my_profile')return respond(null)
+     if(rpc==='pazo_record_pwa_installation'&&pwaFirstPet){
+      assert.equal(value.p_expected_owner,owner)
+      detectedInstallations.push(value.p_expected_owner)
+      return respond(true)
+     }
      if(rpc==='create_pet_profile'){
       assert.equal(value.p_name,'Luna');assert.equal(petCreated,false)
       tx(`INSERT INTO public.pets VALUES('${pet}','${owner}',now())`);petCreated=true;return respond(pet)
@@ -117,13 +124,16 @@ try{
    }catch(error){console.error('Isolated backend:',error.message);return respond({message:'isolated backend rejected request'},403)}
   })
   if(context.routeWebSocket)await context.routeWebSocket('**/*',ws=>ws.close())
-  await context.addInitScript(({session,lang,contextual,width,owner,pushPermission,exerciseAccountSignup})=>{
+  await context.addInitScript(({session,lang,contextual,width,owner,pushPermission,exerciseAccountSignup,pwaFirstPet})=>{
    if(!sessionStorage.getItem('qa-initialized')){
     localStorage.clear()
     if(!exerciseAccountSignup)localStorage.setItem('sb-mrybvqdebbgcayuvgkkr-auth-token',JSON.stringify(session))
     localStorage.setItem('pazo_language_preference_v1',lang)
+    if(pwaFirstPet&&width===430&&lang==='en')localStorage.setItem('pazo_first_pet_install_dismissed','1')
     sessionStorage.setItem('qa-initialized','1')
    }
+   if(pwaFirstPet&&width===430&&lang==='es')Object.defineProperty(navigator,'standalone',{value:true})
+   if(pwaFirstPet&&width===320)Object.defineProperty(navigator,'userAgent',{value:lang==='es'?'Mozilla iPhone Mobile Safari':'Mozilla iPhone Mobile Instagram'})
    if(contextual){
     if(width===320)localStorage.setItem('pazo_push_off_v1','1')
     Object.defineProperty(Notification,'permission',{configurable:true,get:()=>sessionStorage.getItem('qa-permission')??pushPermission})
@@ -155,12 +165,13 @@ try{
     localStorage.setItem('pazo_marketing_firstparty_v1',JSON.stringify({version:1,attribution:{source:'meta',medium:'paid_social',campaign:'pazo_beta_local_202610',creative:lang==='es'?'qr_es':'qr_en',firstTouchAt},steps:['landing','signup_requested','signup_verified'],signupRequestedAt:firstTouchAt,signupOwnerId:owner}))
    }
    Object.defineProperty(navigator,'share',{configurable:true,value:async()=>{if(window.__shareMode==='cancel')throw new DOMException('cancelled','AbortError')}})
-  },{session,lang,contextual,width,owner,pushPermission,exerciseAccountSignup})
+  },{session,lang,contextual,width,owner,pushPermission,exerciseAccountSignup,pwaFirstPet})
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message))
   const waitForPush=pushExpected?page.waitForResponse(res=>res.url().endsWith('/rpc/pazo_push_subscribe')&&res.ok()):null
   await page.goto(origin,{waitUntil:'domcontentloaded',timeout:hostedAsset?90000:30000})
   const nav=page.getByRole('navigation',{name:'Navegación de PAZO'})
   const firstCare=page.getByRole('region',{name:lang==='es'?'Primer cuidado':'First care reminder'})
+  const firstInstall=page.locator('[data-pazo-app-notice="first-install"]')
   if(contextual){
    if(exerciseAccountSignup){
     await page.getByRole('button',{name:lang==='es'?'Comenzar':'Get started',exact:true}).click()
@@ -189,8 +200,14 @@ try{
    await page.getByRole('button',{name:lang==='es'?'Crear perfil y entrar':'Create profile and enter',exact:true}).click()
    const hint=page.getByRole('region',{name:lang==='es'?'Para empezar':'To get started'})
    await hint.waitFor();assert.equal(feedPending,true)
+   if(pwaFirstPet&&width===390)await page.evaluate(lang=>{
+    const event=new Event('beforeinstallprompt',{cancelable:true})
+    Object.assign(event,{prompt:async()=>{sessionStorage.setItem('qa-install-gesture',String(navigator.userActivation.isActive))},userChoice:Promise.resolve({outcome:lang==='es'?'accepted':'dismissed'})})
+    window.dispatchEvent(event)
+   },lang)
    assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompts')),exerciseAccountSignup?'1':null,'saving the pet does not request push permission')
    assert.equal(await firstCare.count(),0,'no first care above the welcome notice')
+   assert.equal(await firstInstall.count(),0,'no install offer above the welcome notice')
    assert.equal(await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).getAttribute('aria-current'),'page')
    assert.equal(sql(`SELECT count(*) FROM public.pets WHERE id='${pet}' AND owner_id='${owner}'`),'1')
    await page.screenshot({path:path.join(out,`${lang}-${width}-first-use.png`)})
@@ -207,6 +224,7 @@ try{
   if(contextual){
    assert.equal(await page.getByRole('region',{name:lang==='es'?'Avisos de PAZO':'PAZO alerts'}).count(),0)
    await firstCare.waitFor()
+   assert.equal(await firstInstall.count(),0,'no install offer above the first care notice')
    for(const button of await firstCare.getByRole('button').all()){
     const box=await button.boundingBox();assert.ok(box.height>=44&&box.x>=0&&box.x+box.width<=width)
    }
@@ -227,6 +245,41 @@ try{
     await dialog.getByRole('button',{name:lang==='es'?'Cerrar':'Close',exact:true}).click()
    }else await page.keyboard.press('Escape')
    await firstCare.waitFor({state:'detached'})
+   if(pwaFirstPet&&width!==430){
+    await firstInstall.waitFor()
+    assert.equal(await page.locator('[data-pazo-app-notice]').count(),1,'only one onboarding notice is visible')
+    for(const button of await firstInstall.getByRole('button').all()){
+     const box=await button.boundingBox();assert.ok(box.height>=44&&box.x>=0&&box.x+box.width<=width)
+    }
+    await page.screenshot({path:path.join(out,`${lang}-${width}-first-install.png`)})
+    if(width===390){
+     await firstInstall.getByRole('button',{name:lang==='es'?'Instalar PAZO':'Install PAZO',exact:true}).click()
+     assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-install-gesture')),'true')
+    }else{
+     await firstInstall.getByRole('button',{name:lang==='es'?'Cómo instalar':'How to install',exact:true}).click()
+     await firstInstall.getByText(lang==='es'?/En Safari, toca Compartir/:/choose “Open in browser”/).waitFor()
+     await firstInstall.getByRole('button',{name:lang==='es'?'Ahora no':'Not now',exact:true}).click()
+    }
+    await firstInstall.waitFor({state:'detached'})
+    assert.equal(await page.evaluate(()=>localStorage.getItem('pazo_first_pet_install_dismissed')),width===390&&lang==='es'?null:'1')
+   }else if(pwaFirstPet)assert.equal(await firstInstall.count(),0,'already installed or previously dismissed devices skip the offer')
+   if(pwaFirstPet){
+    assert.equal(detectedInstallations.length,width===430&&lang==='es'?1:0,'standalone counts once; accepting the prompt does not count')
+    if(width===390&&lang==='es'){
+     const confirmed=page.waitForResponse(r=>r.url().endsWith('/rpc/pazo_record_pwa_installation')&&r.ok())
+     await page.evaluate(()=>window.dispatchEvent(new Event('appinstalled')))
+     await confirmed
+     assert.deepEqual(detectedInstallations,[owner])
+    }
+    if(width===430&&lang==='en'){
+     await page.evaluate(()=>{
+      Object.defineProperty(navigator,'globalPrivacyControl',{configurable:true,value:true})
+      window.dispatchEvent(new Event('appinstalled'))
+      delete navigator.globalPrivacyControl
+     })
+     assert.deepEqual(detectedInstallations,[],'Global Privacy Control suppresses installation recording')
+    }
+   }
   }
   await page.getByText(lang==='es'?'Pasaporte y QR':'Passport & QR',{exact:true}).click()
   await page.getByRole('img',{name:'Pazo · Luna',exact:true}).waitFor()

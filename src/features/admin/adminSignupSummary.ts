@@ -3,7 +3,7 @@ import {supabase} from '../../services/supabaseClient'
 export type SignupMethod = 'email' | 'google' | 'other'
 
 interface SignupAccount {
- method:SignupMethod; email_sent:boolean; confirmed:boolean; signed_in:boolean
+ method:SignupMethod; email_sent:boolean; confirmed:boolean; signed_in:boolean; ad_campaign?:string|null
 }
 
 export interface AdminSignupSummary {

@@ -6,6 +6,7 @@ import {
   readPushEnvironment,
   readPushStatus,
   savePushPreferences,
+  saveReturnTipPreference,
   type PushPreferences,
 } from './pushService'
 import type { PushEnvironment } from './pushSupport'
@@ -42,6 +43,7 @@ export const PushControl = ({ lang, variant, reason }: PushControlProps) => {
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
   const [preferences, setPreferences] = useState<PushPreferences | null>(null)
+  const [savingTips, setSavingTips] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -54,30 +56,46 @@ export const PushControl = ({ lang, variant, reason }: PushControlProps) => {
   }, [])
 
   useEffect(() => {
-    if (!active || variant !== 'panel') return
+    if (variant !== 'panel' || (!active && import.meta.env.VITE_PAZO_RETURN_TIPS_ENABLED !== 'true')) return
     let alive = true
     void fetchPushPreferences().then((value) => { if (alive) setPreferences(value) }).catch(() => undefined)
     return () => { alive = false }
   }, [active, variant])
 
-  if (environment === 'unsupported' || active === null) return null
+  const tipsLabel = es ? 'Consejos de PAZO' : 'PAZO tips'
+  const toggleTips = () => {
+    if (!preferences?.returnAvailable || savingTips) return
+    const previous = preferences.returnTips !== false
+    setSavingTips(true)
+    setPreferences(current => current ? { ...current, returnTips: !previous } : null)
+    void saveReturnTipPreference(!previous).catch(() => {
+      setPreferences(current => current ? { ...current, returnTips: previous } : null)
+    }).finally(() => setSavingTips(false))
+  }
+  const tipsControl = variant === 'panel' && preferences?.returnAvailable ? <button type="button" role="switch"
+    aria-checked={preferences.returnTips !== false} onClick={toggleTips} disabled={savingTips}
+    className="flex min-h-11 w-full items-center justify-between gap-2 rounded-xl bg-[#F3F6EA] px-3 text-left text-sm font-bold text-[#204E4A] focus-visible:bg-[#E1E53F]">
+    {tipsLabel}<span className="text-xs">{preferences.returnTips !== false ? (es ? 'Sí' : 'On') : (es ? 'No' : 'Off')}</span>
+  </button> : null
+
+  if (environment === 'unsupported' || active === null) return tipsControl
 
   if (environment === 'in-app-browser') {
-    return <Notice
+    return <><Notice
       title={es ? 'Abre PAZO en tu navegador' : 'Open PAZO in your browser'}
-      text={es ? 'Aquí no llegan avisos. Ábrelo en Safari o Chrome.' : 'Alerts cannot reach you here. Open it in Safari or Chrome.'} />
+      text={es ? 'Aquí no llegan avisos. Ábrelo en Safari o Chrome.' : 'Alerts cannot reach you here. Open it in Safari or Chrome.'} />{tipsControl}</>
   }
   if (environment === 'ios-needs-install') {
-    return <Notice
+    return <><Notice
       title={es ? 'Recibe avisos en tu iPhone' : 'Get alerts on your iPhone'}
-      text={es ? 'En Safari: Compartir → Añadir a pantalla de inicio. Luego abre PAZO desde ahí.' : 'In Safari: Share → Add to Home Screen. Then open PAZO from there.'} />
+      text={es ? 'En Safari: Compartir → Añadir a pantalla de inicio. Luego abre PAZO desde ahí.' : 'In Safari: Share → Add to Home Screen. Then open PAZO from there.'} />{tipsControl}</>
   }
   if (environment === 'denied') {
-    return variant === 'panel' ? <Notice
+    return variant === 'panel' ? <><Notice
       title={es ? 'Avisos bloqueados' : 'Alerts are blocked'}
-      text={es ? 'Actívalos en los ajustes de tu teléfono.' : 'Turn them on in your phone settings.'} /> : null
+      text={es ? 'Actívalos en los ajustes de tu teléfono.' : 'Turn them on in your phone settings.'} />{tipsControl}</> : null
   }
-  if (!enabled) return null
+  if (!enabled) return tipsControl
 
   const activate = async () => {
     setBusy(true)
@@ -104,14 +122,16 @@ export const PushControl = ({ lang, variant, reason }: PushControlProps) => {
           {busy ? (es ? 'Activando…' : 'Turning on…') : reason ? (es ? 'Activar notificaciones' : 'Turn on notifications') : (es ? 'Activar avisos' : 'Turn on alerts')}
         </button>
         {failed && <p role="status" className="mt-2 text-center text-[12px] font-semibold text-[#5C7470]">{es ? 'No se pudo activar. Inténtalo de nuevo.' : 'Could not turn on. Try again.'}</p>}
+        {tipsControl}
       </div>
     )
   }
 
   if (variant === 'offer') return null
 
-  type ToggleKey = 'sightings' | 'community' | 'care' | 'followers' | 'healthAlerts' | 'adminNewPets' | 'adminNewAccounts' | 'adminVigilante'
+  type ToggleKey = 'sightings' | 'community' | 'care' | 'followers' | 'healthAlerts' | 'returnTips' | 'adminNewPets' | 'adminNewAccounts' | 'adminVigilante'
   const toggle = (key: ToggleKey) => {
+    if (key === 'returnTips') { toggleTips(); return }
     if (!preferences) return
     const previous = preferences
     const next = { ...preferences, [key]: !preferences[key] }
@@ -124,6 +144,7 @@ export const PushControl = ({ lang, variant, reason }: PushControlProps) => {
     { key: 'care', label: es ? 'Cuidados' : 'Care' },
     { key: 'followers', label: es ? 'Seguidores' : 'Followers' },
     { key: 'healthAlerts', label: es ? 'Alertas de salud' : 'Health alerts' },
+    ...(preferences?.returnAvailable ? [{ key: 'returnTips' as const, label: tipsLabel }] : []),
     ...(preferences?.isAdmin ? [
       { key: 'adminNewPets' as const, label: es ? 'Mascotas nuevas' : 'New pets' },
       { key: 'adminNewAccounts' as const, label: es ? 'Cuentas nuevas' : 'New accounts' },
@@ -146,6 +167,7 @@ export const PushControl = ({ lang, variant, reason }: PushControlProps) => {
             role="switch"
             aria-checked={preferences[key]}
             onClick={() => toggle(key)}
+            disabled={key === 'returnTips' && savingTips}
             className="flex min-h-11 w-full items-center justify-between gap-3 text-left text-[14px] font-bold text-[#204E4A]"
           >
             {label}

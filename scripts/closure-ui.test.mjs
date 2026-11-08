@@ -1397,7 +1397,10 @@ test('Feed location comes from an explicit author choice, never a hardcoded city
   assert.ok(feed.includes('post.location ? <>{post.location} &bull; </> : null'),
     'Omit the separator and label if location was not disclosed')
   assert.ok(app.includes("location: wasAuthorDeleted(post) ? '' : (post.location || '')"))
-  assert.ok(profile.includes("location: p.location || ''"))
+  const socialPostFields = profile.match(/\.from\('posts'\)\s*\.select\('([^']+)'\)/)?.[1].split(',')
+  assert.ok(socialPostFields?.includes('text'), 'The profile reads public post text')
+  assert.ok(!socialPostFields.includes('location') && !socialPostFields.includes('*'),
+    'The shared profile never downloads the location field')
   assert.ok(postService.includes("(p.location || '')"))
   assert.ok(!createPost.includes('navigator.geolocation')&&!createPost.includes('getCurrentPosition'),
     'No implicit device GPS collection')

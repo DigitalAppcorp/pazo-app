@@ -27,9 +27,13 @@ export type NotificationTarget =
   | { kind: 'sighting'; sightingId: string }
   | { kind: 'care'; careId: string }
   | { kind: 'pet_profile'; petId: string }
+  | { kind: 'pet_share'; petId: string }
   | { kind: 'pet_edit'; petId: string }
   | { kind: 'official_post'; postId: string }
   | { kind: 'admin_vigilante' }
+  | { kind: 'pet_create' }
+  | { kind: 'pet_home' }
+  | { kind: 'care_agenda' }
 
 // Data the app already holds that a notice may show inside the app (never on a lock screen).
 export interface NotificationContext {
@@ -223,6 +227,41 @@ export const NOTIFICATION_KINDS = {
   supporter_campaign: supporterKind,
   supporter_verified: supporterKind,
   system: plainKind,
+  return_no_pet: {
+    template: 'open', icon: 'paw', tone: 'neutral',
+    copy: (_item, lang) => lang === 'es'
+      ? { title: 'Gracias por visitar PAZO', subtitle: 'Crea el perfil de tu mascota y ten su foto y su agenda en un solo lugar.' }
+      : { title: 'Thanks for visiting PAZO', subtitle: 'Create your pet’s profile to keep their photo and care schedule in one place.' },
+    action: (_item, lang) => lang === 'es' ? 'Crear perfil' : 'Create a profile',
+    target: () => ({ kind: 'pet_create' }),
+  },
+  return_share: {
+    template: 'open', icon: 'paw', tone: 'neutral', styleNeedsTarget: true,
+    copy: (item, lang, context) => {
+      const name = item.petId ? context.petName?.(item.petId) : undefined
+      return lang === 'es'
+        ? { title: name ? `Presenta a ${name}` : 'Comparte el perfil de tu mascota', subtitle: 'Tus amigos pueden conocer a tu mascota con su enlace de PAZO.' }
+        : { title: name ? `Introduce ${name}` : 'Share your pet’s profile', subtitle: 'Friends can get to know your pet through their PAZO link.' }
+    },
+    action: (_item, lang) => lang === 'es' ? 'Compartir perfil' : 'Share profile',
+    target: (item) => item.petId ? { kind: 'pet_share', petId: item.petId } : null,
+  },
+  return_care: {
+    template: 'open', icon: 'calendar', tone: 'care',
+    copy: (_item, lang) => lang === 'es'
+      ? { title: 'Ten a mano su próximo cuidado', subtitle: 'Cuando te venga bien, guarda la fecha en su agenda.' }
+      : { title: 'Keep their next care date handy', subtitle: 'Whenever it suits you, save the date in their care schedule.' },
+    action: (_item, lang) => lang === 'es' ? 'Abrir Agenda' : 'Open care schedule',
+    target: () => ({ kind: 'care_agenda' }),
+  },
+  return_home: {
+    template: 'open', icon: 'paw', tone: 'neutral',
+    copy: (_item, lang) => lang === 'es'
+      ? { title: 'Tu mascota tiene su espacio en PAZO', subtitle: 'Cuando quieras, aquí tienes a mano su perfil y su agenda.' }
+      : { title: 'Your pet has a place on PAZO', subtitle: 'Their profile and care schedule are here whenever you need them.' },
+    action: (_item, lang) => lang === 'es' ? 'Ir a Mi mascota' : 'Go to My pet',
+    target: () => ({ kind: 'pet_home' }),
+  },
 } satisfies Record<string, NotificationKind>
 
 export type NotificationType = keyof typeof NOTIFICATION_KINDS

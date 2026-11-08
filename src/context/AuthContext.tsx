@@ -30,7 +30,7 @@ import {
   captureEvent,
   setObservabilityUser,
 } from '../services/observability'
-import { stageMarketingSignupRequested, stageMarketingSignupVerified, submitAutomaticMarketingAttribution, clearLocalMarketingAttribution } from '../features/marketing/marketingRuntime'
+import { stageMarketingSignupRequested, stageMarketingSignupVerified, submitAutomaticMarketingAttribution, clearLocalMarketingAttribution, pendingMarketingSignupData } from '../features/marketing/marketingRuntime'
 
 /** ok: signed in. unconfirmed: the account exists but its email is not confirmed yet. */
 export type SignInOutcome = 'ok' | 'unconfirmed' | 'failed'
@@ -228,7 +228,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [user?.id, profileRetry, adultAttestationPending])
 
   const signUp = async (email: string, password: string): Promise<SignUpOutcome> => {
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const campaign = pendingMarketingSignupData()
+    const { data, error } = await supabase.auth.signUp({ email, password, ...(campaign ? { options: { data: campaign } } : {}) })
     const outcome = classifySignUpResult(error, data?.session)
 
     if (error) {

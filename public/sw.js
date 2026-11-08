@@ -16,7 +16,8 @@ self.addEventListener('fetch', (event) => {
   )
 })
 
-// Push copy is fixed on the server. A tap always opens the bell, never a URL from the message.
+// Only a closed return-tip category can refine the bell destination.
+const returnTip = (value) => ['return_no_pet','return_share','return_care','return_home'].includes(value) ? value : null
 self.addEventListener('push', (event) => {
   let data = {}
   try { data = event.data ? event.data.json() : {} } catch { /* An unreadable message still has to show. */ }
@@ -26,6 +27,7 @@ self.addEventListener('push', (event) => {
       tag: typeof data.tag === 'string' ? data.tag : 'pazo',
       icon: '/pwa-icon-192.png',
       badge: '/pwa-badge-96.png',
+      data: { tip: returnTip(data.tip) },
     }),
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
       for (const client of windows) client.postMessage({ type: 'pazo-push-received' })
@@ -37,8 +39,12 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close()
   event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windows) => {
     const open = windows.find((client) => new URL(client.url).origin === self.location.origin)
-    if (!open) return self.clients.openWindow('/?open=notifications')
+    const tip = returnTip(event.notification.data?.tip)
+    if (!open) {
+      if (tip) return self.clients.openWindow('/?open=notifications&tip=' + tip)
+      return self.clients.openWindow('/?open=notifications')
+    }
     await open.focus()
-    open.postMessage({ type: 'pazo-open-notifications' })
+    open.postMessage({ type: 'pazo-open-notifications', tip })
   }))
 })

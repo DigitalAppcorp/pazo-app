@@ -18,7 +18,8 @@ permissions:
   contents: read
 jobs:
   google-browser:
-    runs-on: ubuntu-latest
+    # Playwright 1.56.1 does not ship Chromium for Ubuntu 26.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       PAZO_PLAYWRIGHT_MODULE: playwright
@@ -47,9 +48,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - uses: supabase/setup-cli@v3
-        with:
-          version: '2.81.3'
+      - name: Install the pinned Supabase CLI from its official release asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          cli_dir="$(mktemp -d "$RUNNER_TEMP/pazo-supabase-cli.XXXXXX")"
+          cd "$cli_dir"
+          curl --fail --silent --show-error --location --retry 4 --retry-all-errors --max-time 90 --retry-max-time 180 \
+            --header 'Accept: application/octet-stream' \
+            --output supabase.tar.gz 'https://api.github.com/repos/supabase/cli/releases/assets/376336010?download=1'
+          echo '2938de97c4ee1d15de4affe9bfdac3dd665bc57d264f69101482133798f40e0a  supabase.tar.gz' | sha256sum --check
+          tar -xzf supabase.tar.gz supabase
+          test "$(./supabase --version)" = '2.81.3'
+          echo "$cli_dir" >> "$GITHUB_PATH"
       - name: Prepare a disposable Auth stack; no linked project or hosted credentials
         shell: bash
         run: |

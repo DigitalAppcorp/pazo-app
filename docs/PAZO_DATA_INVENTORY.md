@@ -1,3 +1,20 @@
+## Tarjeta pública al compartir el perfil (8-nov-2026)
+
+La ruta `/mascota/{id}` muestra a los rastreadores nombre, descripción y foto del perfil que el invitado ya puede ver, junto con la marca PAZO. Lee solo `name`, `bio` y `photo_url` con la clave pública y las reglas de invitado. Las fotos se limitan a los avatares públicos de PAZO y su proveedor de imágenes de referencia. Los perfiles retirados o inexistentes no entregan una tarjeta de mascota. La plataforma donde se comparte puede guardar su propia copia de la tarjeta.
+
+## Continuidad de campañas y consejos de PAZO — candidatos apagados (8-nov-2026)
+
+- En el alta por correo, el candidato acepta un código de anuncio de lista cerrada y la hora de la primera visita. Retira el dato transitorio de los metadatos de Auth y lo guarda en privado ligado al UUID pendiente. Caduca a las 72 horas desde la visita y se limpia cada cinco minutos. Al confirmar se mueve al sistema de atribución existente, con su plazo vigente de 14 días. Administración ve solo el código de campaña en la página de Usuarios; al vencer deja de mostrarse. No se incorpora correo, URL ni identificadores externos. Ambas puertas de captura comienzan apagadas.
+- Para los consejos, el candidato conserva una marca por cuenta y etapa, la fecha del aviso y su aceptación por el proveedor, y una marca de haber compartido un perfil. El dispositivo puede indicar una zona horaria para los horarios de entrega, sin ubicación exacta. Las marcas se borran con la cuenta; se respetan preferencias y siguen vigentes los plazos de la cola y de la campana. Administración recibe solo totales de los últimos 30 días. El proveedor recibe texto fijo sin nombre de mascota. Los consejos tienen su propio interruptor general y el aviso de 14 días empieza aparte apagado.
+
+## Conteo de instalación de PAZO — candidato apagado (8-nov-2026)
+
+Administración recibe dos totales de cuentas confirmadas elegibles: con y sin instalación detectada. `appinstalled` en Chromium o la apertura en modo instalado (también desde el icono en iOS) crean como máximo una marca con el UUID interno. No hay fechas, eventos de embudo ni IDs de dispositivo. No se infiere instalación al aceptar el aviso; una instalación previa puede quedar sin detectar hasta abrir la app y el navegador no informa de forma fiable la desinstalación. Respetar GPC y el control de medición; excluir QA, cuentas anónimas y Administración. La marca desaparece con la cuenta (`ON DELETE CASCADE`), sin acceso directo de clientes; solo el RPC administrativo devuelve agregados. El candidato empieza apagado y se activa únicamente con la publicación conjunta y el aviso ES/EN.
+
+## Perfil social compartible — candidato (8-nov-2026)
+
+El enlace contiene el UUID público de la mascota. Reutiliza la lectura anónima existente de `pets`, `posts` y el conteo de `follows`, con RLS de mantenimiento y moderación. Solo solicita identidad social, biografía, edad, raza, género, indicador de extravío y publicaciones visibles (texto, foto, total de me gusta); no solicita propietario, zona, comentarios, cuidados, documentos ni datos del pasaporte QR. La vista previa del enlace no contiene datos de mascotas. Si un visitante elige «Conocer PAZO», el destino se guarda en `sessionStorage` hasta volver al perfil o cerrar la pestaña. Sin migración ni nuevas métricas, proveedores o envíos. Actualización ES/EN de «Cuenta y contenido» para aprobación de publicación.
+
 ## Vigilante — aviso de privacidad (3-nov-2026)
 
 Texto aprobado por el PO el 3-nov-2026 en `src/features/legal/legalCopy.ts`: secciones «Salud, comida y código postal» y «Alertas de salud del Vigilante» (ES/EN), y «alertas de salud» en «Avisos en tu teléfono». Sin revisión jurídica. `legalCopy.test.mjs` contrasta el texto con las migraciones y el worker (lista de condiciones, código postal, 8 a. m., tope semanal, 30/7 días, sin IA, fuentes sin datos de usuarios). Requisito para activar el Vigilante.

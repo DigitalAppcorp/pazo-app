@@ -51,13 +51,33 @@ const COPY={
     en:{title:'New account on PAZO',body:'Someone confirmed their sign-up.'},
     urgency:'high',ttl:86400,
   },
+  return_no_pet:{
+    es:{title:'Gracias por visitar PAZO',body:'Crea el perfil de tu mascota y ten su foto y su agenda en un solo lugar.'},
+    en:{title:'Thanks for visiting PAZO',body:'Create your pet’s profile to keep their photo and care schedule in one place.'},
+    urgency:'high',ttl:3600,
+  },
+  return_share:{
+    es:{title:'Comparte el perfil de tu mascota',body:'Presenta a tu mascota a tus amigos con su enlace de PAZO.'},
+    en:{title:'Share your pet’s profile',body:'Introduce your pet to friends with their PAZO link.'},
+    urgency:'high',ttl:3600,
+  },
+  return_care:{
+    es:{title:'Ten a mano su próximo cuidado',body:'Cuando te venga bien, guarda la fecha en su agenda.'},
+    en:{title:'Keep their next care date handy',body:'Whenever it suits you, save the date in their care schedule.'},
+    urgency:'high',ttl:3600,
+  },
+  return_home:{
+    es:{title:'Tu mascota tiene su espacio en PAZO',body:'Cuando quieras, aquí tienes a mano su perfil y su agenda.'},
+    en:{title:'Your pet has a place on PAZO',body:'Their profile and care schedule are here whenever you need them.'},
+    urgency:'high',ttl:3600,
+  },
 }
 
 export function pushMessage(kind,lang,id){
   const copy=COPY[kind]
   if(!copy)return null
   const text=copy[lang==='en'?'en':'es']
-  return {payload:JSON.stringify({title:text.title,body:text.body,tag:'pazo-'+id}),urgency:copy.urgency,ttl:copy.ttl}
+  return {payload:JSON.stringify({title:text.title,body:text.body,tag:'pazo-'+id,...(kind.startsWith('return_')?{tip:kind}:{})}),urgency:copy.urgency,ttl:copy.ttl}
 }
 
 // 404 and 410 mean the device is gone. 429 and 5xx are worth retrying. Anything else
@@ -101,6 +121,7 @@ export function createPushWorker({rpc,fetchImpl=fetch,subject,nowSeconds=()=>Mat
     for(const item of leased){
       const result={id:item.id,retry:false,ok:[],gone:[],failed:[]}
       for(const subscription of item.subscriptions){
+        if(item.kind.startsWith('return_')&&await rpc('pazo_push_worker_return_allowed',{p_outbox_id:item.id,p_subscription_id:subscription.id})!==true)continue
         const message=pushMessage(item.kind,subscription.lang,item.id)
         const outcome=message?await send(subscription,message,vapid):'failed'
         if(outcome==='ok')result.ok.push(subscription.id)

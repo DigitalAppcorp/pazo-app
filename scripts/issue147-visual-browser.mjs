@@ -112,7 +112,13 @@ try{
    assert.ok(Math.abs(agendaBox.width-exploreBox.width)<1&&Math.abs(agendaBox.y-exploreBox.y)<1,'paired secondary actions have equal space')
    const edit=await page.getByRole('button',{name:lang==='es'?'Editar':'Edit',exact:true}).boundingBox()
    const title=await page.getByRole('heading',{name:'Luna',exact:true}).last().boundingBox()
-   assert.ok(title.x+title.width<=edit.x||title.y>=edit.y+edit.height,'profile identity does not collide with Edit')
+   const disjoint=(a,b)=>a.x+a.width<=b.x||b.x+b.width<=a.x||a.y+a.height<=b.y||b.y+b.height<=a.y
+   assert.ok(disjoint(title,edit),'profile identity does not collide with Edit')
+   const shareButton=page.getByRole('button',{name:lang==='es'?'Compartir perfil':'Share profile',exact:true})
+   if(await shareButton.count()){
+    const share=await shareButton.boundingBox()
+    assert.ok(share.width>=44&&share.height>=44&&disjoint(title,share)&&disjoint(edit,share),'Share fits beside Edit without covering the identity')
+   }
    await page.screenshot({path:path.join(out,`${lang}-${width}-${state}-arrival.png`)})
    if(state==='error'){
     await page.keyboard.press('Escape');await notice.waitFor({state:'detached'})

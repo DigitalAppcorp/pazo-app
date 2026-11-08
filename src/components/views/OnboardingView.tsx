@@ -22,10 +22,12 @@ import { WelcomeAnimatedCompanion } from '../../features/onboarding/components/W
 import { PazoInstallControl } from '../../features/pwa/components/PazoInstallControl'
 import { OnboardingProgress } from '../../features/onboarding/OnboardingProgress'
 import { ResendConfirmationButton } from '../../features/auth/ResendConfirmationButton'
+import { fetchNotifications, markNotificationRead } from '../../services/rescueService'
 import type { LegalKind } from '../../features/legal/legalCopy'
 
 interface OnboardingViewProps {
   initialStep?: 'A01' | 'A02' | 'A03' | 'A04'
+  openFirstPetRequest?: number
   onComplete: (createdPet: Pet) => void
   onSkipToLogin: () => void
   onQuickDemo: () => void
@@ -36,6 +38,7 @@ interface OnboardingViewProps {
 
 export const OnboardingView = ({
   initialStep = 'A01',
+  openFirstPetRequest = 0,
   onComplete,
   onSkipToLogin,
   onQuickDemo,
@@ -56,6 +59,9 @@ export const OnboardingView = ({
       setStep(initialStep)
     }
   }, [initialStep])
+  useEffect(() => {
+    if (openFirstPetRequest) setStep('A03')
+  }, [openFirstPetRequest])
 
   // Datos del flujo de onboarding
   const [email, setEmail] = useState('')
@@ -68,6 +74,17 @@ export const OnboardingView = ({
   const ageCheckbox = useRef<HTMLInputElement>(null)
 
   const { signUp, user } = useAuth()
+  const [returnTip, setReturnTip] = useState<{ owner: string; id: string } | null>(null)
+  useEffect(() => {
+    if (step !== 'A03' || !user?.id || !user.email_confirmed_at || import.meta.env.VITE_PAZO_RETURN_TIPS_ENABLED !== 'true') return
+    const owner = user.id
+    let active = true
+    void fetchNotifications(0, 1, 'return_no_pet').then(([notice]) => {
+      if (active) setReturnTip(notice && !notice.read ? { owner, id: notice.id } : null)
+    }).catch(() => undefined)
+    return () => { active = false }
+  }, [step, user?.id, user?.email_confirmed_at])
+  const currentReturnTip = returnTip?.owner === user?.id ? returnTip : null
   const [isSigningUp, setIsSigningUp] = useState(false)
   const [awaitingEmailConfirmation, setAwaitingEmailConfirmation] = useState(false)
 
@@ -547,6 +564,10 @@ export const OnboardingView = ({
               <p className="text-xs text-[#5C7470]">
                 {lang === 'es' ? "Añade cualquier especie. La app se adapta con cariño." : "Add your pet. Choose their species below."}
               </p>
+              {currentReturnTip && <p className="mt-3 rounded-xl bg-[#EAF2E5] p-3 text-xs font-medium leading-relaxed text-[#315B55]">
+                {lang === 'es' ? 'Gracias por volver a PAZO. Crea el perfil de tu mascota y ten su foto y su agenda en un solo lugar.'
+                  : 'Thanks for coming back to PAZO. Create your pet’s profile to keep their photo and care schedule in one place.'}
+              </p>}
             </div>
 
             {/* Avatar selector conectado a la galería */}
@@ -644,7 +665,13 @@ export const OnboardingView = ({
 
           <div className="pb-2">
             <button
-              onClick={() => setStep('A04')}
+              onClick={() => {
+                if (currentReturnTip) {
+                  void markNotificationRead(currentReturnTip.id).catch(() => undefined)
+                  setReturnTip(null)
+                }
+                setStep('A04')
+              }}
               className="w-full bg-[#E1E53F] hover:bg-[#d8dc35] text-[#204E4A] font-extrabold py-3.5 rounded-full text-xs shadow-md cursor-pointer transition-all"
             >
               {lang === 'es' ? "Continuar" : "Continue"}

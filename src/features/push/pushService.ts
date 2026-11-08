@@ -12,6 +12,8 @@ export interface PushPreferences {
   adminNewPets: boolean
   adminNewAccounts: boolean
   adminVigilante?: boolean
+  returnAvailable?: boolean
+  returnTips?: boolean
 }
 
 const browserHasPush = () =>
@@ -51,7 +53,18 @@ const saveSubscription = async (subscription: PushSubscription, lang: 'es' | 'en
     p_lang: lang,
   })
   if (error) throw error
+  if (data === true && import.meta.env.VITE_PAZO_RETURN_TIPS_ENABLED === 'true') {
+    try {
+      const zone = Intl.DateTimeFormat().resolvedOptions().timeZone
+      if (zone) await supabase.rpc('pazo_push_return_device', { p_endpoint: subscription.endpoint, p_zone: zone })
+    } catch { /* A device can still receive essential notices without a known time zone. */ }
+  }
   return data === true
+}
+
+export function recordReturnProfileShare(petId: string) {
+  if (import.meta.env.VITE_PAZO_RETURN_TIPS_ENABLED !== 'true') return
+  void Promise.resolve(supabase.rpc('pazo_push_record_profile_share', { p_pet_id: petId })).catch(() => undefined)
 }
 
 const createSubscription = (worker: ServiceWorkerRegistration, publicKey: string) =>
@@ -185,6 +198,11 @@ export async function fetchPushPreferences() {
   const { data, error } = await supabase.rpc('pazo_push_preferences')
   if (error) throw error
   return data as PushPreferences
+}
+
+export async function saveReturnTipPreference(enabled: boolean) {
+  const result = await supabase.rpc('pazo_push_set_return_preference', { p_enabled: enabled })
+  if (result.error || result.data !== true) throw result.error ?? new Error('The PAZO tips preference was not saved.')
 }
 
 export async function savePushPreferences(value: PushPreferences) {

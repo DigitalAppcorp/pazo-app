@@ -18,6 +18,8 @@ import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { DeletionRequestDialog } from '../../features/account/DeletionRequestDialog'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
 import { PazoInstallControl } from '../../features/pwa/components/PazoInstallControl'
+import { usePetProfileShare } from '../../features/profile/usePetProfileShare'
+import { recordReturnProfileShare } from '../../features/push/pushService'
 import { SupportRequestDialog } from '../../features/support/components/SupportRequestDialog'
 import type { LegalKind } from '../../features/legal/legalCopy'
 import type { Pet, CareItem, Post } from '../../types/pazo'
@@ -41,6 +43,7 @@ interface PetViewProps {
   onRequireAccount: () => void
   availablePets: Pet[]
   onSelectPet: (pet: Pet) => void
+  onOpenSocialProfile?: () => void
   onPetUpdated: (pet: Pet) => void
   onAddPet: () => void
   careItems: CareItem[]
@@ -65,6 +68,7 @@ export const PetView = ({
   onRequireAccount,
   availablePets,
   onSelectPet,
+  onOpenSocialProfile,
   onPetUpdated,
   onAddPet,
   careItems,
@@ -80,6 +84,7 @@ export const PetView = ({
 }: PetViewProps) => {
   const [showPetPicker, setShowPetPicker] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const { shareProfile, shareFeedback } = usePetProfileShare()
   const [isSaving, setIsSaving] = useState(false)
   const [showSupporterAccount, setShowSupporterAccount] = useState(false)
   const [dismissedInvitationPreview, setDismissedInvitationPreview] = useState(false)
@@ -483,15 +488,12 @@ export const PetView = ({
       )}
 
       <div className="p-5 pazo-glass-card rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] overflow-hidden relative">
-        {!isEditing && (
-          <button
-            onClick={handleEditClick}
-            className="absolute top-4 right-4 text-[13px] font-bold text-[#204E4A] bg-[#FAF8F5] hover:bg-[#E1E53F] px-3 py-1.5 rounded-full transition-colors cursor-pointer"
-          >
-            {lang === 'es' ? 'Editar' : 'Edit'}
-          </button>
+        {!isEditing && onOpenSocialProfile && (
+          <button type="button" onClick={onOpenSocialProfile}
+            aria-label={lang === 'es' ? `Abrir perfil público de ${currentPet.name}` : `Open public profile of ${currentPet.name}`}
+            className="absolute inset-0 z-10 cursor-pointer rounded-[inherit] hover:bg-[#204E4A]/5 focus-visible:bg-[#E1E53F]/30 focus-visible:outline-none"
+          />
         )}
-
         <div className="flex gap-4 items-start">
           <div className="relative shrink-0 group">
             <div className="w-20 h-20 rounded-[1.8rem] overflow-hidden shadow-xs relative bg-[#FAF8F5]">
@@ -655,7 +657,7 @@ export const PetView = ({
               </div>
             ) : (
               <>
-                <div className="flex flex-wrap items-center gap-1.5 pr-16">
+                <div className="flex flex-wrap items-center gap-1.5">
                   <h3 className="text-lg font-black text-[#204E4A] truncate">{currentPet.name}</h3>
                   <span className="text-[13px] font-bold px-2 py-0.5 bg-[#E1E53F] text-[#204E4A] rounded-full shrink-0 shadow-xs">
                     {petSpeciesLabel(currentPet.species,lang)}
@@ -682,6 +684,39 @@ export const PetView = ({
             )}
           </div>
         </div>
+        {!isEditing && (
+          <div className="pointer-events-none relative z-20 mt-2 flex items-center justify-end gap-2 [&>button]:pointer-events-auto">
+            <button type="button" onClick={handleEditClick}
+              className="min-h-11 rounded-full bg-[#FAF8F5] px-3 text-[13px] font-bold text-[#204E4A] hover:bg-white focus-visible:bg-[#E1E53F] focus-visible:outline-none cursor-pointer">
+              {lang === 'es' ? 'Editar' : 'Edit'}
+            </button>
+            {onOpenSocialProfile && (
+              <button type="button" onClick={() => { void shareProfile(currentPet) }}
+                aria-label={lang === 'es' ? 'Compartir perfil' : 'Share profile'}
+                title={lang === 'es' ? 'Compartir perfil' : 'Share profile'}
+                className="grid size-11 cursor-pointer place-items-center rounded-full bg-[#FAF8F5] text-[#204E4A] hover:bg-white focus-visible:bg-[#E1E53F] focus-visible:outline-none">
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m8.7 10.5 6.6-4M8.7 13.5l6.6 4" />
+                  <circle cx="6" cy="12" r="2.75" />
+                  <circle cx="18" cy="5" r="2.75" />
+                  <circle cx="18" cy="19" r="2.75" />
+                </svg>
+              </button>
+            )}
+          </div>
+        )}
+        {!isEditing && shareFeedback?.petId === currentPet.id && (
+          <div className="pointer-events-none relative z-20 mt-2 space-y-1 px-2 text-[13px] font-medium text-[#315B55]">
+            <p role="status">{shareFeedback.copied
+              ? (lang === 'es' ? 'Enlace copiado.' : 'Link copied.')
+              : (lang === 'es' ? 'Selecciona y copia el enlace.' : 'Select and copy the link.')}</p>
+            {!shareFeedback.copied && <input readOnly value={shareFeedback.url}
+              aria-label={lang === 'es' ? 'Enlace al perfil social' : 'Social profile link'}
+              onFocus={(event) => event.currentTarget.select()}
+              onCopy={() => recordReturnProfileShare(currentPet.id)}
+              className="pointer-events-auto min-h-11 w-full rounded-xl bg-white px-3 focus:bg-[#F5F4D0] focus:outline-none" />}
+          </div>
+        )}
       </div>
 
       {!isEditing && (
