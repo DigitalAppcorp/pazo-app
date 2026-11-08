@@ -38,7 +38,7 @@ Verificación. Primera mascota en Chrome móvil y iPhone. La instalación, la sa
 
 ## 4. Enviar avisos según el punto donde se quedó la persona
 
-**Candidato integrado [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `cb938dc2`.** PostgreSQL aislado verificó que el interruptor general empieza apagado, que los avisos respetan la etapa y el horario, que dos procesos simultáneos no duplican avisos y que un cambio de preferencia o la creación de la mascota impide un envío ya en cola. Chrome comprobó que el consejo de compartir abre el perfil de la mascota. La fase de 14 días sigue apagada aparte. Pendientes CI del paquete y prueba de entrega en un teléfono físico.
+**Candidato integrado [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `b6e7bc1e`.** PostgreSQL aislado verificó que el interruptor general empieza apagado, que los avisos respetan la etapa y el horario, que dos procesos simultáneos no duplican avisos y que un cambio de preferencia o la creación de la mascota impide un envío ya en cola. Chrome comprobó que el consejo de compartir abre el perfil de la mascota. La fase de 14 días sigue apagada aparte. CI integrado 15/15, incluido el laboratorio GoTrue y las pruebas de Chrome. La prueba de entrega en teléfono físico se realiza en un laboratorio HTTPS temporal con cuentas ficticias.
 
 | Momento propuesto | Quién puede recibirlo | Mensaje | Destino |
 | --- | --- | --- | --- |
@@ -59,7 +59,7 @@ Verificación. Simular cada etapa, cambios antes de enviar, permiso denegado, do
 
 ## 5. Contar cuentas con y sin instalación detectada
 
-**Candidato [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** PostgreSQL aislado comprobó deduplicación, acceso de Administración, exclusiones y borrado con la cuenta. Chrome verificó ambas cifras con datos ficticios y el estado apagado. CI de GitHub en curso; medición apagada y sin cambios alojados.
+**Candidato [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** PostgreSQL aislado comprobó deduplicación, acceso de Administración, exclusiones y borrado con la cuenta. Chrome verificó ambas cifras con datos ficticios y el estado apagado. CI integrado 15/15. Medición apagada y sin cambios alojados.
 
 **Decisión del PO:** mostrar solo dos cifras en Administración: **Con instalación detectada** y **Sin instalación detectada**. Contar una vez cada cuenta confirmada elegible y excluir QA y Administración. No presentar embudo, actividad por periodo, lista de personas ni desgloses por dispositivo.
 
