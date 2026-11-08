@@ -38,6 +38,10 @@ try{
    if(authDriven&&url.pathname==='/auth/v1/user')return reply({id:actorId(route.request()),aud:'authenticated',role:'authenticated',email:'synthetic-qa@example.invalid',app_metadata:{provider:'email'},user_metadata:{},created_at:new Date().toISOString()})
    if(authDriven&&url.pathname.includes('/auth/v1/logout'))return reply({})
    if(rpc==='pazo_ensure_my_profile')return reply(true)
+   if(rpc==='pazo_admin_pwa_installation_counts'){
+    if(authDriven&&actorId(route.request())!=='96000000-0000-4000-8000-000000000031')return reply({code:'42501'},403)
+    return reply(width===320?{enabled:false}:{enabled:true,detected:8,not_detected:13})
+   }
    if(rpc==='pazo_admin_visual_summary_v1'){
     if(mode==='error')return reply({code:'SYNTHETIC_OUTAGE'},503)
     if(mode==='access')return reply({code:'42501',message:'admin required'},403)
@@ -66,6 +70,14 @@ try{
   await page.addStyleTag({content:font});await page.evaluate(()=>document.fonts.load('700 16px Quicksand'))
   assert.ok(await page.evaluate(()=>Array.from(document.fonts).some(f=>f.family.replaceAll('"','').replaceAll("'",'')==='Quicksand'&&f.status==='loaded')));checks++
   await page.locator('.pa-kpi>strong').first().filter({hasText:'120'}).waitFor()
+  const pwaCounts=page.getByRole('region',{name:lang==='es'?'Instalación de PAZO':'PAZO installation'})
+  if(width===320)await pwaCounts.getByText(lang==='es'?'Sin datos aún':'No data yet',{exact:true}).waitFor()
+  else{
+   await pwaCounts.getByText(lang==='es'?'Con instalación detectada':'Installation detected',{exact:true}).waitFor()
+   assert.deepEqual(await pwaCounts.locator('dd').allTextContents(),['8','13'])
+   assert.equal(await pwaCounts.locator('dt').count(),2)
+  }
+  checks++
   assert.deepEqual(await page.locator('.pa-funnel-labels strong').allTextContents(),['80','60','40','20'])
   checks++
   // Overview stays compact: no segments or exclusion until Comportamiento, which keeps every prior assertion below.

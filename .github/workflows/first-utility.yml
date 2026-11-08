@@ -37,6 +37,10 @@ jobs:
       - run: npm run test:first-utility
       - run: npm run test:first-use
       - run: npm run test:first-utility:pg17
+      - name: Verify the two PWA installation counts in a disposable database
+        run: |
+          createdb --maintenance-db=postgres pazo_pwa_installation_test
+          psql -X -d pazo_pwa_installation_test -f supabase/tests/pwa-installation-counts-pg17.sql
   utility-browser:
     runs-on: ubuntu-latest
     timeout-minutes: 12

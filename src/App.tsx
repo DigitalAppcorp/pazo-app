@@ -17,6 +17,8 @@ import { stageMarketingLanding, takeVerifiedFirstUseIntent } from './features/ma
 import { HomeFeedStatus } from './features/feed/HomeFeedStatus'
 import { FirstUsePrompt } from './features/onboarding/FirstUsePrompt'
 import { FirstCarePrompt } from './features/onboarding/FirstCarePrompt'
+import { FirstPetInstallPrompt } from './features/pwa/components/FirstPetInstallPrompt'
+import { useDetectedInstallation } from './features/pwa/useDetectedInstallation'
 import { shouldOfferFirstUse, isCurrentFirstUse, type FirstUseHint } from './features/onboarding/firstUse'
 import { pazoBuildVersion } from './features/release/buildVersion'
 import { applyDocumentLanguage, getInitialLanguage, rememberLanguage, type PazoLanguage } from './features/i18n/languagePreference'
@@ -267,6 +269,7 @@ function PazoMain() {
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
   const [firstUseHint, setFirstUseHint] = useState<FirstUseHint|null>(null)
   const [firstCareHint, setFirstCareHint] = useState<FirstUseHint|null>(null)
+  const [firstInstallHint, setFirstInstallHint] = useState<FirstUseHint|null>(null)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
   const [accountRequests] = useState(createRequestScope)
   const [petRequests] = useState(createRequestScope)
@@ -406,6 +409,7 @@ function PazoMain() {
   const [selectedSightingId, setSelectedSightingId] = useState<string | null>(null)
 
   const canUseAccount = canUseAccountFeatures(user?.id, isDemoUser)
+  useDetectedInstallation(canUseAccount && user?.email_confirmed_at ? user.id : undefined)
 
   const enterDemo = () => {
     if (user) return
@@ -845,6 +849,7 @@ function PazoMain() {
   const selectActivePet = (pet: Pet) => {
     setFirstUseHint(null)
     setFirstCareHint(null)
+    setFirstInstallHint(null)
     retirePetRequests()
     if (isDemoUser) {
       activePetIdRef.current = pet.id
@@ -886,6 +891,7 @@ function PazoMain() {
         setPetBootstrap({ userId, status: 'loading' })
         setFirstUseHint(null)
         setFirstCareHint(null)
+        setFirstInstallHint(null)
         setIsFeedLoading(true)
         setPosts([])
         setProfilePosts([])
@@ -2266,6 +2272,9 @@ function PazoMain() {
   const showFirstCare = canShowAppNotice && activeTab === 'mascota' && ownPetsReady && canUseAccount
     && isCurrentFirstUse(firstCareHint, user?.id, currentPet.id) && !firstUseHint
     && !isCareLoading && !careError && careItems.length === 0 && careHistory.length === 0
+  const showFirstInstall = canShowAppNotice && activeTab === 'mascota' && ownPetsReady && canUseAccount
+    && isCurrentFirstUse(firstInstallHint, user?.id, currentPet.id) && !firstUseHint
+    && (!firstCareHint || (!isCareLoading && !careError && (careItems.length > 0 || careHistory.length > 0)))
 
   return (
     <div className="h-[100dvh] min-h-0 bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:h-auto sm:min-h-screen sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
@@ -2345,6 +2354,7 @@ function PazoMain() {
                   const hint = {ownerId:user.id,petId:newPet.id,intent:takeVerifiedFirstUseIntent(user.id)}
                   setFirstUseHint(hint)
                   setFirstCareHint(hint)
+                  setFirstInstallHint(hint)
                   setActiveTab('mascota')
                 }
                 ownedPetIdsRef.current = [newPet.id]
@@ -2715,6 +2725,8 @@ function PazoMain() {
                 setVaccineDraft((draft) => ({ key: (draft?.key ?? 0) + 1, vaccineType: null }))
                 setIsCareOpen(true)
               })} />}
+
+            {showFirstInstall && <FirstPetInstallPrompt lang={lang} onDismiss={() => setFirstInstallHint(null)} />}
 
             {(activeTab === 'inicio' || activeTab === 'comunidades' || activeTab === 'mascota') && (
               <div

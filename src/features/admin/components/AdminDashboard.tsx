@@ -11,6 +11,7 @@ import {AdminVigilanteInbox} from '../../vigilante/admin/AdminVigilanteInbox'
 import { AdminGlyph,AdminDonut,AdminCohortColumns,AdminModuleRings,type AdminGlyphName } from './AdminVisuals'
 import { InfoTip,PulseTile,RankBars } from './AdminClarity'
 import {AdminSignupReadout} from './AdminSignupReadout'
+import {AdminPwaInstallationCounts} from './AdminPwaInstallationCounts'
 import {
  adminOverview,adminUsers,adminExperiments,adminVoters,adminAudience,
  type AdminOverview,type AdminUser,type AdminExperiment,type AdminVoter,type AdminAudience,
@@ -244,6 +245,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
       <PulseTile icon="calendar" label={l('Activos hoy','Active today')} value={overview?n(overview.activity.today):'—'} onOpen={()=>selectSection('activity')}/>
       <PulseTile icon="layers" label={l('Publicaciones','Posts')} value={overview?n(overview.people.posts):'—'} onOpen={()=>selectSection('content')}/>
      </div>}
+     {section==='summary'&&<AdminPwaInstallationCounts lang={lang}/>}
      {(section==='summary'||section==='behavior')&&<ExecutiveAnalytics key={section} lang={lang} view={section==='summary'?'overview':'full'} onOpenMarketing={()=>selectSection('marketing')} onOpenBehavior={()=>selectSection('behavior')}/>}
      {section!=='paypal'&&section!=='marketing'&&section!=='behavior'&&section!=='summary'&&loading&&overviewSections.includes(section)&&<p role="status" className="rounded-2xl bg-white p-5 text-[13px]">{l('Consultando datos…','Loading data…')}</p>}
      {section!=='paypal'&&section!=='marketing'&&section!=='behavior'&&section!=='summary'&&error&&overviewSections.includes(section)&&<div role="alert" className="rounded-[20px] bg-[#F9E7DE] p-4 text-[13px] text-[#823E2D]">
