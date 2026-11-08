@@ -92,17 +92,16 @@ test('signing back in restores alerts the phone already allows, unless they were
  const service=readFileSync(new URL('./pushService.ts',import.meta.url),'utf8')
  const sync=service.slice(service.indexOf('export async function syncPush'),service.indexOf('export async function releasePushForSignOut'))
  // No prompt: only when the permission is already granted, and never against a manual turn-off.
- assert.match(sync,/Notification\.permission !== 'granted'\) return/)
- assert.match(sync,/if \(!subscription && turnedOffHere\(\)\) return/)
+ assert.match(sync,/isCurrent\(\) && !turnedOffHere\(\) && Notification\.permission === 'granted'/)
  assert.match(sync,/if \(!subscription\) \{\s*subscription = await createSubscription\(worker, config\.publicKey\)/)
- assert.match(sync,/await saveSubscription\(subscription, lang\)/)
+ assert.match(sync,/if \(canSync\(\)\) await saveSubscription\(subscription, lang\)/)
  assert.doesNotMatch(sync,/requestPermission/)
  // Signing out releases the device without remembering a turn-off; the button does remember it.
  const release=service.slice(service.indexOf('export async function releasePushForSignOut'))
  assert.match(release,/releaseDevice\(\)\.catch/)
  assert.doesNotMatch(release,/rememberTurnedOff|disablePush\(/)
- assert.match(service,/export async function disablePush\(\) \{\s*rememberTurnedOff\(true\)\s*await releaseDevice\(\)/)
- assert.match(service,/if \(!await saveSubscription\(subscription, lang\)\) return 'failed'\s*rememberTurnedOff\(false\)/)
+ assert.match(service,/export async function disablePush\(\) \{\s*rememberTurnedOff\(true\)\s*deviceVersion\+\+\s*await releaseDevice\(\)/)
+ assert.match(service,/if \(!await saveSubscription\(subscription, lang\)\) return 'failed'\s*if \(version === deviceVersion\) rememberTurnedOff\(false\)/)
  assert.match(service,/const PUSH_OFF_KEY = 'pazo_push_off_v1'/)
  // The bell's button is the manual turn-off.
  assert.match(readFileSync(new URL('./PushControl.tsx',import.meta.url),'utf8'),/onClick=\{\(\) => void disablePush\(\)/)

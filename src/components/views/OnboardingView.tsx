@@ -4,6 +4,7 @@ import type { Species, Pet } from '../../types/pazo'
 import { IconCat, IconDog, IconRabbit, IconBird, IconPaw } from '../icons/PazoIcons'
 import { useAuth } from '../../context/AuthContext'
 import { createPetProfile } from '../../services/petService'
+import { requestSignupPushPermission } from '../../features/push/pushService'
 import { PostalCodeField } from '../../features/vigilante/PrivateDetailsFields'
 import { isValidPostalCode } from '../../features/vigilante/privateDetails'
 import { saveHouseholdPostalCode } from '../../features/vigilante/privateDetailsService'
@@ -141,6 +142,7 @@ export const OnboardingView = ({
     }
 
     setIsSigningUp(true)
+    void requestSignupPushPermission()
     try {
       const outcome = await signUp(email.trim(), password)
       observePrereg(outcome==='failed'?'signup_error':'signup_requested')

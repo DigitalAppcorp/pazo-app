@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { requestSignupPushPermission } from '../push/pushService'
 
 interface Props {
   lang: 'es' | 'en'
@@ -35,6 +36,19 @@ export function GoogleSignInButton({ lang, confirmAdult }: Props) {
     clearGoogleAuthFailure()
     setStartFailed(false)
     setStarting(true)
+    const permission = confirmAdult ? requestSignupPushPermission() : undefined
+    if (permission) {
+      // Give the native prompt time to resolve before navigating away to Google.
+      // A quiet or ignored prompt cannot hold up sign-in indefinitely.
+      let timeout: number | undefined
+      try {
+        await Promise.race([permission, new Promise<void>(resolve => {
+          timeout = window.setTimeout(resolve, 5000)
+        })])
+      } finally {
+        window.clearTimeout(timeout)
+      }
+    }
     if (!(await signInWithGoogle(adultConfirmed))) {
       setStarting(false)
       setStartFailed(true)
