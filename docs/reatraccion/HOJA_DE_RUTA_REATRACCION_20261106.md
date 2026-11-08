@@ -93,7 +93,7 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ## Punto 4b — Que el origen del anuncio sobreviva al cambio de navegador
 
-**Estado: IMPLEMENTADO EN CANDIDATO [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** Chrome envía el código validado al alta por correo. PostgreSQL aislado comprobó que una confirmación sin contexto local lo promueve una vez, que el código no permanece en los metadatos y que la limpieza retira los vencidos. Captura apagada y aviso de privacidad preparado para la entrega conjunta. Agregado el 6-nov-2026, a partir de una pregunta del PO.
+**Estado: IMPLEMENTADO EN CANDIDATO [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** Un perfil de Chrome registró una cuenta desde el enlace de campaña y otro abrió el enlace de confirmación sin compartir almacenamiento. Auth se simuló y PostgreSQL ejecutó los triggers reales. Administración devolvió la campaña una sola vez, el código salió de los metadatos y la prueba de limpieza retiró los vencidos. Captura apagada y aviso de privacidad preparado para la entrega conjunta. Agregado el 6-nov-2026, a partir de una pregunta del PO.
 
 - **Hipótesis del PO, descartada:** que «sin dato» sea gente que rechaza el seguimiento de Meta. El registro propio del origen **no depende** de esa casilla: `marketingRuntime.ts` crea el registrador con `enabled: true` siempre. La casilla de Meta solo decide si se le comunica el registro a Meta.
 - **Causas reales:**
@@ -122,7 +122,7 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 | 2026-11-06 | 4b | Agregado: el origen se pierde al confirmar el correo en otro navegador; descartado que dependa de la casilla de Meta. |
 | 2026-11-06 | 1 | En curso: rama `feat/push-offer-first-pet-20261106`. |
 | 2026-11-06 | 1, 1b, 2 | El PO pidió invitación sin tecnicismos, recordatorio en agenda y mascota perdida tras «Ahora no», barra de progreso y aviso de spam. Todo en PR #212. |
-| 2026-11-06 | — | Prueba frágil detectada (no es de esta hoja, pero bloquea su CI): «D7 mature calendar cohort» en `scripts/behavior-pg17.mjs` (jobs `behavior` e `intelligence`). Usa `now()-interval '10 days'` y `now()-interval '1 day'`; cuando esos instantes caen a ambos lados de un cambio de horario de Los Ángeles, entre las 07:00 y las 08:00 UTC quedan en otro día de calendario y falla. **Pendiente:** anclar los datos de la prueba a la medianoche de Los Ángeles. |
+| 2026-11-06 | — | Prueba frágil detectada (no es de esta hoja, pero bloquea su CI): «D7 mature calendar cohort» en `scripts/behavior-pg17.mjs` (jobs `behavior` e `intelligence`). Usa `now()-interval '10 days'` y `now()-interval '1 day'`; cuando esos instantes caen a ambos lados de un cambio de horario de Los Ángeles, entre las 07:00 y las 08:00 UTC quedan en otro día de calendario y falla. Resuelto en el candidato. La prueba ancla las fechas al mediodía del día local de Los Ángeles. |
 | 2026-11-08 | 1, 1b, 2 | Publicación reconciliada con #212 y #213; dos confirmaciones reales después del recordatorio. Punto 3 en preparación. |
 | 2026-11-08 | 3 | #216 publicado en producción. Falta observación del push de cuidado en teléfono físico. |
 | 2026-11-08 | 1 | PO pidió activación durante el alta y restauración al volver. Candidato #217 probado en Chrome con datos sintéticos. |
@@ -130,3 +130,4 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 | 2026-11-08 | 1 | #217 publicado. Activación durante el alta de cuenta y recuperación al entrar. Pendiente prueba física. |
 | 2026-11-08 | Subhoja 2 | Candidato [#218](https://github.com/DigitalAppcorp/pazo-app/pull/218): perfil social compartible probado en Chrome. Sin cambios alojados. |
 | 2026-11-08 | 4, 4b, 5 | [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219) integra los puntos pendientes. Verificación local con Chrome y PostgreSQL. Revisar CI y prueba física antes de publicar el paquete. |
+| 2026-11-08 | 4, 4b, 5 y subhoja | #219 `417e3a93` con 15/15 workflows. El PO aprobó la tarjeta y confirmó ambos destinos de avisos y la instalación desde el teléfono. La cuenta instalada contó una vez tras dos aperturas. Se comprobó continuidad de campaña entre dos perfiles Chrome contra PostgreSQL aislado. Pendiente GO explícito para publicar el paquete y activar sus tres puertas. |
