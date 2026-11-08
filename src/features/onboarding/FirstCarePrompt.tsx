@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { PazoStateIllustration } from '../illustrations/PazoStateIllustration'
-import { noticeSurface } from '../notices/AppNotice'
 
 export function FirstCarePrompt({ petName, lang, onStart, onDismiss }: {
   petName: string
@@ -18,7 +17,7 @@ export function FirstCarePrompt({ petName, lang, onStart, onDismiss }: {
 
   return <section aria-label={es ? 'Primer cuidado' : 'First care reminder'} data-pazo-app-notice="first-care"
     onKeyDown={event => { if (event.key === 'Escape') { event.stopPropagation(); dismiss() } }}
-    className={noticeSurface}>
+    className="absolute inset-x-3 bottom-[calc(112px+env(safe-area-inset-bottom))] z-[35] max-h-[calc(100%-190px)] overflow-y-auto overscroll-contain rounded-[24px] bg-[#FFFEFB] p-4 text-[#204E4A] shadow-[0_12px_48px_-12px_rgba(32,78,74,0.30)] sm:inset-x-5 sm:p-5">
     <button type="button" onClick={dismiss} aria-label={es ? 'Cerrar aviso' : 'Dismiss notice'}
       className="absolute right-1.5 top-1.5 flex h-11 w-11 items-center justify-center rounded-full text-[#5C7470] hover:bg-[#204E4A]/5 focus-visible:bg-[#E1E53F] focus-visible:outline-none">
       <span aria-hidden="true">×</span>

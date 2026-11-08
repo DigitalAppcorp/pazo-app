@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { PazoStateIllustration } from '../../illustrations/PazoStateIllustration'
-import { noticeSurface } from '../../notices/AppNotice'
 import { readPazoInstallState, subscribePazoInstall, takePazoInstallPrompt } from '../installPromptBridge'
 
 const dismissedKey = 'pazo_first_pet_install_dismissed'
@@ -80,7 +79,7 @@ export function FirstPetInstallPrompt({ lang, onDismiss }: { lang: 'es' | 'en'; 
   return (
     <section aria-label={es ? 'Instalar PAZO' : 'Install PAZO'} data-pazo-app-notice="first-install"
       onKeyDown={(event) => { if (event.key === 'Escape' && !inFlight.current) { event.stopPropagation(); dismiss() } }}
-      className={noticeSurface}>
+      className="absolute inset-x-3 bottom-[calc(112px+env(safe-area-inset-bottom))] z-[35] max-h-[calc(100%-190px)] overflow-y-auto overscroll-contain rounded-[24px] bg-[#FFFEFB] p-4 text-[#204E4A] shadow-[0_12px_48px_-12px_rgba(32,78,74,0.30)] sm:inset-x-5 sm:p-5">
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <h2 className="text-xl font-black leading-tight">{es ? 'Ten PAZO a mano' : 'Keep PAZO handy'}</h2>

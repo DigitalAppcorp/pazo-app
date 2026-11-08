@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import './features/notices/noticeSurface.css'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from './features/legal/supportContact.ts'
 import { getPublicSupabaseConfig } from './lib/publicConfig.ts'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'

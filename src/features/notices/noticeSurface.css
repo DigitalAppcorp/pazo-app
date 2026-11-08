@@ -1,0 +1,8 @@
+:is([data-pazo-app-notice='welcome'], [data-pazo-app-notice='first-care'], [data-pazo-app-notice='first-install']) {
+  box-shadow: 0 5px 24px 8px rgb(255 255 255 / 96%);
+}
+
+[data-pazo-app-notice='welcome'],
+[data-pazo-app-notice='welcome'] button {
+  border-width: 0;
+}
