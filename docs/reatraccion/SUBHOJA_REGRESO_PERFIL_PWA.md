@@ -53,19 +53,21 @@ El aviso de 14 días queda como segunda fase. Abrirlo solo si los primeros aviso
 
 Verificación. Simular cada etapa, cambios antes de enviar, permiso denegado, dos dispositivos, concurrencia, reintentos y enlace de retorno. Verificar en un teléfono real la recepción y el destino. Medir solicitudes aceptadas por el proveedor, aperturas observadas y paso completado dentro de siete días. Comparar con una cohorte sin avisos cuando el volumen lo permita.
 
-## 5. Mostrar cuántas cuentas usan PAZO instalado
+## 5. Contar cuentas con y sin instalación detectada
 
-Tarjeta propuesta en Administración. **Cuentas que abrieron PAZO instalado · últimos 14 días**. Contar una sola vez cada cuenta verificada que abra PAZO en modo instalado, aunque lo haga varias veces o desde varios dispositivos. Mostrar debajo las cuentas activas elegibles del mismo periodo para dar contexto. Excluir pruebas y administración con `marketing_private.is_reporting_owner`.
+**Decisión del PO:** mostrar solo dos cifras en Administración: **Con instalación detectada** y **Sin instalación detectada**. Contar una vez cada cuenta confirmada elegible y excluir QA y Administración. No presentar embudo, actividad por periodo, lista de personas ni desgloses por dispositivo.
 
-Señales separadas para el embudo. **Aviso mostrado → tocó Instalar o Cómo instalar → instalación detectada → apertura en modo instalado**. El evento `appinstalled` aporta una señal adicional en Chromium. En iPhone se puede constatar el uso cuando la persona abre PAZO desde el icono y la app detecta modo instalado. El permiso push y el clic en el botón se miden por separado. El gráfico responde cuántas cuentas se observaron usando PAZO instalado en la ventana, porque el navegador no ofrece un inventario completo de instalaciones ni desinstalaciones. [Detección de instalación y modo de apertura](https://web.dev/learn/pwa/detection)
+Marcar la cuenta cuando el navegador emita `appinstalled` o cuando la persona abra PAZO en modo instalado, también desde el icono en iPhone. Aceptar el diálogo no cuenta. Una instalación anterior puede quedar sin detectar hasta que se abra la PWA, y el navegador no informa de forma fiable las desinstalaciones. [Detección de instalación](https://web.dev/learn/pwa/detection)
 
-Guardar solo la referencia interna de cuenta, el tipo de señal y la fecha necesaria para el agregado. Proponer 14 días de retención, borrar al eliminar la cuenta y exponer únicamente totales mediante un RPC para Administración. Aprobar el aviso actualizado antes de recolectar la señal. Verificar deduplicación, expiración, acceso, Chrome, iPhone y el estado «Sin datos aún».
+Guardar una sola marca interna sin fecha ni historial y borrarla al eliminar la cuenta. Respetar GPC y el control de medición. La recolección empieza apagada; la aclaración de privacidad ES/EN y el encendido corresponden a la publicación conjunta.
+
+Verificación: confirmar deduplicación, permisos, eliminación con la cuenta, modo instalado, evento nativo, aceptación sin instalación y estado «Sin datos aún».
 
 ## Orden de trabajo y decisiones
 
 1. Cerrar el flujo de avisos y el correo ya existentes. Validar en el punto 1 que una cuenta confirmada puede quedar suscrita antes de registrar una mascota.
 2. Entregar primero la tarjeta y el enlace social. La invitación a compartir en un push depende de un destino público que ya funcione.
-3. Entregar juntos la tarjeta de instalación y el conteo agregado. Validar el aviso de privacidad y la ventana de datos antes de recolectar.
+3. Entregar juntos la tarjeta de instalación y el conteo agregado. Validar el aviso de privacidad antes de activar el conteo.
 4. Añadir los avisos por etapa en modo de prueba. Revisar los textos ES/EN, los plazos y la frecuencia con el PO antes de activar envíos. Probar primero el caso sin mascota y el de compartir.
 5. Revisar resultados de registro completado, primera mascota, perfil compartido, apertura en PWA y retorno. Conservar los avisos que produzcan una mejora sin aumentar la desactivación.
 
