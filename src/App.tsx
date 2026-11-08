@@ -18,6 +18,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { stageMarketingLanding, takeVerifiedFirstUseIntent } from './features/marketing/marketingRuntime'
 import { HomeFeedStatus } from './features/feed/HomeFeedStatus'
 import { FirstUsePrompt } from './features/onboarding/FirstUsePrompt'
+import { FirstCarePrompt } from './features/onboarding/FirstCarePrompt'
 import { shouldOfferFirstUse, isCurrentFirstUse, type FirstUseHint } from './features/onboarding/firstUse'
 import { pazoBuildVersion } from './features/release/buildVersion'
 import { applyDocumentLanguage, getInitialLanguage, rememberLanguage, type PazoLanguage } from './features/i18n/languagePreference'
@@ -260,6 +261,7 @@ function PazoMain() {
 
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
   const [firstUseHint, setFirstUseHint] = useState<FirstUseHint|null>(null)
+  const [firstCareHint, setFirstCareHint] = useState<FirstUseHint|null>(null)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
   const [accountRequests] = useState(createRequestScope)
   const [petRequests] = useState(createRequestScope)
@@ -389,7 +391,7 @@ function PazoMain() {
   // Bumped by the welcome notice to open the pet's edit form.
   const [petEditRequestKey, setPetEditRequestKey] = useState(0)
   // Set when a health alert is answered "has it": the care form opens with that vaccine.
-  const [vaccineDraft, setVaccineDraft] = useState<{ key: number; vaccineType: VaccineType } | null>(null)
+  const [vaccineDraft, setVaccineDraft] = useState<{ key: number; vaccineType: VaccineType | null } | null>(null)
   const [isPassportOpen, setIsPassportOpen] = useState(false)
   const [isCareOpen, setIsCareOpen] = useState(false)
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
@@ -837,6 +839,7 @@ function PazoMain() {
 
   const selectActivePet = (pet: Pet) => {
     setFirstUseHint(null)
+    setFirstCareHint(null)
     retirePetRequests()
     if (isDemoUser) {
       activePetIdRef.current = pet.id
@@ -877,6 +880,7 @@ function PazoMain() {
       const initApp = async () => {
         setPetBootstrap({ userId, status: 'loading' })
         setFirstUseHint(null)
+        setFirstCareHint(null)
         setIsFeedLoading(true)
         setPosts([])
         setProfilePosts([])
@@ -1611,6 +1615,7 @@ function PazoMain() {
     await createCareItem(petId, input)
     if (!isCurrent()) return
 
+    setFirstCareHint(null)
     await refreshCareAfterMutation(petId)
   }
 
@@ -2220,6 +2225,9 @@ function PazoMain() {
   const isAuthenticated = (!!user && !isOnboardingActive) || isDemoUser
   const isCurrentOnboardingCompletion = accountRequests.capture()
   const canShowAppNotice = !selectedPublicProfileId&&!isSearchOpen&&!isCreateMenuOpen&&!isCreatePostOpen&&!isAddPetOpen&&!isPassportOpen&&!isCareOpen&&!isDocumentsOpen&&!isAlertOpen&&!isMessagesOpen&&!isNotificationsOpen&&!selectedSightingId
+  const showFirstCare = canShowAppNotice && activeTab === 'mascota' && ownPetsReady && canUseAccount
+    && isCurrentFirstUse(firstCareHint, user?.id, currentPet.id) && !firstUseHint && pushOffer.ready && !pushOffer.kind
+    && !isCareLoading && !careError && careItems.length === 0 && careHistory.length === 0
 
   return (
     <div className="h-[100dvh] min-h-0 bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:h-auto sm:min-h-screen sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
@@ -2295,7 +2303,9 @@ function PazoMain() {
               onComplete={(newPet) => {
                 if (!isCurrentOnboardingCompletion()) return
                 if (shouldOfferFirstUse(ownedPetIdsRef.current,user?.id,newPet.id,isDemoUser)&&user?.id) {
-                  setFirstUseHint({ownerId:user.id,petId:newPet.id,intent:takeVerifiedFirstUseIntent(user.id)})
+                  const hint = {ownerId:user.id,petId:newPet.id,intent:takeVerifiedFirstUseIntent(user.id)}
+                  setFirstUseHint(hint)
+                  setFirstCareHint(hint)
                   setActiveTab('mascota')
                 }
                 ownedPetIdsRef.current = [newPet.id]
@@ -2661,6 +2671,14 @@ function PazoMain() {
                 onQr={()=>{setFirstUseHint(null);openAccountAction(()=>setIsPassportOpen(true))}}
                 onCare={()=>{setFirstUseHint(null);openAccountAction(()=>setIsCareOpen(true))}}/>
             )}
+
+            {showFirstCare && <FirstCarePrompt petName={currentPet.name} lang={lang}
+              onDismiss={() => setFirstCareHint(null)}
+              onStart={() => openAccountAction(() => {
+                setFirstCareHint(null)
+                setVaccineDraft((draft) => ({ key: (draft?.key ?? 0) + 1, vaccineType: null }))
+                setIsCareOpen(true)
+              })} />}
 
             {(activeTab === 'inicio' || activeTab === 'comunidades' || activeTab === 'mascota') && (
               <div

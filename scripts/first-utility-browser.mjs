@@ -44,6 +44,9 @@ try{
  let number=0
  for(const lang of ['es','en'])for(const width of [320,390,430]){
   const owner=id(++number),pet=id(number+100),registered=new Date().toISOString()
+  const exercisePushOffer=contextual&&width===390
+  const scheduleFirstCare=contextual&&width!==320
+  const careTitle=scheduleFirstCare?(lang==='es'?'Rabia':'Rabies'):'QA persisted care'
   let petCreated=!contextual
   sql(`INSERT INTO auth.users(id,created_at,email_confirmed_at) VALUES('${owner}',${q(registered)},${q(registered)});INSERT INTO public.profiles(id) VALUES('${owner}');${contextual?'':`INSERT INTO public.pets VALUES('${pet}','${owner}',now())`}`)
   const user={id:owner,aud:'authenticated',role:'authenticated',email:'qa@invalid.example',created_at:registered,email_confirmed_at:registered,app_metadata:{provider:'email',providers:['email']},user_metadata:{}}
@@ -75,6 +78,7 @@ try{
       tx(`INSERT INTO public.pets VALUES('${pet}','${owner}',now())`);petCreated=true;return respond(pet)
      }
      if(['pazo_is_admin','f14_is_moderator'].includes(rpc))return respond(false)
+     if(rpc==='pazo_push_config'&&contextual)return respond({enabled:exercisePushOffer,publicKey:'synthetic-push-key'})
      if(rpc==='pazo_marketing_record_utility_v1'){
       metricRequests.push(value.p_event)
       if(failMetric)return respond({message:'synthetic offline metric'},503)
@@ -104,23 +108,29 @@ try{
    }catch(error){console.error('Isolated backend:',error.message);return respond({message:'isolated backend rejected request'},403)}
   })
   if(context.routeWebSocket)await context.routeWebSocket('**/*',ws=>ws.close())
-  await context.addInitScript(({session,lang,contextual,width,owner})=>{
+  await context.addInitScript(({session,lang,contextual,width,owner,exercisePushOffer})=>{
    localStorage.clear();localStorage.setItem('sb-mrybvqdebbgcayuvgkkr-auth-token',JSON.stringify(session));localStorage.setItem('pazo_language_preference_v1',lang)
+   if(exercisePushOffer){
+    Object.defineProperty(Notification,'permission',{configurable:true,value:'default'})
+    Object.defineProperty(navigator.serviceWorker,'getRegistration',{configurable:true,value:async()=>({pushManager:{getSubscription:async()=>null}})})
+   }else if(contextual)localStorage.setItem('pazo_push_off_v1','1')
    window.__shareMode='cancel'
    if(contextual&&width!==320){
     const firstTouchAt=Date.now()
     localStorage.setItem('pazo_marketing_firstparty_v1',JSON.stringify({version:1,attribution:{source:'meta',medium:'paid_social',campaign:'pazo_beta_local_202610',creative:lang==='es'?'qr_es':'qr_en',firstTouchAt},steps:['landing','signup_requested','signup_verified'],signupRequestedAt:firstTouchAt,signupOwnerId:owner}))
    }
    Object.defineProperty(navigator,'share',{configurable:true,value:async()=>{if(window.__shareMode==='cancel')throw new DOMException('cancelled','AbortError')}})
-  },{session,lang,contextual,width,owner})
+  },{session,lang,contextual,width,owner,exercisePushOffer})
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(origin,{waitUntil:'domcontentloaded',timeout:hostedAsset?90000:30000})
   const nav=page.getByRole('navigation',{name:'Navegación de PAZO'})
+  const firstCare=page.getByRole('region',{name:lang==='es'?'Primer cuidado':'First care reminder'})
   if(contextual){
    await page.getByPlaceholder(lang==='es'?'Ej: Luna, Bruno, Nube...':'E.g. Luna, Bruno, Cloud...').fill('Luna')
    await page.getByRole('button',{name:lang==='es'?'Continuar':'Continue',exact:true}).click()
    await page.getByRole('button',{name:lang==='es'?'Crear perfil y entrar':'Create profile and enter',exact:true}).click()
    const hint=page.getByRole('region',{name:lang==='es'?'Para empezar':'To get started'})
    await hint.waitFor();assert.equal(feedPending,true)
+   assert.equal(await firstCare.count(),0,'no first care above the welcome notice')
    assert.equal(await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).getAttribute('aria-current'),'page')
    assert.equal(sql(`SELECT count(*) FROM public.pets WHERE id='${pet}' AND owner_id='${owner}'`),'1')
    await page.screenshot({path:path.join(out,`${lang}-${width}-first-use.png`)})
@@ -134,6 +144,34 @@ try{
   }
   await nav.waitFor()
   await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).click()
+  if(contextual){
+   if(exercisePushOffer){
+    const push=page.getByRole('region',{name:lang==='es'?'Avisos de PAZO':'PAZO alerts'})
+    await push.waitFor();assert.equal(await firstCare.count(),0,'the push offer comes first')
+    await push.getByRole('button',{name:lang==='es'?'Ahora no':'Not now',exact:true}).click()
+   }
+   await firstCare.waitFor()
+   for(const button of await firstCare.getByRole('button').all()){
+    const box=await button.boundingBox();assert.ok(box.height>=44&&box.x>=0&&box.x+box.width<=width)
+   }
+   await page.screenshot({path:path.join(out,`${lang}-${width}-first-care.png`)})
+   if(scheduleFirstCare){
+    await firstCare.getByRole('button',{name:lang==='es'?'Agendar cuidado':'Schedule care',exact:true}).click()
+    const dialog=page.getByRole('dialog',{name:lang==='es'?'Cuidados de Luna':"Luna's care",exact:true})
+    const date=dialog.locator('#pazo-care-dueDate')
+    const save=dialog.getByRole('button',{name:lang==='es'?'Guardar cuidado':'Save care',exact:true})
+    assert.equal(await date.inputValue(),'','no date is selected for the owner')
+    await dialog.getByRole('button',{name:careTitle,exact:true}).click()
+    assert.equal(await save.isEnabled(),false)
+    const due=new Date(Date.now()+14*86400000).toISOString().slice(0,10)
+    await date.fill(due)
+    await save.click()
+    await dialog.getByText(careTitle,{exact:true}).waitFor()
+    assert.equal(sql(`SELECT count(*) FROM public.care_items WHERE pet_id='${pet}' AND category='vaccine' AND vaccine_type='rabies' AND due_date=${q(due)}`),'1')
+    await dialog.getByRole('button',{name:lang==='es'?'Cerrar':'Close',exact:true}).click()
+   }else await page.keyboard.press('Escape')
+   await firstCare.waitFor({state:'detached'})
+  }
   await page.getByText(lang==='es'?'Pasaporte y QR':'Passport & QR',{exact:true}).click()
   await page.getByRole('img',{name:'Pazo · Luna',exact:true}).waitFor()
   if(contextual){
@@ -159,23 +197,26 @@ try{
   await page.screenshot({path:path.join(out,`${lang}-${width}-qr.png`)})
   await page.getByRole('heading',{name:lang==='es'?'Pasaporte de Luna':"Luna's Passport",exact:true}).locator('..').locator('..').getByRole('button').click();failMetric=false
   await page.getByText(lang==='es'?'Cuidados y Agenda':'Care & Agenda',{exact:true}).click()
-  await page.getByRole('button',{name:lang==='es'?/Añadir nuevo cuidado/:/Add care item/}).click()
-  // Labels are read from the real existing form, not replaced by a test UI.
-  await (contextual?page.getByLabel(lang==='es'?'Título':'Title',{exact:true}):page.getByPlaceholder(lang==='es'?'Ej: Vacuna anual':'Example: Annual vaccine',{exact:true})).fill('QA persisted care')
-  if(contextual)assert.ok(await page.getByRole('dialog').locator('label').evaluateAll(labels=>labels.every(label=>label.htmlFor&&document.getElementById(label.htmlFor))))
-  await page.getByRole('button',{name:lang==='es'?'Guardar cuidado':'Save care',exact:true}).click()
-  await page.getByText('QA persisted care',{exact:true}).first().waitFor()
-  assert.equal(sql(`SELECT count(*) FROM public.care_items WHERE pet_id='${pet}' AND title='QA persisted care'`),'1')
+  if(!scheduleFirstCare){
+   await page.getByRole('button',{name:lang==='es'?/Añadir nuevo cuidado/:/Add care item/}).click()
+   // Labels are read from the real existing form, not replaced by a test UI.
+   await (contextual?page.getByLabel(lang==='es'?'Título':'Title',{exact:true}):page.getByPlaceholder(lang==='es'?'Ej: Vacuna anual':'Example: Annual vaccine',{exact:true})).fill(careTitle)
+   if(contextual)assert.ok(await page.getByRole('dialog').locator('label').evaluateAll(labels=>labels.every(label=>label.htmlFor&&document.getElementById(label.htmlFor))))
+   await page.getByRole('button',{name:lang==='es'?'Guardar cuidado':'Save care',exact:true}).click()
+  }
+  await page.getByText(careTitle,{exact:true}).first().waitFor()
+  assert.equal(sql(`SELECT count(*) FROM public.care_items WHERE pet_id='${pet}' AND title=${q(careTitle)}`),'1')
   const outcome=JSON.parse(sql(`SELECT row_to_json(o) FROM marketing_private.utility_outcomes o WHERE owner_id='${owner}'`))
   assert.ok(outcome.care_created_at&&outcome.qr_visible_at&&outcome.qr_share_confirmed_at)
   await page.screenshot({path:path.join(out,`${lang}-${width}-care.png`)})
   assert.deepEqual(errors,[])
-  evidence.push({lang,width,firstUse:contextual?'PASS':'not exercised',verifiedQrIntention:contextual&&width!==320?'PASS':'neutral',qrVisible:'PASS',shareCancelledNotCounted:'PASS',nativeShareConfirmed:'PASS',downloadWorksWithMetricOffline:'PASS',carePersistedInPg17:'PASS',backendOutcomesConfirmed:true,pageErrors:0,hostedWrites:0})
+  evidence.push({lang,width,firstUse:contextual?'PASS':'not exercised',firstCare:contextual?(scheduleFirstCare?'saved':'dismissed'):'not exercised',firstCareAfterPush:exercisePushOffer?'PASS':'not exercised',verifiedQrIntention:contextual&&width!==320?'PASS':'neutral',qrVisible:'PASS',shareCancelledNotCounted:'PASS',nativeShareConfirmed:'PASS',downloadWorksWithMetricOffline:'PASS',carePersistedInPg17:'PASS',backendOutcomesConfirmed:true,pageErrors:0,hostedWrites:0})
   feedPending=false;releaseFeed.splice(0).forEach(r=>r())
   if(contextual){
    await page.getByRole('button',{name:lang==='es'?'Cerrar':'Close',exact:true}).click()
    await page.reload();await nav.waitFor()
    assert.equal(await page.getByRole('region',{name:lang==='es'?'Para empezar':'To get started'}).count(),0,'existing-pet bootstrap never repeats the prompt')
+   assert.equal(await firstCare.count(),0,'existing pets never get the first-care prompt')
   }
   await context.close()
  }
