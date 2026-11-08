@@ -23,6 +23,8 @@ Verificación. Abrir desde la tarjeta, compartir y abrir el enlace en un navegad
 
 ## 3. Ofrecer instalar PAZO tras la primera mascota
 
+**Candidato [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219), `ddb25a07`.** Aviso probado en seis flujos Chrome/PG17 aislados. Verificados el orden con bienvenida/cuidado, aviso nativo simulado, Safari/in-app, «Ahora no» y omisión en modo instalado. Reservado para la publicación conjunta.
+
 Mostrar una tarjeta del mismo estilo que **Todo listo** y **Primer cuidado**. Presentarla cuando termine el aviso de bienvenida y después de que la persona complete u omita la sugerencia de cuidado. Mostrar una sola tarjeta a la vez. Si está usando PAZO instalado o ya desestimó esta oferta en el dispositivo, omitirla. Conservar la opción de instalar desde los ajustes.
 
 > **Ten PAZO a mano**
@@ -54,6 +56,8 @@ El aviso de 14 días queda como segunda fase. Abrirlo solo si los primeros aviso
 Verificación. Simular cada etapa, cambios antes de enviar, permiso denegado, dos dispositivos, concurrencia, reintentos y enlace de retorno. Verificar en un teléfono real la recepción y el destino. Medir solicitudes aceptadas por el proveedor, aperturas observadas y paso completado dentro de siete días. Comparar con una cohorte sin avisos cuando el volumen lo permita.
 
 ## 5. Contar cuentas con y sin instalación detectada
+
+**Candidato [#219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** PostgreSQL aislado comprobó deduplicación, acceso de Administración, exclusiones y borrado con la cuenta. Chrome verificó ambas cifras con datos ficticios y el estado apagado. CI de GitHub en curso; medición apagada y sin cambios alojados.
 
 **Decisión del PO:** mostrar solo dos cifras en Administración: **Con instalación detectada** y **Sin instalación detectada**. Contar una vez cada cuenta confirmada elegible y excluir QA y Administración. No presentar embudo, actividad por periodo, lista de personas ni desgloses por dispositivo.
 
