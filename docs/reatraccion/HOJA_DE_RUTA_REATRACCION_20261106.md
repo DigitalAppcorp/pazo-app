@@ -70,7 +70,7 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ## Punto 3 — Sugerir el primer cuidado al terminar el registro
 
-**Estado: LISTO PARA REVISIÓN DE PUBLICACIÓN en [PR #216](https://github.com/DigitalAppcorp/pazo-app/pull/216), head `c25aadf9`, 12/12 workflows en verde.** La sugerencia, el guardado y su aparición en Agenda se comprobaron en Chrome ES/EN con PostgreSQL aislado. Pendiente GO explícito y, tras publicar, observar el aviso de cuidado en un teléfono físico.
+**Estado: PUBLICADO en [PR #216](https://github.com/DigitalAppcorp/pazo-app/pull/216), `main` `520da6ca`, Vercel `dpl_5xmxSVosc1uXMRbCT5X76DFPpFwE`.** Los 12 workflows pasaron para el candidato, y los cinco archivos del cambio coinciden con los probados. La sugerencia, el guardado y su aparición en Agenda se comprobaron en Chrome ES/EN con PostgreSQL aislado. El dominio de producción sirve el despliegue y Chrome carga la app. Falta observar el aviso de cuidado en su fecha en un teléfono físico.
 
 - **Objetivo:** que cada mascota tenga al menos un recordatorio, por ejemplo su próxima vacuna. Así cada aviso es una razón para volver.
 - **Propuesta:** tras la primera mascota (y después de la oferta de avisos del punto 1), sugerir crear un cuidado con un toque, con el tipo de vacuna (`src/features/care/vaccineTypes.ts`) y la fecha. Encaja con el aviso de bienvenida («Completar el perfil»).
@@ -118,3 +118,4 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 | 2026-11-06 | 1, 1b, 2 | El PO pidió invitación sin tecnicismos, recordatorio en agenda y mascota perdida tras «Ahora no», barra de progreso y aviso de spam. Todo en PR #212. |
 | 2026-11-06 | — | Prueba frágil detectada (no es de esta hoja, pero bloquea su CI): «D7 mature calendar cohort» en `scripts/behavior-pg17.mjs` (jobs `behavior` e `intelligence`). Usa `now()-interval '10 days'` y `now()-interval '1 day'`; cuando esos instantes caen a ambos lados de un cambio de horario de Los Ángeles, entre las 07:00 y las 08:00 UTC quedan en otro día de calendario y falla. **Pendiente:** anclar los datos de la prueba a la medianoche de Los Ángeles. |
 | 2026-11-08 | 1, 1b, 2 | Publicación reconciliada con #212 y #213; dos confirmaciones reales después del recordatorio. Punto 3 en preparación. |
+| 2026-11-08 | 3 | #216 publicado en producción. Falta observación del push de cuidado en teléfono físico. |
