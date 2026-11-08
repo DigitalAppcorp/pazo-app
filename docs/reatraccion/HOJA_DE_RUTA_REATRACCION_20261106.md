@@ -70,7 +70,7 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ## Punto 3 — Sugerir el primer cuidado al terminar el registro
 
-**Estado: EN CURSO, candidato local en preparación.**
+**Estado: LISTO PARA REVISIÓN DE PUBLICACIÓN en [PR #216](https://github.com/DigitalAppcorp/pazo-app/pull/216), head `c25aadf9`, 12/12 workflows en verde.** La sugerencia, el guardado y su aparición en Agenda se comprobaron en Chrome ES/EN con PostgreSQL aislado. Pendiente GO explícito y, tras publicar, observar el aviso de cuidado en un teléfono físico.
 
 - **Objetivo:** que cada mascota tenga al menos un recordatorio, por ejemplo su próxima vacuna. Así cada aviso es una razón para volver.
 - **Propuesta:** tras la primera mascota (y después de la oferta de avisos del punto 1), sugerir crear un cuidado con un toque, con el tipo de vacuna (`src/features/care/vaccineTypes.ts`) y la fecha. Encaja con el aviso de bienvenida («Completar el perfil»).
