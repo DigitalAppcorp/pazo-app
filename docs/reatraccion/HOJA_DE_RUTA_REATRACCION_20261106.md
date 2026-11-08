@@ -39,11 +39,11 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ---
 
-## Punto 1 — Pedir los avisos justo después de registrar la mascota
+## Punto 1 — Activar los avisos desde el registro de la cuenta
 
 **Estado: PUBLICADO en [PR #212](https://github.com/DigitalAppcorp/pazo-app/pull/212), `main` `a854593d`, Vercel `dpl_GRkeRRKXPkLbAJD51J3YTwf939c4`.** Oferta y cierre verificados en navegador; queda observar la activación desde la oferta de primera mascota en un teléfono físico.
 
-**Corrección del 8-nov-2026 en [PR #217](https://github.com/DigitalAppcorp/pazo-app/pull/217).** El permiso del navegador se gestiona al crear la cuenta, con correo o Google. PAZO registra el dispositivo al obtener una sesión confirmada con permiso concedido, aunque la cuenta todavía no tenga mascota. Al salir se desvincula la cuenta del dispositivo. Al entrar se recupera la suscripción con el permiso guardado y se respeta «Desactivar en este teléfono». Los detalles de la invitación de abajo corresponden al despliegue vigente hasta publicar el cambio. Chrome con permisos simulados verificó la suscripción antes de crear mascota y la recuperación tras volver a entrar. CI 14/14 en verde para `e35fe666`. Pendiente publicación y validación en teléfono físico.
+**Corrección publicada el 8-nov-2026 en [PR #217](https://github.com/DigitalAppcorp/pazo-app/pull/217), `main` `186eb2db`, Vercel `dpl_4jzQhWMJ2nPwM5mCDQAKQw8SudJW`.** Al crear la cuenta, con correo o Google, el navegador puede pedir su permiso si aún no está decidido. PAZO registra el dispositivo al obtener una sesión confirmada con permiso concedido, incluso con cero mascotas. Al salir se desvincula el dispositivo y al entrar se recupera la suscripción con el permiso guardado. Se respeta «Desactivar en este teléfono». CI 14/14 y pruebas de Chrome con permiso simulado pasaron. Se comprobó la carga de la app publicada en Chrome. Pendiente prueba en teléfono físico. La invitación tras la primera mascota descrita abajo pertenece a #212.
 
 - **Objetivo:** que cada persona active el push en el momento en que más le importa, con un motivo concreto y con el nombre de su mascota.
 - **Hoy:** `PushControl` (`src/features/push/PushControl.tsx`) tiene la variante `offer`, que solo se usa en `CareModal` y `ActiveLostAlertPanel`.
@@ -125,3 +125,4 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 | 2026-11-08 | 3 | #216 publicado en producción. Falta observación del push de cuidado en teléfono físico. |
 | 2026-11-08 | 1 | PO pidió activación durante el alta y restauración al volver. Candidato #217 probado en Chrome con datos sintéticos. |
 | 2026-11-08 | 1 | PO aclaró que la activación debe empezar en el alta de cuenta, antes de guardar una mascota. #217 y la subhoja se ajustan a ese alcance. |
+| 2026-11-08 | 1 | #217 publicado. Activación durante el alta de cuenta y recuperación al entrar. Pendiente prueba física. |
