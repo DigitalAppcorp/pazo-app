@@ -1,9 +1,10 @@
 import { excludeBrowserAnalytics } from './analyticsPreference'
 
-/** PO order 8-nov-2026: a browser where a test or administrator account signs in
- * stops sending usage signals, including later visits without a session.
- * It happens once per browser. If the administrator turns signals back on in
- * Administration → My activity, that choice is respected. */
+/** PO order 8-nov-2026: a browser where a test account signs in stops sending
+ * usage signals, including later visits without a session. The flag travels in
+ * the session itself, so this makes no request. It happens once per browser; if
+ * the browser is included again from Administration → My activity, that choice
+ * is respected. Administrator browsers keep the existing manual switch. */
 export const AUTO_EXCLUSION_KEY = 'pazo_analytics_auto_excluded_v1'
 
 type AccountLike = { id?: string; app_metadata?: Record<string, unknown> } | null | undefined
@@ -16,20 +17,8 @@ function alreadyApplied(): boolean {
   try { return window.localStorage.getItem(AUTO_EXCLUSION_KEY) === '1' } catch { return true }
 }
 
-// Accounts already checked in this page load: a session refresh does not ask again.
-const checked = new Set<string>()
-
-export async function autoExcludeInternalBrowser(user: AccountLike, isAdmin: () => Promise<boolean>): Promise<boolean> {
-  if (typeof window === 'undefined' || !user?.id || alreadyApplied()) return false
-  let internal = isTestAccount(user)
-  if (!internal) {
-    if (checked.has(user.id)) return false
-    try {
-      internal = await isAdmin()
-      if (!internal) checked.add(user.id)
-    } catch { internal = false }
-  }
-  if (!internal || alreadyApplied()) return false
+export function autoExcludeTestAccountBrowser(user: AccountLike): boolean {
+  if (typeof window === 'undefined' || !user?.id || !isTestAccount(user) || alreadyApplied()) return false
   if (!excludeBrowserAnalytics(true)) return false
   try { window.localStorage.setItem(AUTO_EXCLUSION_KEY, '1') } catch { /* The exclusion itself is saved. */ }
   return true
