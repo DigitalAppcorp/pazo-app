@@ -39,7 +39,7 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ## Punto 1 — Pedir los avisos justo después de registrar la mascota
 
-**Estado: PROGRAMADO en PR #212, sin publicar.**
+**Estado: PUBLICADO en [PR #212](https://github.com/DigitalAppcorp/pazo-app/pull/212), `main` `a854593d`, Vercel `dpl_GRkeRRKXPkLbAJD51J3YTwf939c4`.** Oferta y cierre verificados en navegador; queda observar la activación desde la oferta de primera mascota en un teléfono físico.
 
 - **Objetivo:** que cada persona active el push en el momento en que más le importa, con un motivo concreto y con el nombre de su mascota.
 - **Hoy:** `PushControl` (`src/features/push/PushControl.tsx`) tiene la variante `offer`, que solo se usa en `CareModal` y `ActiveLostAlertPanel`.
@@ -55,13 +55,13 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ## Punto 1b — Barra de progreso en el registro
 
-**Estado: PROGRAMADO en PR #212, sin publicar.** Pedido por el PO el 6-nov-2026: el registro parecía una lista larga de tareas.
+**Estado: PUBLICADO en [PR #212](https://github.com/DigitalAppcorp/pazo-app/pull/212), `main` `a854593d`, en el mismo despliegue que el punto 1.** Verificado en ES y EN a 375 px. Pedido por el PO el 6-nov-2026: el registro parecía una lista larga de tareas.
 
 - Cuatro tramos, uno por pantalla: Tu cuenta, Confirma tu correo, Tu mascota y Tu zona (`src/features/onboarding/OnboardingProgress.tsx`). Los tramos cruzados en verde, el actual en lima. Se conserva «Paso X de 3», del que dependen pruebas de navegador.
 
 ## Punto 2 — Recuperar las cuentas que no confirmaron el correo
 
-**Estado: PENDIENTE, una parte programada.** En PR #212, la pantalla «Revisa tu correo» ya pide mirar spam y la pestaña Promociones de Gmail (el PO sospecha que entraron al correo y no lo vieron).
+**Estado: PUBLICADO Y VERIFICADO en [PR #213](https://github.com/DigitalAppcorp/pazo-app/pull/213), `main` `3cc9d548`, Vercel `dpl_HQnPezsFjej9w25zJcLES2JPYd7J`.** El recordatorio único usa Supabase Auth y elimina su marca a los 14 días. Dos cuentas reales confirmaron y accedieron después del reenvío automático: en ambos casos coinciden la ejecución programada, una llamada de reenvío exitosa y el uso posterior del enlace. La evidencia es de confirmación; no identifica la carpeta del mensaje. En PR #212, la pantalla «Revisa tu correo» ya pide mirar spam y la pestaña Promociones de Gmail (el PO sospecha que entraron al correo y no lo vieron).
 
 - **Objetivo:** que quien se registró llegue a entrar.
 - **Antes de programar:** revisar en Supabase Auth la plantilla y el remitente del correo de confirmación, y si llega a spam (Gmail entrega los correos de cuenta según el aviso de privacidad). Sin proveedor de pago nuevo sin autorización (regla 15).
@@ -70,7 +70,7 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ## Punto 3 — Sugerir el primer cuidado al terminar el registro
 
-**Estado: PENDIENTE.**
+**Estado: EN CURSO, candidato local en preparación.**
 
 - **Objetivo:** que cada mascota tenga al menos un recordatorio, por ejemplo su próxima vacuna. Así cada aviso es una razón para volver.
 - **Propuesta:** tras la primera mascota (y después de la oferta de avisos del punto 1), sugerir crear un cuidado con un toque, con el tipo de vacuna (`src/features/care/vaccineTypes.ts`) y la fecha. Encaja con el aviso de bienvenida («Completar el perfil»).
@@ -117,3 +117,4 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 | 2026-11-06 | 1 | En curso: rama `feat/push-offer-first-pet-20261106`. |
 | 2026-11-06 | 1, 1b, 2 | El PO pidió invitación sin tecnicismos, recordatorio en agenda y mascota perdida tras «Ahora no», barra de progreso y aviso de spam. Todo en PR #212. |
 | 2026-11-06 | — | Prueba frágil detectada (no es de esta hoja, pero bloquea su CI): «D7 mature calendar cohort» en `scripts/behavior-pg17.mjs` (jobs `behavior` e `intelligence`). Usa `now()-interval '10 days'` y `now()-interval '1 day'`; cuando esos instantes caen a ambos lados de un cambio de horario de Los Ángeles, entre las 07:00 y las 08:00 UTC quedan en otro día de calendario y falla. **Pendiente:** anclar los datos de la prueba a la medianoche de Los Ángeles. |
+| 2026-11-08 | 1, 1b, 2 | Publicación reconciliada con #212 y #213; dos confirmaciones reales después del recordatorio. Punto 3 en preparación. |
