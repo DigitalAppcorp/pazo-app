@@ -43,7 +43,7 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 **Estado: PUBLICADO en [PR #212](https://github.com/DigitalAppcorp/pazo-app/pull/212), `main` `a854593d`, Vercel `dpl_GRkeRRKXPkLbAJD51J3YTwf939c4`.** Oferta y cierre verificados en navegador; queda observar la activación desde la oferta de primera mascota en un teléfono físico.
 
-**Cambio pedido el 8-nov-2026, candidato [PR #217](https://github.com/DigitalAppcorp/pazo-app/pull/217).** Al guardar la primera mascota, PAZO activa los avisos si el navegador los permite. Si el permiso aún no está decidido, el navegador puede mostrar su solicitud durante ese toque. Se retira la tarjeta de PAZO. Al salir se desvincula la cuenta del dispositivo y al entrar se recupera la suscripción sin repetir la solicitud. Se respeta «Desactivar en este teléfono». Chrome con permisos simulados verificó el alta y el reingreso; CI 14/14 en verde para `d12f843d`; pendiente aprobación de publicación y prueba física. Los detalles de la invitación de abajo corresponden al despliegue anterior.
+**Corrección del 8-nov-2026 en [PR #217](https://github.com/DigitalAppcorp/pazo-app/pull/217).** El permiso del navegador se gestiona al crear la cuenta, con correo o Google. PAZO registra el dispositivo al obtener una sesión confirmada con permiso concedido, aunque la cuenta todavía no tenga mascota. Al salir se desvincula la cuenta del dispositivo. Al entrar se recupera la suscripción con el permiso guardado y se respeta «Desactivar en este teléfono». Los detalles de la invitación de abajo corresponden al despliegue vigente hasta publicar el cambio.
 
 - **Objetivo:** que cada persona active el push en el momento en que más le importa, con un motivo concreto y con el nombre de su mascota.
 - **Hoy:** `PushControl` (`src/features/push/PushControl.tsx`) tiene la variante `offer`, que solo se usa en `CareModal` y `ActiveLostAlertPanel`.
@@ -124,3 +124,4 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 | 2026-11-08 | 1, 1b, 2 | Publicación reconciliada con #212 y #213; dos confirmaciones reales después del recordatorio. Punto 3 en preparación. |
 | 2026-11-08 | 3 | #216 publicado en producción. Falta observación del push de cuidado en teléfono físico. |
 | 2026-11-08 | 1 | PO pidió activación durante el alta y restauración al volver. Candidato #217 probado en Chrome con datos sintéticos. |
+| 2026-11-08 | 1 | PO aclaró que la activación debe empezar en el alta de cuenta, antes de guardar una mascota. #217 y la subhoja se ajustan a ese alcance. |
