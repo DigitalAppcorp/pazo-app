@@ -18,8 +18,8 @@ interface CareModalProps {
   onClose: () => void
   petName: string
   petSpecies?: Species
-  // A health alert answered "has it" opens a new vaccine item with its type already chosen.
-  vaccineDraft?: { key: number; vaccineType: VaccineType } | null
+  // Health alerts provide a type; a first-care invitation asks the owner to choose one.
+  vaccineDraft?: { key: number; vaccineType: VaccineType | null } | null
   careItems: CareItem[]
   careHistory: CareCompletion[]
   isLoading: boolean
@@ -154,13 +154,18 @@ export const CareModal = ({
   onUndoCompletion,
   lang,
 }: CareModalProps) => {
-  const dialogRef=useModalFocus(isOpen,onClose)
   const [activeTab, setActiveTab] = useState<AgendaTab>('proximos')
   const [isEditing, setIsEditing] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<CareItemInput>(emptyForm)
   const [busyKey, setBusyKey] = useState<string | null>(null)
   const [formError, setFormError] = useState('')
+  const [firstCareDraft, setFirstCareDraft] = useState(false)
+  const close = () => {
+    if (firstCareDraft) resetForm()
+    onClose()
+  }
+  const dialogRef=useModalFocus(isOpen,close)
 
   const latestCompletionIds = useMemo(() => {
     const seenCareItems = new Set<string>()
@@ -180,7 +185,10 @@ export const CareModal = ({
   const [handledDraftKey, setHandledDraftKey] = useState(vaccineDraft?.key ?? 0)
   if (vaccineDraft && vaccineDraft.key !== handledDraftKey) {
     setHandledDraftKey(vaccineDraft.key)
-    setForm({ ...emptyForm(), category: 'vaccine', vaccineType: vaccineDraft.vaccineType, title: VACCINE_LABELS[vaccineDraft.vaccineType][lang] })
+    const type = vaccineDraft.vaccineType
+    const draft = emptyForm()
+    setForm({ ...draft, category: 'vaccine', vaccineType: type, title: type ? VACCINE_LABELS[type][lang] : '', dueDate: type ? draft.dueDate : '' })
+    setFirstCareDraft(type === null)
     setEditingId(null)
     setIsEditing(true)
     setFormError('')
@@ -198,8 +206,9 @@ export const CareModal = ({
 
   if (!isOpen) return null
 
-  const resetForm = () => {
+  function resetForm() {
     setForm(emptyForm())
+    setFirstCareDraft(false)
     setEditingId(null)
     setIsEditing(false)
     setFormError('')
@@ -207,12 +216,14 @@ export const CareModal = ({
 
   const startCreate = () => {
     setForm(emptyForm())
+    setFirstCareDraft(false)
     setEditingId(null)
     setIsEditing(true)
     setFormError('')
   }
 
   const startEdit = (item: CareItem) => {
+    setFirstCareDraft(false)
     setForm({
       title: item.title,
       category: item.category,
@@ -292,7 +303,7 @@ export const CareModal = ({
             </h3>
           </div>
           <button
-            onClick={onClose}
+            onClick={close}
             className="w-11 h-11 rounded-full bg-[#FAF8F5] text-[#5C7470] focus-visible:bg-[#E1E53F] hover:text-[#204E4A] flex items-center justify-center font-bold text-sm cursor-pointer"
             aria-label={lang === 'es' ? 'Cerrar' : 'Close'}
           >
