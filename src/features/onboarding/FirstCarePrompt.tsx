@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
 import { PazoStateIllustration } from '../illustrations/PazoStateIllustration'
+import { NoticeDialog } from '../notices/AppNotice'
 
 export function FirstCarePrompt({ petName, lang, onStart, onDismiss }: {
   petName: string
@@ -8,17 +8,8 @@ export function FirstCarePrompt({ petName, lang, onStart, onDismiss }: {
   onDismiss: () => void
 }) {
   const es = lang === 'es'
-  const start = useRef<HTMLButtonElement>(null)
-  useEffect(() => { start.current?.focus({ preventScroll: true }) }, [])
-  const dismiss = () => {
-    onDismiss()
-    document.querySelector<HTMLButtonElement>('nav[data-pazo-floating-nav] button[aria-current="page"]')?.focus({ preventScroll: true })
-  }
-
-  return <section aria-label={es ? 'Primer cuidado' : 'First care reminder'} data-pazo-app-notice="first-care"
-    onKeyDown={event => { if (event.key === 'Escape') { event.stopPropagation(); dismiss() } }}
-    className="absolute inset-x-3 bottom-[calc(112px+env(safe-area-inset-bottom))] z-[35] max-h-[calc(100%-190px)] overflow-y-auto overscroll-contain rounded-[24px] bg-[#FFFEFB] p-4 text-[#204E4A] shadow-[0_12px_48px_-12px_rgba(32,78,74,0.30)] sm:inset-x-5 sm:p-5">
-    <button type="button" onClick={dismiss} aria-label={es ? 'Cerrar aviso' : 'Dismiss notice'}
+  return <NoticeDialog kind="first-care" label={es ? 'Primer cuidado' : 'First care reminder'} onDismiss={onDismiss}>
+    <button type="button" onClick={onDismiss} aria-label={es ? 'Cerrar aviso' : 'Dismiss notice'}
       className="absolute right-1.5 top-1.5 flex h-11 w-11 items-center justify-center rounded-full text-[#5C7470] hover:bg-[#204E4A]/5 focus-visible:bg-[#E1E53F] focus-visible:outline-none">
       <span aria-hidden="true">×</span>
     </button>
@@ -33,14 +24,14 @@ export function FirstCarePrompt({ petName, lang, onStart, onDismiss }: {
       {es ? 'Puedes empezar por su próxima vacuna. Elige cuál es y en qué fecha toca.' : 'Start with their next vaccine. Choose which one and when it’s due.'}
     </p>
     <div className="mt-4 grid grid-cols-2 gap-2">
-      <button type="button" ref={start} onClick={onStart}
+      <button type="button" data-notice-primary onClick={onStart}
         className="min-h-12 rounded-2xl bg-[#204E4A] px-3 py-3 text-[13px] font-extrabold leading-snug text-white hover:bg-[#183D3A] focus-visible:bg-[#E1E53F] focus-visible:text-[#204E4A] focus-visible:underline focus-visible:outline-none">
         {es ? 'Agendar cuidado' : 'Schedule care'}
       </button>
-      <button type="button" onClick={dismiss}
+      <button type="button" onClick={onDismiss}
         className="min-h-12 rounded-2xl bg-[#F3F6EE] px-2 py-3 text-[12px] font-extrabold leading-snug text-[#204E4A] hover:bg-[#E7EEDC] focus-visible:bg-[#E1E53F] focus-visible:underline focus-visible:outline-none">
         {es ? 'Ahora no' : 'Not now'}
       </button>
     </div>
-  </section>
+  </NoticeDialog>
 }

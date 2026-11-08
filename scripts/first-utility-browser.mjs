@@ -170,8 +170,12 @@ try{
   const waitForPush=pushExpected?page.waitForResponse(res=>res.url().endsWith('/rpc/pazo_push_subscribe')&&res.ok()):null
   await page.goto(origin,{waitUntil:'domcontentloaded',timeout:hostedAsset?90000:30000})
   const nav=page.getByRole('navigation',{name:'Navegación de PAZO'})
-  const firstCare=page.getByRole('region',{name:lang==='es'?'Primer cuidado':'First care reminder'})
+  const firstCare=page.getByRole('dialog',{name:lang==='es'?'Primer cuidado':'First care reminder'})
   const firstInstall=page.locator('[data-pazo-app-notice="first-install"]')
+  const assertNoticeBackdrop=async notice=>{
+   assert.equal(await notice.evaluate(e=>e.matches(':modal')&&getComputedStyle(e,'::backdrop').backdropFilter.includes('blur(')),true)
+   assert.equal(await notice.locator('[data-notice-primary]').evaluate(e=>e===document.activeElement),true)
+  }
   if(contextual){
    if(exerciseAccountSignup){
     await page.getByRole('button',{name:lang==='es'?'Comenzar':'Get started',exact:true}).click()
@@ -198,8 +202,15 @@ try{
    await page.getByPlaceholder(lang==='es'?'Ej: Luna, Bruno, Nube...':'E.g. Luna, Bruno, Cloud...').fill('Luna')
    await page.getByRole('button',{name:lang==='es'?'Continuar':'Continue',exact:true}).click()
    await page.getByRole('button',{name:lang==='es'?'Crear perfil y entrar':'Create profile and enter',exact:true}).click()
-   const hint=page.getByRole('region',{name:lang==='es'?'Para empezar':'To get started'})
+   const hint=page.getByRole('dialog',{name:lang==='es'?'Para empezar':'To get started'})
    await hint.waitFor();assert.equal(feedPending,true)
+   await assertNoticeBackdrop(hint)
+   const currentTab=page.locator('nav[data-pazo-floating-nav] button[aria-current="page"]')
+   const backgroundTab=page.locator('nav[data-pazo-floating-nav] button').first()
+   const backgroundBox=await backgroundTab.boundingBox()
+   assert.ok(backgroundBox)
+   await page.touchscreen.tap(backgroundBox.x+backgroundBox.width/2,backgroundBox.y+backgroundBox.height/2)
+   assert.equal(await hint.isVisible(),true,'tapping behind a notice does not navigate')
    if(pwaFirstPet&&width===390)await page.evaluate(lang=>{
     const event=new Event('beforeinstallprompt',{cancelable:true})
     Object.assign(event,{prompt:async()=>{sessionStorage.setItem('qa-install-gesture',String(navigator.userActivation.isActive))},userChoice:Promise.resolve({outcome:lang==='es'?'accepted':'dismissed'})})
@@ -208,7 +219,7 @@ try{
    assert.equal(await page.evaluate(()=>sessionStorage.getItem('qa-prompts')),exerciseAccountSignup?'1':null,'saving the pet does not request push permission')
    assert.equal(await firstCare.count(),0,'no first care above the welcome notice')
    assert.equal(await firstInstall.count(),0,'no install offer above the welcome notice')
-   assert.equal(await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).getAttribute('aria-current'),'page')
+   assert.equal(await currentTab.getAttribute('aria-label'),lang==='es'?'Mi mascota':'My Pet')
    assert.equal(sql(`SELECT count(*) FROM public.pets WHERE id='${pet}' AND owner_id='${owner}'`),'1')
    await page.screenshot({path:path.join(out,`${lang}-${width}-first-use.png`)})
    if(width!==320)assert.ok((await hint.innerText()).includes(lang==='es'?'Abre su pasaporte':'Open their passport'))
@@ -219,11 +230,14 @@ try{
    if(width===390)await page.getByRole('button',{name:lang==='es'?'Cerrar':'Close',exact:true}).click()
    if(width===430)await page.getByRole('button',{name:lang==='es'?'Cerrar':'Close',exact:true}).click()
   }
-  await nav.waitFor()
-  await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).click()
+  const petTab=lang==='es'?'Mi mascota':'My Pet'
+  if(await page.locator('nav[data-pazo-floating-nav] button[aria-current="page"]').getAttribute('aria-label')!==petTab){
+   await nav.getByRole('button',{name:petTab,exact:true}).click()
+  }
   if(contextual){
    assert.equal(await page.getByRole('region',{name:lang==='es'?'Avisos de PAZO':'PAZO alerts'}).count(),0)
    await firstCare.waitFor()
+   await assertNoticeBackdrop(firstCare)
    assert.equal(await firstInstall.count(),0,'no install offer above the first care notice')
    for(const button of await firstCare.getByRole('button').all()){
     const box=await button.boundingBox();assert.ok(box.height>=44&&box.x>=0&&box.x+box.width<=width)
@@ -247,6 +261,7 @@ try{
    await firstCare.waitFor({state:'detached'})
    if(pwaFirstPet&&width!==430){
     await firstInstall.waitFor()
+    await assertNoticeBackdrop(firstInstall)
     assert.equal(await page.locator('[data-pazo-app-notice]').count(),1,'only one onboarding notice is visible')
     for(const button of await firstInstall.getByRole('button').all()){
      const box=await button.boundingBox();assert.ok(box.height>=44&&box.x>=0&&box.x+box.width<=width)
@@ -323,7 +338,7 @@ try{
   if(contextual){
    await page.getByRole('button',{name:lang==='es'?'Cerrar':'Close',exact:true}).click()
    await page.reload();await nav.waitFor()
-   assert.equal(await page.getByRole('region',{name:lang==='es'?'Para empezar':'To get started'}).count(),0,'existing-pet bootstrap never repeats the prompt')
+   assert.equal(await page.getByRole('dialog',{name:lang==='es'?'Para empezar':'To get started'}).count(),0,'existing-pet bootstrap never repeats the prompt')
    assert.equal(await firstCare.count(),0,'existing pets never get the first-care prompt')
    if(pushPermission==='default'){
     await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).click()

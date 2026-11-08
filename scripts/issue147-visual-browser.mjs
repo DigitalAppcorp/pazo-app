@@ -83,20 +83,27 @@ try{
   await page.getByPlaceholder(lang==='es'?'Ej: Luna, Bruno, Nube...':'E.g. Luna, Bruno, Cloud...').fill('Luna')
   await page.getByRole('button',{name:lang==='es'?'Continuar':'Continue',exact:true}).click()
   await page.getByRole('button',{name:lang==='es'?'Crear perfil y entrar':'Create profile and enter',exact:true}).click()
-  const nav=page.getByRole('navigation',{name:'Navegación de PAZO'});await nav.waitFor()
-  const toolsEntry=page.getByRole('button',{name:lang==='es'?'Explorar PAZO':'Explore PAZO',exact:true})
-  // App-level notice: not a child of the scrolling page or a modal barrier.
-  const onPet=await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).getAttribute('aria-current')==='page'
+  const nav=page.locator('nav[data-pazo-floating-nav]');await nav.waitFor()
+  const onPet=await nav.locator('button[aria-current="page"]').getAttribute('aria-label')===(lang==='es'?'Mi mascota':'My Pet')
+  const dismissFollowUpNotices=async()=>{
+   if(hosted)return
+   for(const kind of ['first-care','first-install']){
+    const notice=page.locator(`[data-pazo-app-notice="${kind}"]`)
+    await notice.waitFor()
+    await page.keyboard.press('Escape')
+    await notice.waitFor({state:'detached'})
+   }
+  }
   const arrivalControls=[]
   if(onPet){
-   await toolsEntry.waitFor()
+   const notice=page.locator('[data-pazo-app-notice="welcome"]')
+   await notice.waitFor()
    await settle(page)
    if(height===844)assert.equal(await page.locator('main').evaluate(e=>e.scrollTop),0,'first arrival must not jump past identity into loss/membership tools')
    await page.getByText(lang==='es'?'gato':'Cat',{exact:true}).first().waitFor()
    if(lang==='en')assert.equal(await page.locator('main').getByText('Desconocida',{exact:true}).count(),0)
-   const notice=page.getByRole('region',{name:lang==='es'?'Para empezar':'To get started'})
    assert.equal(await notice.evaluate(e=>Boolean(e.closest('main'))),false)
-   assert.equal(await notice.getAttribute('aria-modal'),null)
+   if(!hosted)assert.equal(await notice.evaluate(e=>e.matches(':modal')&&getComputedStyle(e,'::backdrop').backdropFilter.includes('blur(')),true)
    assert.equal(await notice.evaluate(e=>e.scrollHeight>e.clientHeight),false,'notice actions fit without internal scrolling')
    const dock=await nav.boundingBox()
    const primary=notice.locator('[data-notice-primary]')
@@ -110,11 +117,11 @@ try{
    }
    const agendaBox=arrivalControls[1],exploreBox=arrivalControls[2]
    assert.ok(Math.abs(agendaBox.width-exploreBox.width)<1&&Math.abs(agendaBox.y-exploreBox.y)<1,'paired secondary actions have equal space')
-   const edit=await page.getByRole('button',{name:lang==='es'?'Editar':'Edit',exact:true}).boundingBox()
-   const title=await page.getByRole('heading',{name:'Luna',exact:true}).last().boundingBox()
+   const edit=await page.getByRole('button',{name:lang==='es'?'Editar':'Edit',exact:true,includeHidden:true}).boundingBox()
+   const title=await page.getByRole('heading',{name:'Luna',exact:true,includeHidden:true}).last().boundingBox()
    const disjoint=(a,b)=>a.x+a.width<=b.x||b.x+b.width<=a.x||a.y+a.height<=b.y||b.y+b.height<=a.y
    assert.ok(disjoint(title,edit),'profile identity does not collide with Edit')
-   const shareButton=page.getByRole('button',{name:lang==='es'?'Compartir perfil':'Share profile',exact:true})
+   const shareButton=page.getByRole('button',{name:lang==='es'?'Compartir perfil':'Share profile',exact:true,includeHidden:true})
    if(await shareButton.count()){
     const share=await shareButton.boundingBox()
     assert.ok(share.width>=44&&share.height>=44&&disjoint(title,share)&&disjoint(edit,share),'Share fits beside Edit without covering the identity')
@@ -122,8 +129,9 @@ try{
    await page.screenshot({path:path.join(out,`${lang}-${width}-${state}-arrival.png`)})
    if(state==='error'){
     await page.keyboard.press('Escape');await notice.waitFor({state:'detached'})
+    await dismissFollowUpNotices()
     await nav.getByRole('button',{name:lang==='es'?'Inicio':'Home',exact:true}).click()
-   }else await toolsEntry.click()
+   }else await notice.getByRole('button',{name:lang==='es'?'Explorar PAZO':'Explore PAZO',exact:true}).click()
   }
   if(state==='pending')await page.locator('main [data-pazo-feed-state="loading"]').waitFor()
   if(state==='error')await page.getByRole('button',{name:lang==='es'?'Reintentar':'Try again',exact:true}).waitFor()
@@ -152,6 +160,7 @@ try{
   }
   mode='empty';releases.splice(0).forEach(r=>r())
   await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).click()
+  if(onPet&&state!=='error')await dismissFollowUpNotices()
   const qr=page.getByRole('button',{name:lang==='es'?/^Pasaporte y QR/:/^Passport & QR/})
   if(version==='candidate'){await qr.focus();await page.keyboard.press('Enter')}
   else await page.getByText(lang==='es'?'Pasaporte y QR':'Passport & QR',{exact:true}).click()
