@@ -45,6 +45,10 @@ jobs:
         run: |
           createdb --maintenance-db=postgres pazo_return_roadmap_test
           psql -X -d pazo_return_roadmap_test -f supabase/tests/return-roadmap-pg17.sql
+      - name: Verify test-account marking in a disposable database
+        run: |
+          createdb --maintenance-db=postgres pazo_test_account_marking_test
+          psql -X -d pazo_test_account_marking_test -f supabase/tests/test-account-marking-pg17.sql
   utility-browser:
     runs-on: ubuntu-latest
     timeout-minutes: 12
