@@ -229,8 +229,8 @@ export const NOTIFICATION_KINDS = {
   return_no_pet: {
     template: 'open', icon: 'paw', tone: 'neutral',
     copy: (_item, lang) => lang === 'es'
-      ? { title: 'Gracias por visitar PAZO', subtitle: 'Si te apetece, crea el perfil de tu mascota para tener su foto y su agenda a mano.' }
-      : { title: 'Thanks for visiting PAZO', subtitle: 'If you like, create your pet’s profile to keep their photo and care schedule handy.' },
+      ? { title: 'Gracias por visitar PAZO', subtitle: 'Crea el perfil de tu mascota y ten su foto y su agenda en un solo lugar.' }
+      : { title: 'Thanks for visiting PAZO', subtitle: 'Create your pet’s profile to keep their photo and care schedule in one place.' },
     action: (_item, lang) => lang === 'es' ? 'Crear perfil' : 'Create a profile',
     target: () => ({ kind: 'pet_create' }),
   },
@@ -239,8 +239,8 @@ export const NOTIFICATION_KINDS = {
     copy: (item, lang, context) => {
       const name = item.petId ? context.petName?.(item.petId) : undefined
       return lang === 'es'
-        ? { title: name ? `Presenta a ${name}` : 'Comparte el perfil de tu mascota', subtitle: 'Si te apetece, comparte su enlace de PAZO con tus amigos.' }
-        : { title: name ? `Introduce ${name}` : 'Share your pet’s profile', subtitle: 'If you like, share their PAZO link with your friends.' }
+        ? { title: name ? `Presenta a ${name}` : 'Comparte el perfil de tu mascota', subtitle: 'Tus amigos pueden conocer a tu mascota con su enlace de PAZO.' }
+        : { title: name ? `Introduce ${name}` : 'Share your pet’s profile', subtitle: 'Friends can get to know your pet through their PAZO link.' }
     },
     action: (_item, lang) => lang === 'es' ? 'Ver perfil' : 'View profile',
     target: (item) => petProfile(item.petId ?? null),

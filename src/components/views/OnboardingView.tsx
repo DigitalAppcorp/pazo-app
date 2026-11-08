@@ -560,8 +560,8 @@ export const OnboardingView = ({
                 {lang === 'es' ? "Añade cualquier especie. La app se adapta con cariño." : "Add your pet. Choose their species below."}
               </p>
               {currentReturnTip && <p className="mt-3 rounded-xl bg-[#EAF2E5] p-3 text-xs font-medium leading-relaxed text-[#315B55]">
-                {lang === 'es' ? 'Gracias por volver a PAZO. Si te apetece, crea el perfil de tu mascota para tener su foto y su agenda a mano.'
-                  : 'Thanks for coming back to PAZO. If you like, create your pet’s profile to keep their photo and care schedule handy.'}
+                {lang === 'es' ? 'Gracias por volver a PAZO. Crea el perfil de tu mascota y ten su foto y su agenda en un solo lugar.'
+                  : 'Thanks for coming back to PAZO. Create your pet’s profile to keep their photo and care schedule in one place.'}
               </p>}
             </div>
 

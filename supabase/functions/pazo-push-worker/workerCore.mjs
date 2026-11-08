@@ -52,13 +52,13 @@ const COPY={
     urgency:'high',ttl:86400,
   },
   return_no_pet:{
-    es:{title:'Gracias por visitar PAZO',body:'Si te apetece, crea el perfil de tu mascota para tener su foto y su agenda a mano.'},
-    en:{title:'Thanks for visiting PAZO',body:'If you like, create your pet’s profile to keep their photo and care schedule handy.'},
+    es:{title:'Gracias por visitar PAZO',body:'Crea el perfil de tu mascota y ten su foto y su agenda en un solo lugar.'},
+    en:{title:'Thanks for visiting PAZO',body:'Create your pet’s profile to keep their photo and care schedule in one place.'},
     urgency:'high',ttl:3600,
   },
   return_share:{
-    es:{title:'Comparte el perfil de tu mascota',body:'Si te apetece, preséntasela a tus amigos con su enlace de PAZO.'},
-    en:{title:'Share your pet’s profile',body:'If you like, introduce them to your friends with their PAZO link.'},
+    es:{title:'Comparte el perfil de tu mascota',body:'Presenta a tu mascota a tus amigos con su enlace de PAZO.'},
+    en:{title:'Share your pet’s profile',body:'Introduce your pet to friends with their PAZO link.'},
     urgency:'high',ttl:3600,
   },
   return_care:{
