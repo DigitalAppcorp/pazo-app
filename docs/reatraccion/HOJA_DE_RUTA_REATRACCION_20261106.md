@@ -84,7 +84,7 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ## Punto 4 — Ver en Administración quién llegó por anuncio
 
-**Estado: PENDIENTE. Hay una decisión del PO.**
+**Estado: IMPLEMENTADO EN CANDIDATO [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** Usuarios muestra «Anuncio · Meta · campaña» o «Sin anuncio registrado». Se conservó el plazo vigente de 14 días. Verificados el permiso de Administración y el ocultamiento tras vencer.
 
 - **Hoy:** Administración → Usuarios muestra correo, antigüedad, mascotas y días activos, pero no el origen. El origen por cuenta existe en `marketing_private.acquisition` (`source`, `medium`, `campaign`, `creative`), solo para cuentas con registro confirmado.
 - **Propuesta:** una etiqueta por cuenta: «Anuncio · Meta · [campaña]» o «Sin anuncio registrado». **No usar la palabra «orgánico»**: sin dato puede ser alguien que vino por un anuncio y se registró después o desde otro teléfono.
@@ -93,7 +93,7 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ## Punto 4b — Que el origen del anuncio sobreviva al cambio de navegador
 
-**Estado: PENDIENTE. Hay una decisión del PO.** Agregado el 6-nov-2026, a partir de una pregunta del PO.
+**Estado: IMPLEMENTADO EN CANDIDATO [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** Chrome envía el código validado al alta por correo. PostgreSQL aislado comprobó que una confirmación sin contexto local lo promueve una vez, que el código no permanece en los metadatos y que la limpieza retira los vencidos. Captura apagada y aviso de privacidad preparado para la entrega conjunta. Agregado el 6-nov-2026, a partir de una pregunta del PO.
 
 - **Hipótesis del PO, descartada:** que «sin dato» sea gente que rechaza el seguimiento de Meta. El registro propio del origen **no depende** de esa casilla: `marketingRuntime.ts` crea el registrador con `enabled: true` siempre. La casilla de Meta solo decide si se le comunica el registro a Meta.
 - **Causas reales:**
@@ -105,7 +105,7 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 
 ## Punto 5 — Ver la información de la mascota desde Administración
 
-**Estado: PENDIENTE. Hay una decisión del PO.**
+**Estado: IMPLEMENTADO EN CANDIDATO [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219).** Chrome verificó que se puede abrir con teclado el mismo perfil social público desde Mascotas. Abre en otra pestaña y conserva el contexto de Administración.
 
 - **Hoy:** Administración → Mascotas muestra el nombre, la especie y el correo del dueño, sin detalle.
 - **Propuesta:** tocar una mascota abre su **perfil público** (foto, raza, edad, descripción y publicaciones), lo mismo que ve cualquier usuario.
@@ -129,3 +129,4 @@ Cómo saber si funciona: cuentas reales con push activo (`push_private.subscript
 | 2026-11-08 | 1 | PO aclaró que la activación debe empezar en el alta de cuenta, antes de guardar una mascota. #217 y la subhoja se ajustan a ese alcance. |
 | 2026-11-08 | 1 | #217 publicado. Activación durante el alta de cuenta y recuperación al entrar. Pendiente prueba física. |
 | 2026-11-08 | Subhoja 2 | Candidato [#218](https://github.com/DigitalAppcorp/pazo-app/pull/218): perfil social compartible probado en Chrome. Sin cambios alojados. |
+| 2026-11-08 | 4, 4b, 5 | [PR #219](https://github.com/DigitalAppcorp/pazo-app/pull/219) integra los puntos pendientes. Verificación local con Chrome y PostgreSQL. Revisar CI y prueba física antes de publicar el paquete. |
