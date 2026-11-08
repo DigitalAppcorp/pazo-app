@@ -12,6 +12,7 @@ import { AdminGlyph,AdminDonut,AdminCohortColumns,AdminModuleRings,type AdminGly
 import { InfoTip,PulseTile,RankBars } from './AdminClarity'
 import {AdminSignupReadout} from './AdminSignupReadout'
 import {AdminPwaInstallationCounts} from './AdminPwaInstallationCounts'
+import { sharedPetUrl } from '../../profile/sharedPetRoute'
 import {
  adminOverview,adminUsers,adminExperiments,adminVoters,adminAudience,
  type AdminOverview,type AdminUser,type AdminExperiment,type AdminVoter,type AdminAudience,
@@ -295,12 +296,17 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
        <DashboardPanel title={l('Mascotas','Pets')} info={l('Solo las cuentas de la página cargada; usa Usuarios para avanzar entre registros.','Only accounts on the loaded page; use Users to browse further.')}>
         <ul className="ac-rows">
          {users.flatMap(u=>u.pets.map(p=>({owner:u.email,id:p.id,name:p.name,species:p.species}))).map(p=>
-          <li key={p.id} className="flex items-center gap-3 rounded-[12px] px-1 py-2">
+          <li key={p.id}>
+           <a href={sharedPetUrl(window.location.origin,p.id)} target="_blank" rel="noopener noreferrer"
+            aria-label={l(`Ver perfil público de ${p.name} en otra pestaña`,`View ${p.name}'s public profile in another tab`)}
+            className="flex min-h-11 items-center gap-3 rounded-xl px-2 py-2 text-[#204E4A] outline-none hover:bg-[#EDF3E8] focus-visible:bg-[#E1E53F]">
            <span className="ac-avatar" aria-hidden="true"><AdminGlyph name="paw" size={19}/></span>
            <div className="ac-row-main">
             <p>{p.name}</p>
             <small className="truncate">{p.species} · {p.owner||l('Sin correo','No email')}</small>
            </div>
+           <span aria-hidden="true" className="ml-auto shrink-0"><AdminGlyph name="chevron" size={16}/></span>
+           </a>
           </li>)}
         </ul>
         {users.every(u=>u.pets.length===0)&&<p className="ac-empty">{l('No hay mascotas en esta página.','No pets on this page.')}</p>}
@@ -419,6 +425,9 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
            <dd className="m-0 text-xs font-bold">{registration.signed_in?l('Inició sesión','Signed in'):l('Sin registro','No record')}</dd>
           </div>
          </dl>}
+         {registration&&'ad_campaign' in registration&&<p className="!m-0 rounded-xl bg-white px-3 py-2 text-xs font-semibold text-[#315B55]">
+          {registration.ad_campaign ? `${l('Anuncio','Ad')} · Meta · ${registration.ad_campaign}` : l('Sin anuncio registrado','No ad recorded')}
+         </p>}
          {u.pets.length>0?<details className="group rounded-[12px] bg-[#EAF2E5]">
           <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-[12px] px-3 text-xs font-bold outline-none focus-visible:bg-[#E1E53F] [&::-webkit-details-marker]:hidden">
            <AdminGlyph name="paw" size={16}/>

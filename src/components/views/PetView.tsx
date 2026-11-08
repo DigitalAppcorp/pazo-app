@@ -18,7 +18,8 @@ import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { DeletionRequestDialog } from '../../features/account/DeletionRequestDialog'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
 import { PazoInstallControl } from '../../features/pwa/components/PazoInstallControl'
-import { sharedPetUrl } from '../../features/profile/sharedPetRoute'
+import { usePetProfileShare } from '../../features/profile/usePetProfileShare'
+import { recordReturnProfileShare } from '../../features/push/pushService'
 import { SupportRequestDialog } from '../../features/support/components/SupportRequestDialog'
 import type { LegalKind } from '../../features/legal/legalCopy'
 import type { Pet, CareItem, Post } from '../../types/pazo'
@@ -83,34 +84,7 @@ export const PetView = ({
 }: PetViewProps) => {
   const [showPetPicker, setShowPetPicker] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
-  const [shareFeedback, setShareFeedback] = useState<{ petId: string; copied: boolean; url: string } | null>(null)
-  const sharing = useRef(false)
-  const sharePet = async () => {
-    if (!onOpenSocialProfile || sharing.current) return
-    const petId = currentPet.id
-    const url = sharedPetUrl(window.location.origin, petId)
-    const data = { title: `${currentPet.name} · PAZO`, url }
-    sharing.current = true
-    setShareFeedback(null)
-    try {
-      if (typeof navigator.share === 'function') {
-        try {
-          await navigator.share(data)
-          return
-        } catch (error) {
-          if (error instanceof Error && error.name === 'AbortError') return
-        }
-      }
-      try {
-        await navigator.clipboard.writeText(url)
-        setShareFeedback({ petId, copied: true, url })
-      } catch {
-        setShareFeedback({ petId, copied: false, url })
-      }
-    } finally {
-      sharing.current = false
-    }
-  }
+  const { shareProfile, shareFeedback } = usePetProfileShare()
   const [isSaving, setIsSaving] = useState(false)
   const [showSupporterAccount, setShowSupporterAccount] = useState(false)
   const [dismissedInvitationPreview, setDismissedInvitationPreview] = useState(false)
@@ -719,7 +693,7 @@ export const PetView = ({
                 {lang === 'es' ? 'Editar' : 'Edit'}
               </button>
               {onOpenSocialProfile && (
-                <button type="button" onClick={() => { void sharePet() }}
+                <button type="button" onClick={() => { void shareProfile(currentPet) }}
                   className="min-h-11 rounded-full bg-[#204E4A] px-3 text-[13px] font-bold text-white hover:bg-[#315B55] focus-visible:bg-[#E1E53F] focus-visible:text-[#204E4A] focus-visible:outline-none cursor-pointer">
                   {lang === 'es' ? 'Compartir perfil' : 'Share profile'}
                 </button>
@@ -735,6 +709,7 @@ export const PetView = ({
             {!shareFeedback.copied && <input readOnly value={shareFeedback.url}
               aria-label={lang === 'es' ? 'Enlace al perfil social' : 'Social profile link'}
               onFocus={(event) => event.currentTarget.select()}
+              onCopy={() => recordReturnProfileShare(currentPet.id)}
               className="min-h-11 w-full rounded-xl bg-white px-3 focus:bg-[#F5F4D0] focus:outline-none" />}
           </div>
         )}

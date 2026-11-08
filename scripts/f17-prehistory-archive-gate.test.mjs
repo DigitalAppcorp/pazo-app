@@ -12,6 +12,7 @@ const marketing=JSON.parse(readFileSync(new URL('../docs/evidence/marketing-e2e-
 const pendingMarketing=[...new Set([...marketing.records,...(marketing.pendingRecords??[]),...(marketing.installedRecords??[])].map(r=>r.version))]
 const intelligence=JSON.parse(readFileSync(new URL('docs/product-intelligence/PREPARED_MIGRATIONS.json',root),'utf8'))
 const directedAds2Expansion=['20261103130000'] // Reviewed new Ads2 allowlist migration, not a historical hosted source.
+const pendingReengagement=['20261108130000','20261108131000','20261108132000'] // Candidates for the joint release, gates default off.
 const pendingConfirmation=['20261106090005'] // Auth reminder candidate; not installed in hosted Supabase.
 // PO GO 3-nov-2026 (Vigilante, installed OFF): six directed additive migrations, see docs/vigilante/VIGILANTE_RELEASE_RUNBOOK.md.
 const directedVigilante=['20261103200000','20261103201000','20261103202000','20261103210000','20261103220000','20261103230000']
@@ -41,9 +42,9 @@ test('historical migration versions equal hosted snapshot; F18 individually inst
  assert.ok(['INSTALLED_OFF','ACTIVATED'].includes(intelligence.status))
  assert.equal(intelligence.records[0].hostedVersion,'20261029005231')
  assert.equal(intelligence.newCollectionEnabled,intelligence.status==='ACTIVATED')
- assert.deepEqual(actual.filter(v=>v!==prepared.installedVersion&&!additional.includes(v)&&!prepared.versions.includes(v)&&!pendingMarketing.includes(v)&&!pendingIntelligence.includes(v)&&!directedAds2Expansion.includes(v)&&!directedVigilante.includes(v)&&!pendingConfirmation.includes(v)),expected,'historical hosted version inventory changed')
- assert.deepEqual(actual,expected.concat([prepared.installedVersion],additional,prepared.versions,pendingMarketing,pendingIntelligence,directedAds2Expansion,directedVigilante,pendingConfirmation).sort(),'unexpected new executable SQL source')
- assert.equal(new Set(actual).size,123+additional.length+prepared.versions.length+pendingMarketing.length+pendingIntelligence.length+directedAds2Expansion.length+directedVigilante.length+pendingConfirmation.length)
+ assert.deepEqual(actual.filter(v=>v!==prepared.installedVersion&&!additional.includes(v)&&!prepared.versions.includes(v)&&!pendingMarketing.includes(v)&&!pendingIntelligence.includes(v)&&!directedAds2Expansion.includes(v)&&!directedVigilante.includes(v)&&!pendingConfirmation.includes(v)&&!pendingReengagement.includes(v)),expected,'historical hosted version inventory changed')
+ assert.deepEqual(actual,expected.concat([prepared.installedVersion],additional,prepared.versions,pendingMarketing,pendingIntelligence,directedAds2Expansion,directedVigilante,pendingConfirmation,pendingReengagement).sort(),'unexpected new executable SQL source')
+ assert.equal(new Set(actual).size,123+additional.length+prepared.versions.length+pendingMarketing.length+pendingIntelligence.length+directedAds2Expansion.length+directedVigilante.length+pendingConfirmation.length+pendingReengagement.length)
  assert.ok(hosted.hosted_entries.every(r=>existsSync(new URL(r.path,root))))
 })
 test('archive is deliberately non-deployable and remains fenced',()=>{

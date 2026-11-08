@@ -2001,6 +2001,17 @@ function PazoMain() {
       case 'pet_profile':
         setSelectedPublicProfileId(target.petId)
         break
+      case 'pet_create':
+        if (!pets.length) setIsAddPetOpen(true)
+        else setActiveTab('mascota')
+        break
+      case 'pet_home':
+        setActiveTab('mascota')
+        break
+      case 'care_agenda':
+        setActiveTab('mascota')
+        if (pets.length) setIsCareOpen(true)
+        break
       case 'official_post':
         setActiveTab('inicio')
         break
@@ -2064,6 +2075,8 @@ function PazoMain() {
 
   const refreshNotificationsRef = useRef(refreshNotifications)
   refreshNotificationsRef.current = refreshNotifications
+  const openNotificationRef = useRef(handleOpenNotification)
+  openNotificationRef.current = handleOpenNotification
 
   useEffect(() => {
     if (!user?.id || !user.email_confirmed_at || isPasswordRecovery || isDemoUser) return
@@ -2076,23 +2089,37 @@ function PazoMain() {
 
   // The bell catches up when the person comes back or a push arrives while PAZO is open.
   useEffect(() => {
-    if (!user?.id || isOnboardingActive || isDemoUser) return
-    const open = () => {
+    if (!user?.id || isOnboardingActive || isDemoUser || !ownPetsReady) return
+    const openBell = () => {
       setIsNotificationsOpen(true)
       void refreshNotificationsRef.current()
+    }
+    const open = (tip: unknown) => {
+      if (tip !== 'return_no_pet' && tip !== 'return_share' && tip !== 'return_care' && tip !== 'return_home') {
+        openBell()
+        return
+      }
+      const isCurrent = accountRequests.capture()
+      void fetchNotifications(0, 1, tip).then(([notice]) => {
+        if (!isCurrent()) return
+        if (notice && !notice.read) void openNotificationRef.current(notice)
+        else openBell()
+      }).catch(() => { if (isCurrent()) openBell() })
     }
     const onVisible = () => {
       if (document.visibilityState === 'visible') void refreshNotificationsRef.current()
     }
     const onMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'pazo-open-notifications') open()
+      if (event.data?.type === 'pazo-open-notifications') open(event.data.tip)
       else if (event.data?.type === 'pazo-push-received') void refreshNotificationsRef.current()
     }
     if (new URLSearchParams(window.location.search).get('open') === 'notifications') {
       const url = new URL(window.location.href)
+      const tip = url.searchParams.get('tip')
       url.searchParams.delete('open')
+      url.searchParams.delete('tip')
       window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash)
-      open()
+      open(tip)
     }
     document.addEventListener('visibilitychange', onVisible)
     navigator.serviceWorker?.addEventListener('message', onMessage)
@@ -2100,7 +2127,7 @@ function PazoMain() {
       document.removeEventListener('visibilitychange', onVisible)
       navigator.serviceWorker?.removeEventListener('message', onMessage)
     }
-  }, [user?.id, isOnboardingActive, isDemoUser])
+  }, [user?.id, isOnboardingActive, isDemoUser, ownPetsReady, accountRequests])
 
   // Messaging is still in development for everyone: never display fictitious unread counts.
   const unreadMessages = 0

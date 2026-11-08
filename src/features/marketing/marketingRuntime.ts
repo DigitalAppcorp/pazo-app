@@ -57,6 +57,18 @@ export function stageMarketingSignupRequested(ownerId?: string): void {
   recorder()?.signupRequested(ownerId)
 }
 
+/** Closed campaign data for the email signup trigger. The server derives the
+ * account from the new Auth row and removes this input from Auth metadata. */
+export function pendingMarketingSignupData() {
+  if (import.meta.env.VITE_PAZO_PENDING_CAMPAIGN_ENABLED !== 'true') return undefined
+  const state = recorder()?.read()
+  if (!state || state.signupOwnerId || state.attribution.firstTouchAt > Date.now()) return undefined
+  return { pazo_pending_campaign: {
+    creative: state.attribution.creative,
+    first_touch_ms: state.attribution.firstTouchAt,
+  } }
+}
+
 /** Only a recently created, email-confirmed user can advance a local funnel. */
 export function stageMarketingSignupVerified(
   createdAt: string | null | undefined,

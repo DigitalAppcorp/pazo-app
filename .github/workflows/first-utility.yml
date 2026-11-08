@@ -41,6 +41,10 @@ jobs:
         run: |
           createdb --maintenance-db=postgres pazo_pwa_installation_test
           psql -X -d pazo_pwa_installation_test -f supabase/tests/pwa-installation-counts-pg17.sql
+      - name: Verify campaign continuity and return tips in a disposable database
+        run: |
+          createdb --maintenance-db=postgres pazo_return_roadmap_test
+          psql -X -d pazo_return_roadmap_test -f supabase/tests/return-roadmap-pg17.sql
   utility-browser:
     runs-on: ubuntu-latest
     timeout-minutes: 12
@@ -119,6 +123,8 @@ jobs:
       - run: node scripts/issue147-gallery.mjs artifacts/issue147/candidate
       - name: Short mobile screen, ES and EN
         run: PAZO_VISUAL_VERSION=candidate PAZO_VISUAL_HEIGHT=568 PAZO_VISUAL_SMOKE=true PAZO_VISUAL_OUTPUT=artifacts/issue147/short npm run test:issue147:visual
+      - name: Verify shared profiles, Admin routes, campaign signup and the share tip
+        run: node scripts/shared-pet-browser.mjs
       - uses: actions/upload-artifact@v6
         if: always()
         with:

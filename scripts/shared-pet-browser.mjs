@@ -9,6 +9,7 @@ const host = 'https://mrybvqdebbgcayuvgkkr.supabase.co'
 const sessionKey = `sb-${new URL(host).hostname.split('.')[0]}-auth-token`
 process.env.VITE_SUPABASE_URL = host
 process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_synthetic'
+process.env.VITE_PAZO_PENDING_CAMPAIGN_ENABLED = 'true'
 const origin = 'http://127.0.0.1:5357'
 const owner = '11000000-0000-4000-8000-000000000001'
 const other = '11000000-0000-4000-8000-000000000002'
@@ -17,6 +18,11 @@ const hidden = '22000000-0000-4000-8000-000000000002'
 const sharedUrl = `${origin}/#/pet/${pet}`
 const now = new Date().toISOString()
 const luna = { id: pet, owner_id: owner, name: 'Luna', species: 'gato', age: '3 años', bio: 'Le gusta dormir al sol', is_lost: false, photo_url: `${origin}/pwa-icon-192.png`, created_at: now }
+const adminOverview = {
+  as_of: now, period_days: 30,
+  people: { registered: 1, new_7d: 1, new_30d: 1, with_pet: 1, without_pet: 0, pets: 1, posts: 1, comments: 0, communities: 0 },
+  activity: { today: 1, last_7d: 1, last_30d: 1, active_period: 1, total_user_days: 1, module_counts: {} },
+}
 const post = { id: hidden, text: 'Una tarde al sol', photo_url: null, likes: 2 }
 const petColumns = 'id,name,species,age,photo_url,bio,breed,gender,is_lost'
 const postColumns = 'id,text,photo_url,likes'
@@ -31,6 +37,7 @@ const sessionFor = (id) => {
 let browser
 const errors = []
 const requests = []
+const signupRequests = []
 async function pageFor({ id, lang = 'es', width = 390 } = {}) {
   const context = await browser.newContext({ viewport: { width, height: 844 }, locale: lang === 'es' ? 'es-GT' : 'en-US', isMobile: true, hasTouch: true, reducedMotion: 'reduce', serviceWorkers: 'block' })
   await context.route('**/*', async (route) => {
@@ -45,8 +52,21 @@ async function pageFor({ id, lang = 'es', width = 390 } = {}) {
     const authId = signedIn ? id || other : null
     if (url.pathname.endsWith('/rpc/pazo_public_maintenance_status')) return reply({ enabled: false })
     if (url.pathname.endsWith('/rpc/pazo_push_config')) return reply({ enabled: false })
+    if (table === 'rpc/pazo_admin_overview') return reply(adminOverview)
+    if (table === 'rpc/pazo_admin_users') return reply([{
+      user_id: owner, email: 'private-owner@invalid.example', created_at: now, active_days_30: 1,
+      pets: [{ id: pet, name: luna.name, species: luna.species }],
+    }])
+    if (table === 'rpc/pazo_admin_signup_summary_v1') return reply({ methods: [], attempts: [], attempts_active: false,
+      accounts: { [owner]: { method: 'email', confirmed: true, signed_in: true, email_sent: true, ad_campaign: 'pazo_beta_local_202610' } } })
+    if (table === 'rpc/pazo_admin_experiments') return reply([])
+    if (table === 'rpc/pazo_admin_pwa_installation_counts') return reply({ enabled: false })
     if (url.pathname.startsWith('/rest/v1/rpc/')) return reply(false)
     if (url.pathname === '/auth/v1/user' && authId) return reply(sessionFor(authId).user)
+    if (url.pathname === '/auth/v1/signup') {
+      signupRequests.push(req.postDataJSON().data)
+      return reply({ ...sessionFor(owner).user, email_confirmed_at: null, identities: [{ id: owner }] })
+    }
     if (table === 'pets') {
       if (url.searchParams.has('id') && columns === petColumns) {
         requests.push({ table, signedIn, columns })
@@ -59,6 +79,9 @@ async function pageFor({ id, lang = 'es', width = 390 } = {}) {
     if (table === 'posts' && columns === postColumns && url.searchParams.get('pet_id') === `eq.${pet}`) {
       requests.push({ table, signedIn, columns })
       return reply([post])
+    }
+    if (table === 'notifications' && authId === owner && url.searchParams.get('type') === 'eq.return_share') {
+      return reply([{ id: hidden, type: 'return_share', title: 'Consejos de PAZO', body: '', read_at: null, created_at: now, pet_id: pet }])
     }
     if (!authId && ['pets', 'posts'].includes(table)) errors.push(`Unexpected guest read: ${table} (${columns})`)
     return reply([])
@@ -140,6 +163,44 @@ try {
   await unavailable.goto(`${origin}/#/pet/${hidden}`)
   await unavailable.getByText('Pet profile not found.', { exact: true }).waitFor()
   assert.equal(await unavailable.getByRole('button', { name: 'Explore PAZO' }).count(), 0)
+
+  const admin = await pageFor({ id: other, width: 320 })
+  await admin.goto(`${origin}/supabase/tests/marketing/behavior-harness.html?lang=es`)
+  await admin.locator('#pazo-admin-section').selectOption('users')
+  await admin.getByText('Anuncio · Meta · pazo_beta_local_202610', { exact: true }).waitFor()
+  await admin.locator('#pazo-admin-section').selectOption('pets')
+  const adminLink = admin.getByRole('link', { name: 'Ver perfil público de Luna en otra pestaña' })
+  assert.equal(await adminLink.getAttribute('href'), sharedUrl)
+  const profilePage = admin.context().waitForEvent('page')
+  await adminLink.press('Enter')
+  const publicPage = await profilePage
+  await publicPage.getByText(post.text, { exact: true }).waitFor()
+  assert.equal(await publicPage.getByText('private-owner@invalid.example').count(), 0)
+  assert.ok(admin.url().includes('behavior-harness.html'))
+  console.log('PASS Admin: retained campaign label and keyboard link to the public projection')
+
+  await author.goto(`${origin}/?open=notifications&tip=return_share`)
+  await author.getByText(post.text, { exact: true }).waitFor()
+  await author.getByRole('button', { name: 'Compartir perfil', exact: true }).waitFor()
+  assert.ok(!author.url().includes('tip='))
+  console.log('PASS return-tip destination: a share notice opens the owned social profile')
+
+  const campaign = await pageFor()
+  await campaign.goto(origin)
+  const firstTouchAt = Date.now() - 1000
+  await campaign.evaluate(firstTouchAt => localStorage.setItem('pazo_marketing_firstparty_v1', JSON.stringify({
+    version: 1, steps: ['landing'], attribution: { source: 'meta', medium: 'paid_social', campaign: 'pazo_beta_local_202610', creative: 'qr_es', firstTouchAt },
+  })), firstTouchAt)
+  await campaign.getByRole('button', { name: 'Comenzar', exact: true }).click()
+  await campaign.locator('#pazo-signup-email').fill('qa@invalid.example')
+  await campaign.locator('#pazo-signup-password').fill('SyntheticPass123')
+  await campaign.locator('#pazo-signup-password-confirm').fill('SyntheticPass123')
+  await campaign.getByRole('checkbox').check()
+  await campaign.getByRole('button', { name: 'Crear cuenta', exact: true }).click()
+  await campaign.getByText('Revisa tu correo', { exact: true }).waitFor()
+  assert.deepEqual(signupRequests, [{ pazo_pending_campaign: { creative: 'qr_es', first_touch_ms: firstTouchAt } }])
+  console.log('PASS campaign signup sends only the closed code and first-touch timestamp to Auth')
+
   assert.ok(requests.some((request) => request.table === 'posts' && !request.signedIn))
   assert.deepEqual(errors, [])
   console.log('PASS unavailable profile and no unexpected anonymous reads')

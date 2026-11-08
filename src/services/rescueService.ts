@@ -190,14 +190,17 @@ export const markNotificationRead = async (notificationId: string): Promise<void
 
 export const fetchNotifications = async (
   offset = 0,
-  limit = 10
+  limit = 10,
+  type?: 'return_no_pet' | 'return_share' | 'return_care' | 'return_home'
 ): Promise<PazoNotification[]> => {
   const safeOffset = Math.max(0, offset)
   const safeLimit = Math.min(Math.max(1, limit), 50)
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('notifications')
     .select('id,type,title,body,read_at,created_at,pet_id,source_id,supporter_state,supporter_copy_version,alert_reason,alert_vaccine_type,alert_answer,title_en,body_en')
+  if (type) query = query.eq('type', type)
+  const { data, error } = await query
     .order('created_at', { ascending: false })
     .order('id', { ascending: false })
     .range(safeOffset, safeOffset + safeLimit - 1)
