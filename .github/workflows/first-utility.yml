@@ -78,7 +78,7 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+      - run: bash .github/scripts/install-isolated-playwright.sh
       - name: Use runner Chrome
         run: |
           browser_path="$(command -v google-chrome || command -v chromium || true)"
@@ -114,7 +114,7 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+      - run: bash .github/scripts/install-isolated-playwright.sh
       - name: Use runner Chrome
         run: |
           browser_path="$(command -v google-chrome || command -v chromium || true)"
